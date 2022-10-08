@@ -1,0 +1,18 @@
+{%extends 'posts/design.html'%}
+
+  
+{%block contents%}
+    <table>
+        <theader>
+            <tr>
+                <th>title</th>
+                <th>content</th>
+            </tr>
+        </theader>
+        {% for post in posts%}
+            <td>{{post.title}}</td>
+            <td>{{post.content1}}</td>
+        {% endfor %}
+    </table>
+
+{%endblock%}
