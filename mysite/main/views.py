@@ -34,3 +34,8 @@ def get_category_id(request, cat_id):
     cat = category.objects.get(id = cat_id)
     context = {'cat_id':cat}
     return render(request, 'posts/disply_cat_id.html', context)
+
+def get_category_post(request):
+    cat = category.get_post()
+    context = {'cat_post':cat}
+    return render(request)
