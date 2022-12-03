@@ -17,14 +17,32 @@
         Your tiny social network built with Django
     </p>
 </div>
+{% if request.user.is_authenticated %}
+<p>Hello {{request.user}}!</p>
+<a href="{% url 'dwitter:logout_user' %}">logout</a>
+{% else %}
+<a href="{% url 'dwitter:login_registor' %}">login</a>
+{% endif %}
 </section>
-<div class="container">
 
+<div class="container">
 
     <div class="columns">
         {% block content %}
+        
         {% endblock content %}
     </div>
+    <div>
+        <br>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li></li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    
  </div>
 </body>
 </html>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if page == 'login' %}
+<div>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <label>user name:</label>
+        <input type="text" name="username" placeholder="Enter username"/>
+
+        <label>password:</label>
+        <input type="password" name="password" placeholder="Enter Password"/>
+
+        <input type="submit" value="login" />
+        
+    </form>
+    <div>
+        <p>Haven't Register Yet?</p>
+        <a href="{% url 'dwitter:registerPage' %}">Sign In</a>
+    </div>
+</div>
+{% else %}
+<div>
+    <form method="POST" action="">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Register" />
+    </form>
+    <div>
+        <p>Already Registered?</p>
+        <a href="{% url 'dwitter:login_registor' %}">Sign Up</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock content %}
