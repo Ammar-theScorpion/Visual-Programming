@@ -1,0 +1,10 @@
+{% extends "cards/base.html" %}
+{% load humanize %}
+{% block content %}
+<h2>🗃 {{ box_number | ordinal }} Box</h2>
+<mark>{{ object_list | length }}</mark> Card{{ object_list | pluralize }} left in box.
+<hr>
+{% for card in object_list %}
+{% include "cards/card.html" %}
+{% endfor %}
+{% endblock content %}
