@@ -1,0 +1,23 @@
+{% extends 'hi_1.html' %}
+{% block content %}
+    {% load humanize %}
+    <p>{{4500|intcomma}}</p>
+    <p>{{-1200000000|intword}}</p>
+
+    {% load dinotags %}
+    <p>"{{dinos.l|get_first:2}}"</p>
+    <p>count 's' in ssss "{{'ssss'|letter_count:'s'}}"</p>
+    <p>Custom tags
+        <li>
+            Comment {% comment "delete this" %}
+        </li> 
+        <li>
+            Custom ul {% make_ul dinos.l %}
+        </li>
+        <li>
+            Custom context {% custom_context 'dinos list' %}
+            {{change}}
+        </li>
+    </p>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'hi_1.html' %}
+{% block content %}
+<h1>HI</h1>
+{% comment %} anything {% endcomment %}
+
+
+<ul>
+    {% for dino in dinos.l %}
+    <li><p>{{dino|lower}}</p></li> 
+    {% endfor %}
+</ul>
+{% endblock %}
