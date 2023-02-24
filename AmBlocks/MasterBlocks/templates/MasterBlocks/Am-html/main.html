@@ -14,43 +14,53 @@
 <body>
    <div class="sidebar" >
 
-    
       <svg xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       xmlns:html="http://www.w3.org/1999/xhtml"
       version="1.1" width="658px" height="627px">
 
-      <g class="draggable if-container" data-category="control" data-shapes="c-block c-1" data-id="control_if" transform="translate(5,2)">
+      <!-- 
+         if
+         -text
+            condition
+               input
+               operation
+               input
+         -text
+      -->
+
+      <g class="draggable if-container" id="one-condition" data-category="control" data-shapes="c-block c-1" data-id="control_if" transform="translate(5,2)">
          <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
          fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
-         <text y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(8,24)">if</text>
+         <text y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(8,24)">if </text>
          <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#CF8b17" transform="translate(50,8)"></path>
-         <text y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(124,24)" >then</text>
+         <text y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(124,24)" > then </text>
 
-
-   </g>
-         <g class="draggable operation-logic"  data-id="text" transform="translate(5,130)" data-argument-type="text">
+      </g>
+         <g class="draggable operation-logic" id="operationLogic" data-id="text" transform="translate(5,130)" data-argument-type="text">
             <path d="m 0,0 m 20,0 H 156.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
             <image href="{% static '/Am-images/variable.png' %}" height="15" x="19" y="12" width="15"></image>
+
             <g transform="translate(20,0)">
-               <foreignObject x="12" y="0" width="35" height="35">
-                  <div xmlns="http://www.w3.org/1999/xhtml">
-                     <input class="input"></input>
-                  </div>
-                  </foreignObject>
+               <g id="1" transform="translate(10, 5)"  data-argument-type="text number" data-shapes="argument round">
+                  <path stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="blocklyEditableText" transform="translate(8, 0)" style="cursor: text;">
+                     <text class="blocklyText" x="12" y="18" dy="0" dominant-baseline="middle" text-anchor="middle">10</text>    
+                  </g>
+               </g>
+               
             </g>
+            <g class="move-input">
+
             <g class="am-drop select"  transform="translate(72, 10)" style="cursor: text;">
                <rect  rx="4" ry="4" x="0" y="0" height="18" width="31"></rect>
-               <text x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> >
-               </text>
-               <text x="23" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ▾
-               </text>
+               <text x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ></text>
+               <text x="23" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ▾ </text>
                <foreignObject x="-80" y="50" width="200" height="250" visibility="hidden">
                   <div xmlns="http://www.w3.org/1999/xhtml">
                      <div class="operation-head">
                      </div>
-
-                        <div class="operation-list input-mimic">
+                        <div class="operation-list input-mimic">        
                            <p><</p>
                            <p><=</p>
                            <p>==</p>
@@ -61,22 +71,23 @@
                </foreignObject>
             </g>
             <g transform="translate(92,0)">
-               <foreignObject x="12" y="0" width="35" height="35">
-                  <div xmlns="http://www.w3.org/1999/xhtml">
-                     <input class="input"></input>
-                  </div>
-               </foreignObject>
+               <g id="2" transform="translate(10, 5)"  data-argument-type="text number" data-shapes="argument round">
+                  <path stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="blocklyEditableText" transform="translate(8, 0)" style="cursor: text;">
+                     <text class="blocklyText" x="12" y="18" dy="0" dominant-baseline="middle" text-anchor="middle">10</text>    
+                  </g>
+               </g>
+     
             </g>
             <image href="{% static '/Am-images/variable.png' %}" height="15" x="142" y="12" width="15"></image>
-
          </g>
-
+      </g>
 
          <g class="draggable operation"  data-id="text" transform="translate(5,500)" data-argument-type="text">
             <rect stroke="#389438" fill="#59C059" width="170" height="40" rx="4" ry="4" x="1" y="0"></rect>
             <image href="{% static '/Am-images/variable.png' %}" height="15" x="15" y="12" width="15"></image>
 
-            <g class="am-drop select select-var" transform="translate(20, 0)" style="cursor: text;">
+            <g class="am-drop select" transform="translate(20, 0)" style="cursor: text;">
                <g transform="translate(15, 5)">
                   <rect  rx="12" ry="12" x="0" y="0" height="30" width="30"></rect>
                   <text x="10" y="17" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff">
@@ -84,27 +95,23 @@
                   <text x="23" y="17" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ▾
                   </text>
                </g>
-               <foreignObject x="10" y="0" width="35" height="35" visibility="hidden">
-                  <div xmlns="http://www.w3.org/1999/xhtml">
-                     <input class="input"></input>
-                  </div>
-                  </foreignObject>
+               <g id="3" transform="translate(10, 5)"  data-argument-type="text number" data-shapes="argument round">
+                  <path stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="blocklyEditableText" transform="translate(8, 0)" style="cursor: text;">
+                     <text class="blocklyText" x="12" y="18" dy="0" dominant-baseline="middle" text-anchor="middle">10</text>    
+                  </g>
+               </g>
                <foreignObject x="-80" y="50" width="200" height="250" visibility="hidden">
                   <div xmlns="http://www.w3.org/1999/xhtml">
                      <div class="operation-head">
                      </div>
 
-                        <div class="operation-list input-mimic">
-                           <p>=</p>
-                           <p>*</p>
-                           <p>/</p>
-                           <p>+</p>
-                           <p>-</p>
-                           <p>^</p>
+                        <div class="operation-var input-mimic">
                         </div>
                      </div>
                </foreignObject>
             </g>
+            <g class="move-input">
             <g class="am-drop select"  transform="translate(72, 10)" style="cursor: text;">
                <rect  rx="4" ry="4" x="0" y="0" height="18" width="31"></rect>
                <text x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> =
@@ -116,8 +123,7 @@
                      <div class="operation-head">
                      </div>
 
-                        <div class="operation-list input-mimic">
-                           <p>=</p>
+                        <div class="operation-list input-mimic">              <p>=</p>
                            <p>*</p>
                            <p>/</p>
                            <p>+</p>
@@ -127,7 +133,7 @@
                      </div>
                </foreignObject>
             </g>
-            <g class="am-drop select select-var" transform="translate(93, 0)" style="cursor: text;">
+            <g class="am-drop select" transform="translate(93, 0)" style="cursor: text;">
                <g transform="translate(15, 5)">
                   <rect  rx="12" ry="12" x="0" y="0" height="30" width="30"></rect>
                   <text x="10" y="17" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff">
@@ -144,30 +150,23 @@
                   <div xmlns="http://www.w3.org/1999/xhtml">
                      <div class="operation-head">
                      </div>
-
-                        <div class="operation-list input-mimic">
-                           <p>=</p>
-                           <p>*</p>
-                           <p>/</p>
-                           <p>+</p>
-                           <p>-</p>
-                           <p>^</p>
+                        <div class="operation-var input-mimic">
                         </div>
                      </div>
                </foreignObject>
             </g>
             <image href="{% static '/Am-images/variable.png' %}" height="15" x="142" y="12" width="15"></image>
+         </g>
 
          </g>
 
-         <g class="draggable while-container" transform="translate(5,200)" >
+         <g class="draggable while-container" id="many-condition" transform="translate(5,200)" >
             <path  stroke-width="2" stroke="#CF8B17" fill="#FFAB19" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 156 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 64 c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 h -8  a 4,4 0 0,0 -4,4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z"></path>
-            <text text-anchor="middle" dominant-baseline="middle" dy="0" x="40" transform="translate(8, 24) ">repeat&nbsp;until</text>
+            <text text-anchor="middle" dominant-baseline="middle" dy="0" x="40" transform="translate(8, 24) "> repeat&nbsp;until </text>
             <g>
                <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#CF8B17" transform="translate(95.17500305175781,8)"></path>
             </g>
          </g>
-
 
          <g  class="draggable else-container" data-category="control" data-shapes="c-block c-1" data-id="control_else" transform="translate(5,350)">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
@@ -201,8 +200,11 @@
       </g>
    </svg>
 </body>
-<script src="{% static '/Am-logic/main.js' %}"></script>
+<script type="module" src="{% static '/Am-logic/main.js' %}" defer></script>
 
+<div class="textField"  style="direction: ltr; display: block; top: 511.063px;  width: 57.4074px; height: 33px; transform: scale(0.675); margin-left: 0px; border-radius: 16.5px; border-color: rgb(51, 115, 204); left: 55.775px; transition: box-shadow 0.25s ease 0s; box-shadow: rgba(255, 255, 255, 0.3) 0px 0px 0px 4px;">
+   <input id="input 3" class="htmlInput" style="border-radius: 16.5px; transition: font-size 0.25s ease 0s; font-size: 12pt;" value="10"> 
+</div>
 </html>
 <!--
             <rect x="3" y="2" width="160em" height="112" fill-opacity="0">
