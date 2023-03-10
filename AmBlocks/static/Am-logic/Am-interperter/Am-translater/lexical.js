@@ -2,7 +2,7 @@ export const TokenType = {
     Number: 0,
     String: 1,
     Identifier: 2,
-    Let: 3,
+    Int: 3,
     BinaryOperator: 4,
     Equals: 5,
     OpenParen: 6,
@@ -21,6 +21,7 @@ export const TokenType = {
     else: TokenType.Else,
     then: TokenType.Then,
     repeat: TokenType.Repeat,
+    int: TokenType.Int,
   };
   
   function Token(value, type) {

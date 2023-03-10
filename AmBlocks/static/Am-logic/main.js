@@ -58,21 +58,20 @@ $(document).ready(function() {
                 height+=80;
         });
     }
-    function alterParentsLength(droppable, d, regex, direction) {
+    function alterParentsLength(droppable, draggableLength, regex, direction) {
         let paths = getAllParentPath(droppable); 
-        let draggableLength =  parseFloat(d.match(H_REGEX)[1]);
-        console.log(paths)
+        console.log(draggableLength)
 
         paths.each(function() {
             let next = $(this).parent().children().last();
             if(next.is('text')){
-                next.attr('transform','translate('+(parseFloat(next.attr('transform').match(TRANS_REGEX)[1].split(",")[0]) + (draggableLength*0.75)*direction) +',24)')
+                next.attr('transform','translate('+(parseFloat(next.attr('transform').match(TRANS_REGEX)[1].split(",")[0]) + (draggableLength*0.72)*direction) +',24)')
             }
             let d = $(this).attr("d");
             let match;
             while(match = regex.exec(d)) {
                 let matchedString = match[0];
-                let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength*0.70)*direction}`;
+                let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength*0.72)*direction}`;
                 d = d.replace(matchedString, newString);
           }
           $(this).attr("d", d);
@@ -85,7 +84,7 @@ $(document).ready(function() {
 
     const sidebarWidth = $('.sidebar').width()+38;
     let gClicked=null;
-      
+    var edit = null;  
     $(document).keydown(function(event) {
         if (event.which === 67 && event.ctrlKey) {
             if(gClicked!=null){
@@ -148,6 +147,20 @@ $(document).ready(function() {
             }
             clones.getBlocks().click(function() {
                 gClicked = $(this)
+                
+            });
+            $('.Am-edit').on('click', function(event) {
+                event.stopPropagation();
+                edit= $(this);
+                    var leftValue = $(this).position().left;
+                    var topValue = $(this).position().top;
+                    console.log($('#flex'));
+                    $('#flex').css('left', leftValue + 'px');
+                    $('#flex').css('top', topValue + 'px');
+                    $('#inner').text($(this).children().last().text());
+                    if($('#flex').css('display')=='none'){
+                        $('#flex').css('display','block');
+                    }
             });
             $('.select').click(function(){
                 var foreignObject = $(this).find('foreignObject');
@@ -180,11 +193,11 @@ $(document).ready(function() {
                     draggable.attr('transform', 'translate('  + ui.offset.left + ',' + ui.offset.top + ')');
                     $('.drobable').each(function() {
                         if(draggable.attr('class').indexOf('operation-logic')!==-1){
-                            droppable = $(this);
+                            const droppable = $(this);
                             var distance = findDistance(draggable, droppable); 
                             if (distance <= 50) { 
                                 if(!droppable.attr('id'))
-                                droppable.attr('id', 'close');
+                                    droppable.attr('id', 'close');
                                 droppable.css({"stroke": "white", "stroke-width": "2" });
                             }
                             else{
@@ -194,8 +207,9 @@ $(document).ready(function() {
                                 droppable.removeAttr('id');
                                 clones.addBlock(draggable);
                             let d = draggable.find('path').attr("d");
+                            let dlength =  parseFloat(d.match(H_REGEX)[1]);
 
-                                alterParentsLength(droppable, d, IF_LK_REGEX, -1);
+                                alterParentsLength(droppable, dlength, IF_LK_REGEX, -1);
                             }
                         }
                     });
@@ -242,7 +256,9 @@ $(document).ready(function() {
 
                 },
                 stop: function(event, ui) {
-                    clones.translate();
+                    /// 
+                    let C_Code = clones.translate();
+                    ///
                     var draggable = $(this);
                     if(event.pageX<sidebarWidth){
                         clones.setBlocks(clones.getBlocks().not(draggable));
@@ -265,7 +281,8 @@ $(document).ready(function() {
                         if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
                             droppable.after(draggable)
                             let d = draggable.find('path').attr("d");
-                            alterParentsLength(droppable, d, IF_LK_REGEX, 1);
+                            let dlength =  parseFloat(d.match(H_REGEX)[1]);
+                            alterParentsLength(droppable, dlength, IF_LK_REGEX, 1);
                             const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
                             draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
                             droppable.attr("id", 'closed');
@@ -278,7 +295,6 @@ $(document).ready(function() {
               });
 
             if(event.pageX<sidebarWidth){
-              
                 clone.animate({opacity: 0}, 500, function() {clone.remove();});
             }else if(clone.offset().left<sidebarWidth){
                 clone.attr('transform', 'translate(' + sidebarWidth+',' + ui.offset.top + ')');
@@ -286,26 +302,33 @@ $(document).ready(function() {
         } 
     });
     
-    $(document).on('keydown', 'input', function(event) {
+    $('#flex').on('keydown', function(event) {
+        if($(this).width()!=25){
 
-        const text = $(this).val();
-        const width = $(this).width();
-        if(text.length*12> 40){ 
-            $(this).width(text.length+0.1+'ch');
-            let frame = ($('#'+($(this).attr('id').split(' ')[1])));
-            const path = frame.find('path');
-            let d = path.attr("d");
+            let direction = 1;
+            if(event.keyCode == 8)
+            direction=-1;
+            const inputWidth = $(this).width();
+            console.log($(this).val())
+            edit.children().first().css('width', inputWidth);
+            edit.children().last().text($(this).text());
+            if(edit.next().length!=0)
+            edit.next().attr('transform','translate('+(parseFloat(edit.next().attr('transform').match(TRANS_REGEX)[1].split(",")[0])+8*direction) +',0)')
+            
+            let path = edit.parent().find('path');
+            if(path.length==0)
+                path = edit.parent().parent().find('path')
+            
+            let d = path.attr('d');
             let match;
-            match = H_REGEX.exec(d)
+            match = H_REGEX.exec(d) 
             let matchedString = match[0];
-            let newString = `H ${text.length+6}`;
+            let newString = `H ${parseFloat(matchedString.split(' ')[1])+(8*direction)}`;
             d = d.replace(matchedString, newString);
-            path.attr('d',d)
-            if(frame.parent().next().is($('.move-input'))){
-                $('.move-input').attr(
-                    'transform','translate('+$(this).width()+',0)'
-                );
-            }
+            path.attr("d", d);
+            alterParentsLength(edit, 8, IF_LK_REGEX, direction);
         }
+
     });
 });
+print('hello world!');

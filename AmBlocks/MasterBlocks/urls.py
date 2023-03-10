@@ -2,5 +2,7 @@ from django.urls import path
 from .views import*
 
 urlpatterns = [
-    path('', mainCompiler, name='maincompiler')
+    path('', renderProblems, name='renderProblems'),
+    path('problem/<str:pname>/', problem, name='problem'),
+    path('free-style/', mainCompiler, name='mainCompiler')
 ]

@@ -258,43 +258,34 @@ image{
     color: #59c0598c;
     width: calc(100vw - 20vw);
 }
-.input{
-    margin: 5px;
-    width: 30px;
-    height: 30px;
-    border-radius:40%;
-    -moz-border-radius:40%;
-    -webkit-border-radius:40%;
-    border: 1px solid #1e8f14;
-    text-align: center;
-    color: transparent;
-    text-shadow: 0 0 0 #000000;
-    font-size: 13px;
-    box-sizing: border-box;
-    padding: 1px 6px;
-}
-.htmlInput{
-    border: none;
-    font-family: "Helvetica Neue", Helvetica, sans-serif;
-    font-size: 12pt;
-    height: 100%;
-    margin: 0;
-    outline: none;
-    box-sizing: border-box;
-    width: 100%;
-    text-align: center;
-    color: #575E75;
-    font-weight: 500;
-}
-.textField {
-    border: 1px solid;
-    display: none;
+.Am-edit{
     
-    box-sizing: border-box;
-    transform-origin: 0 0;
-    -ms-transform-origin: 0 0;
-    -moz-transform-origin: 0 0;
-    -webkit-transform-origin: 0 0;
+    cursor: pointer;
+}
+.Am-edit:hover{
+    box-shadow: #000000;
+}
+#flex {
+    position: absolute;
+    display: flex;
+    display: -webkit-flex;
+  }
+  #inner {
+      padding: 0 5px;
+      min-width: 15px;
+      height:23px;
+      border-radius: 4px;
+      line-height:20px;
+      color: #1e8f14;
+      background-color: #fff;
+      outline:none;
+  }
+
+
+.Am-text{
+    font: normal 11pt sans-serif;
+}
+.Am-edit-text{
     position: absolute;
     z-index: 99999;
 }

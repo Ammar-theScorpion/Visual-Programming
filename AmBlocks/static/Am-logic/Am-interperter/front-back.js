@@ -1,18 +1,19 @@
-import { Parser } from "./Am-translater/parser.js";
+import { Converter } from "./Am-converter/convert.js";
 Array.prototype.insert = function (index, ...items) {
     this.splice(index, 0, ...items);
 };
 export class Blocks {
     static _instance;
-  
+    
     constructor() {
+      this.covert = new Converter();
       this.blocks = $();
       this.rules = {
         'one-condition':'text',
         'operationLogic':'text',
         'many-condition':'text',
       };
-      this.parser = new Parser();
+      
     }
   
     static getInstance() {
@@ -43,14 +44,26 @@ export class Blocks {
         });
     }
     getBlocksAsString(){ // translate Blocks into Strings
+ 
         let textCode = "";
         let rules = this.rules;
+        const This = this;
         this.blocks.each(function(){
             let child = $(this);
             const rule = rules[child.attr('id')];
             const element = child.find(rule);
-            textCode+=element.text() ;
-            textCode+='\nnew '
+            element.each(function(){
+                const text = this.text();
+                textCode+=text;
+                if(text.indexOf('then')!==-1){
+                    textCode+='{';
+
+                }
+            });
+            if(textCode.indexOf('then')!==-1){ 
+                textCode+='}';
+            }
+
 
         });
         return textCode;
@@ -61,30 +74,15 @@ export class Blocks {
         //   x=1
         //   if cond then{ 
         //      if cond then
-        //   }
+        //}
         //   if cond then
         //}
         //this.parser.produceAST((("if 50>60 then Ammar=3 if x<b then  if xx<bx then")))
         // if 50>60 then { Ammar=3 if x<b then { if xx<bx then { repeat i<10 { v } } }z=1 }
-        const src = "if 50>60 then { Ammar=3 if x<b then { if xx<bx then { repeat i<10 { v } else { u=1 } } }  else { tt=44 } z=1 }"; 
-        console.log(src);
-        console.log((this.parser.produceAST(src)));
-    }
-
-    lexer=(srcCode)=>{
-        console.log(srcCode)
-        const regex = /\b(if|while)\b|[<=>!]=?|[\d]+|[()]+/g;
-        let tokens = [];
-        let match;
-        while(match = regex.exec(srcCode)){
-            let result = 'BinaryExpression';
-            if(match[0][0] >='0' && match[0][0]<='9')
-                result = 'IntLitral';
-                tokens.push({
-                    type:  ( match[0] === 'if') ? match[0]+'Statement' : result,
-                    value: match[0]
-                });
-            }
-        return tokens;
+        // { Ammar=3 if x<b then { if xx<bx then { repeat i<10 { v } else { u=1 } } }  else { tt=44 } z=1 }
+        // = " Ammar=3 if x<b then { if xx<bx then { repeat i<10 { v } else { u=1 } } }  else { tt=44 } z=1"; 
+        //const src = (this.getBlocksAsString());
+        //console.log(src)
+        //console.log(this.covert.covertString(src));
     }
 }
