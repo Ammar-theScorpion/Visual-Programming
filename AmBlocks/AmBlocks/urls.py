@@ -20,6 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("mainBlocks.urls")),
     path('problems/', include("MasterBlocks.urls")),
+    path('tutorial/', include("TutorialsBlocks.urls")),
 ]
 
 handler404 = 'MasterBlocks.views.error_404'
