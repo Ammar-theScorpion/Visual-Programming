@@ -1,15 +1,38 @@
 export class Symbol{
-    constructor(){
+    constructor(parent){
+        this.parent = parent;
         this.symbolTable = {};
-        this.parent = null;
     }
 
-    pushVar(varattr){// {type, name, value}
-        this.symbolTable[varattr[0]] = [varattr[1], varattr[2]];
+    declareVar(varattr){// {{naem, [type, value]}
+        if(!this.symbolTable.hasOwnProperty(varattr[0]))
+            this.symbolTable[varattr[0]] = [varattr[1][0], varattr[1][1]];
+        else
+            return `${varattr[0]} is already defined!`;
+    }
+    assignVar(varattr){//[name, value]
+        let at = this.resolve(varattr[0]);
+        at.symbolTable[varattr[0]] = varattr[1];
+    }
+
+    resolve(varname){
+        if(this.symbolTable.hasOwnProperty(varname))
+            return this;
+        if(this.parent==null)
+            return `${varname} is not defined yet`;
+
+        return  this.parent.resolve(varname); 
     }
 
     lookUp(varName){
-        return this.symbolTable[varName];
+        let at = this.resolve(varName);
+        return at.symbolTable[varName];
     }
 
 }
+
+
+
+
+
+

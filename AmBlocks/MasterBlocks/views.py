@@ -24,4 +24,6 @@ def problem(request, pname):
     
 
 def mainCompiler(request): # web request -> web response
-    return render(request, 'MasterBlocks/Am-html/main.html', {})
+    dic = ['printBlock', 'ifBlock', 'conditionalBlock', 'operationBlock', 'whileBlock', 'elseBlock', 'createVarBlock', 'makeVarBlock']
+    context = {'id':dic}
+    return render(request, 'blocks.html', context)

@@ -2,11 +2,23 @@
 
 export class ConverterPy{
     constructor(){
-        this.codepy = [];
+        this.ast='';
     }
     clear(){
-        this.codepy = [];
     }
+    moveNode(array){
+      const prev = array.shift();
+      return prev;
+    }
+    canMove(array){
+        return array.kind != ''
+    }
+    covertString(){ // main entry
+      let codepy = [];
+      while(this.canMove(this.ast[0])){
+        codepy.push(this.generateCode(this.moveNode(this.ast), -1)+'\n');
+      }return codepy.join('')
+  }
     generatePrintStatement(printNode){
         const printValue = printNode.printValue;
         return('print('+ printValue+')')+'\n';
@@ -26,11 +38,20 @@ export class ConverterPy{
             return this.generatePrintStatement(node, level);
           case 'BinaryExpression':
             return this.generateBinaryExpression(node, level);
+          case 'declarationStatements':
+            return this.generateDeclarationStatements(node, level);
+          case 'assignmentStatement':
+            return this.generateassignmentStatement(node, level);
           default:
-            break;
-        }
+            return node.value;
+         }
       }
-      
+      generateassignmentStatement(node, level){
+        return node.left.value + ' = '+ this.generateCode(node.right);
+      }
+      generateDeclarationStatements(node, level){
+        return node.varname+' = '+this.generateCode(node.varBody[1])+'\n';
+      }
       generateIfStatement(ifNode, level) {
         const condition = ifNode.condition;
         let conditionValue = 'false';
@@ -38,7 +59,8 @@ export class ConverterPy{
           conditionValue = condition.left.value;
           conditionValue += condition.operater.value;
           conditionValue += condition.right.value;
-        }
+        }else
+          conditionValue='False'
         const body = !ifNode.body?undefined: [...ifNode.body];
         let bodyValue = '';
         if (body) {

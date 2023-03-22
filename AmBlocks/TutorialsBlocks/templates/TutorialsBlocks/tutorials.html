@@ -110,7 +110,9 @@
 		flex-direction: column;
 		border-top: solid 6px #f0f0f0;
 	}
-
+	pre{
+		tab-size: 4;
+	}
 	.code-column {
 		flex: 1;
 		display: flex;
@@ -168,6 +170,7 @@
   line-height: 1.5;
   border-right: solid 6px #f0f0f0;
 }
+ 
 .codesspace{
 	height: 65%;
 	width: 100%;
@@ -209,27 +212,57 @@
 	  </div>
 
 	</div>
-	<div class="workspace">
-		<p id ='setcode' style="height: 100%;" >
+		<div class="workspace">
+			<div>
+				<button onclick="lang_id = 0; language_type()">C++</button>
+				<button onclick="lang_id = 1; language_type()">Python</button>
+			</div>	
+			
+			<p id ='setcode' style="height: 100%;" >
 		
-		</p>
-	  <div class="footer">
-		<button>Submit</button>
-	  </div>
+			</p>
+		<form method="post">
+			{% csrf_token %}
+			<input type="hidden" name="user_code" id="user_code_input">
+			 <div class="footer">
+				<button type="submit" value="Submit" onclick="set_code()" >Submit </button>
+			</div>
+		</form>
 	</div>
+	 
   
-	<div id="flex" style="display: none;">
-		<div id="inner" contenteditable="true" spellcheck="false"><div>
+		<div id="flex" style="display: none;">
+			<div id="inner" contenteditable="true" spellcheck="false"><div>
 		</div>
   </body>
 
   <script>
+		let language = '';
+		let lang_id=0;
 	  const blocks = $('.draggable');
 	  	let space = 0;
 		blocks.each(function(){
 			$(this).attr('transform', 'translate('  + 0 + ',' + space + ')');
 			space+=130;
 		});
-           
+		function set_code(){
+			const userCodeInput = document.getElementById('user_code_input');
+			document.getElementById("setcode").innerHTML = language.split('`')[1];
+			const text = document.getElementById('setcode').innerHTML;
+
+			userCodeInput.value = text.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+			console.log(userCodeInput.value)
+		}
+
+		function language_type(){
+			var code = language.split('`')[lang_id];
+			var codeNode = document.createElement("pre");
+			codeNode.style.whiteSpace = "pre-wrap";
+			codeNode.textContent = code;
+			document.getElementById("setcode").innerHTML = "";
+			document.getElementById("setcode").appendChild(codeNode);
+		}
+		
+
   </script>
 </html>  

@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<!-- Created By CodingNepal -->
-<html lang="en" dir="ltr">
-   <head>
-      <meta charset="utf-8">
-      <title>main</title>
-   </head>
-    <body>
+{% extends 'main.html' %}
+    {% block content %}
         {% for problem in problems %}
-        <li><a href="{% url 'problem' problem.pname %}"> {{problem.pname}} </a></li>
+            <li><a href="{% url 'problem' problem.pname %}"> {{problem.pname}} </a></li>
         {% endfor %}
-
-    </body>
-</html>
+    {% endblock content %}

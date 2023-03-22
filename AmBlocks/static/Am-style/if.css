@@ -1,16 +1,17 @@
 body{
-    color: white;
+    fill: rgb(255, 255, 255);
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    background-image: radial-gradient(
-        rgb(191, 191, 191) 2px,
-        transparent 1px
-    );
-    background-size: 120px;
+    font-size: larger;
     margin: 0;
 }
+.dragging * {
+    pointer-events: none;
+  }
 .draggable, .clone{
     cursor: grab;
-}
+ 
+
+}/*
 .insert-squre{
     background-color: #FFAB19;
     border-bottom: solid 1px #CF8B17;
@@ -63,7 +64,7 @@ body{
     background-color: transparent;
     left: 20%;
 }
-
+*/
 .sidebar{
     position: absolute;
     width: 200px;
@@ -111,7 +112,7 @@ body{
 .fire-insertIn :last-child{
     filter: drop-shadow(6px 1px 1px white);
 }
-/*               if              */
+/*   
 .if-container{
     justify-content: space-between;
     flex-wrap: wrap;
@@ -183,13 +184,13 @@ body{
     flex-wrap: wrap;
     flex-direction: row;
 }
-/*               operation              */
 
 .operation-logic{
     flex-grow: 1;
-     
-
-}/*
+    
+    
+} 
+*/
 .insert :first-child {
     position: relative;
     right: var(--width);
@@ -290,7 +291,7 @@ image{
     z-index: 99999;
 }
 .input-real {
-    background: rgba(255, 255, 255, 0);
+    background: rgb(206, 196, 196);
     color: transparent;
     padding: 0;
     border: 0 none transparent;
@@ -299,7 +300,7 @@ image{
   
   .input-real:focus {
     background: rgba(255, 255, 255, 1);
-    color: #333;
+    color: #ffffff;
   }
   
   .input-real,

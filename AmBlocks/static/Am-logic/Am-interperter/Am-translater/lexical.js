@@ -13,15 +13,21 @@ export const TokenType = {
     Else:11,
     Then:12,
     Repeat:13,
-    EOC : 14,
+    Print:14,
+    newLine:15,
+    Float:16,
+    String:17,
+    EOC : 18,
   };
-  
   const KEYWORDS = {
     if:   TokenType.If,
     else: TokenType.Else,
     then: TokenType.Then,
     repeat: TokenType.Repeat,
     int: TokenType.Int,
+    float: TokenType.Float,
+    string: TokenType.String,
+    print:TokenType.Print,
   };
   
   function Token(value, type) {
@@ -38,13 +44,13 @@ export const TokenType = {
   }
   
   function isskippable(str) {
-    return str === ' ' || str === '\n' || str === '\t';
+    return str === ' ' ||  str === '\t';
   }
   
   function isint(str) {
     const c = str.charCodeAt(0);
     const bounds = ['0'.charCodeAt(0), '9'.charCodeAt(0)];
-    return c >= bounds[0] && c <= bounds[1];
+    return (c >= bounds[0] && c <= bounds[1]) || c==46;
   }
   
   export function tokenize(sourceCode) {
@@ -76,8 +82,16 @@ export const TokenType = {
             string+=src.shift();
           tokens.push(token(string, TokenType.String));
         }
-
-        else if (isint(src[0])) {
+        else if(src[0]=="\""){
+          let string = src.shift();
+          while(src.length > 0 && src[0] != "\""){
+              string+=src.shift();
+          }
+          if(src.length)
+          string+=src.shift();
+        tokens.push(token(string, TokenType.String));
+      }
+         else if (isint(src[0])) {
           let num = '';
           while (src.length > 0 && isint(src[0])) {
             num += src.shift();
@@ -99,9 +113,13 @@ export const TokenType = {
             } else {
                 tokens.push(token(ident, TokenType.Identifier));
             }
+        } else if(src[0] === '\n'){
+
+              tokens.push(token(src.shift(), TokenType.newLine));
+
         } else if (isskippable(src[0])) {
-          src.shift();
-        } 
+              src.shift();
+          }  
   
         }
     }tokens.push(token('', TokenType.EOC))

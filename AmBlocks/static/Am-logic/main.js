@@ -2,7 +2,7 @@ import {Blocks} from "./Am-interperter/front-back.js";
 
 $(document).ready(function() {
     var clones = Blocks.getInstance();
-
+ 
     function findDistance(fElement, Selement, height=0, direction=0){
         let f=0, s=0;
         let ftop = fElement.offset().top
@@ -33,34 +33,37 @@ $(document).ready(function() {
     function getAllParentPath(currentElement){
         let pathss = []; //jq container
         let parent = currentElement.parent();
-        while(parent.prop("tagName") !== "svg"){
+        while(parent.prop("tagName") == "g"  ){
             const path = parent.children('path:first');
             if(path.length > 0)
                 pathss.push(path); // return the added element
             parent = parent.parent()
         }return $(pathss);
     }
-    function alterVerticalLength(droppable, d, height, direction){
-        let paths = getAllParentPath(droppable);
-        paths = paths.add(droppable.find('path:first')); // return the added element
-        paths.each(function() {
-            let dd = $(this).attr("d");
-            const re = /v ([0-9.]+)/g
-            let match = re.exec(dd);
-            match = re.exec(dd);
-            let matchedString = match[0];
-            let newString = `v ${(height-5)}`;
+    function alterVerticalLength(droppable, d, height, direction, at){
+        if(droppable.prop("tagName")!=='svg'){
+
+            let paths = getAllParentPath(droppable);
+            paths = paths.add(droppable.find('path:first')); // return the added element
+            paths.each(function() {
+                let dd = $(this).attr("d");
+                const re = /v ([0-9.]+)/g
+                let match = re.exec(dd);
+                match = re.exec(dd);
+                let matchedString = match[0];
+                let newString = `v ${height-5+ (at=='m' ? 0 :( parseFloat(matchedString.split(' ')[1])))}`;
+                at='m';
                 if(direction==-1){
-                     newString = `v ${ 16}`;
+                    newString = `v ${ 16}`;
                 }
                 dd = dd.replace(matchedString, newString);
                 $(this).attr("d", dd)
                 height+=80;
-        });
+            });
+        }
     }
     function alterParentsLength(droppable, draggableLength, regex, direction) {
         let paths = getAllParentPath(droppable); 
-        console.log(draggableLength)
 
         paths.each(function() {
             let next = $(this).parent().children().last();
@@ -77,14 +80,31 @@ $(document).ready(function() {
           $(this).attr("d", d);
       });
     }
+
+    function translateAndSet(){
+        let C_Code_List = clones.translate();
+        let code = '';
+        for (let index = 0; index < C_Code_List.length; index++) {
+            let C_Code = C_Code_List[index];
+            code += C_Code;
+            code += '`'
+        }
+        console.log(code);
+        language = code;
+        language_type();
+    }
+
     const H_REGEX      = /H ([0-9.]+)/;
     const V_REGEX      = /v ([0-9.]+)/g;
     const IF_LK_REGEX  = /-2 H [0-9.][0-9.]+/g;
     const TRANS_REGEX  = /translate\(([^)]+)\)/;
 
-    const sidebarWidth = $('.sidebar').width()+38;
+    const sidebarWidth = $('.left-section').width()+38;
     let gClicked=null;
+    let ch= null;
+    let chdirection=0;
     var edit = null;  
+    var visited = false;
     $(document).keydown(function(event) {
         if (event.which === 67 && event.ctrlKey) {
             if(gClicked!=null){
@@ -125,174 +145,217 @@ $(document).ready(function() {
         }
     });
 
-    $('.draggable').draggable({
-        zIndex: 100,
-        appendTo: 'svg',
-        helper: function() {
-            var clone = $(this).clone();
-            return clone;
-        },
-        start: function(){
-        },
-        drag: function(event, ui){
-            var clone = ui.helper;
-            clone.attr('transform', 'translate('  + ui.offset.left + ',' + ui.offset.top + ')');
-        },
-        stop: function(event, ui) {
-            var clone = ui.helper.clone();
-            if (!clone.parent().is("svg")) { 
-                clone.appendTo('svg');
-                clone.addClass('clone');
-                clones.addBlock(clone);
-            }
-            clones.getBlocks().click(function() {
-                gClicked = $(this)
-                
-            });
-            $('.Am-edit').on('click', function(event) {
-                event.stopPropagation();
-                edit= $(this);
-                    var leftValue = $(this).position().left;
-                    var topValue = $(this).position().top;
-                    console.log($('#flex'));
-                    $('#flex').css('left', leftValue + 'px');
-                    $('#flex').css('top', topValue + 'px');
-                    $('#inner').text($(this).children().last().text());
-                    if($('#flex').css('display')=='none'){
-                        $('#flex').css('display','block');
-                    }
-            });
-            $('.select').click(function(){
-                var foreignObject = $(this).find('foreignObject');
-                if (foreignObject.attr('visibility') === 'visible') {
-                    foreignObject.attr('visibility', 'hidden');
-                } else {
-                    foreignObject.attr('visibility', 'visible');
+    clones.getBlocks().click(function() {
+        gClicked = $(this)
+        
+    });
+ 
+    $('.select').click(function(){
+        var foreignObject = $(this).find('foreignObject');
+        if (foreignObject.attr('visibility') === 'visible') {
+            foreignObject.attr('visibility', 'hidden');
+        } else {
+            foreignObject.attr('visibility', 'visible');
+        }
+    });
+    $('.operation-var p').click(function(){
+        var text = $(this).parent().parent().parent().parent().find('text:first');
+        var currentText = $(this).text();
+        text.text(currentText)
+    });
+    $('.operation-list p').click(function(){
+        var text = $(this).parent().parent().parent().parent().find('text:first');
+        var currentText = $(this).text();
+        text.text(currentText)
+    });
+
+   
+    $('.draggable').click(function(){
+        var clone = $(this).clone();
+        if (!clone.parent().is("#Am-workspace")) { 
+            clone.appendTo('#Am-workspace');
+            translateAndSet();
+        }   
+        clones.addBlock(clone);
+        $('.Am-edit').on('click', function(event) {
+            event.stopPropagation();
+            edit= $(this);
+                var leftValue = $(this).position().left;
+                var topValue = $(this).position().top;
+                $('#flex').css('left', leftValue + 'px');
+                $('#flex').css('ttopValueop',  + 'px');
+                $('#inner').text($(this).children().last().text());
+                if($('#flex').css('display')=='none'){
+                    $('#flex').css('display','block');
                 }
-            });
-            $('.operation-var p').click(function(){
-                var text = $(this).parent().parent().parent().parent().find('text:first');
-                var currentText = $(this).text();
-                text.text(currentText)
-            });
-            $('.operation-list p').click(function(){
-                var text = $(this).parent().parent().parent().parent().find('text:first');
-                var currentText = $(this).text();
-                text.text(currentText)
-            });
-            clones.getBlocks().draggable({
-                zIndex: 100,
-                start: function(event, ui) {
-                    clones.translate();
-                },
-                drag: function(event, ui) {
-                    var draggable =  $(this);
-                    if(draggable.parent()!=$('svg')){
-                        draggable.appendTo($('svg'));
-                    }
-                    draggable.attr('transform', 'translate('  + ui.offset.left + ',' + ui.offset.top + ')');
-                    $('.drobable').each(function() {
-                        if(draggable.attr('class').indexOf('operation-logic')!==-1){
-                            const droppable = $(this);
-                            var distance = findDistance(draggable, droppable); 
-                            if (distance <= 50) { 
-                                if(!droppable.attr('id'))
-                                    droppable.attr('id', 'close');
-                                droppable.css({"stroke": "white", "stroke-width": "2" });
-                            }
-                            else{
-                                droppable.css({"stroke": "none", "stroke-width": "none"});
-                            }
-                            if(droppable.attr('id')=='closed' && droppable.css('stroke')=='none'){
-                                droppable.removeAttr('id');
-                                clones.addBlock(draggable);
-                            let d = draggable.find('path').attr("d");
-                            let dlength =  parseFloat(d.match(H_REGEX)[1]);
-
-                                alterParentsLength(droppable, dlength, IF_LK_REGEX, -1);
-                            }
+        });
+        $('#inner').on("blur", function() {
+            $('#flex').css('display','none');
+        });
+        
+        clones.getBlocks().draggable({
+            zIndex: 999999,
+            start: function(event, ui) {
+                const clone = $(this);
+           
+                translateAndSet();
+                /*
+                let clone = $(this);
+                $(this).css('position','absolute');
+                $('#Am-workspace').addClass('dragging')
+                */
+                
+            },
+            drag: function(event, ui) {
+                const draggable =  $(this);
+                translateAndSet();
+                
+                draggable.attr('transform', 'translate('  + ui.offset.left + ',' + ui.offset.top + ')');
+                $('.drobable').each(function() {
+                    if(draggable.attr('class').indexOf('operation-logic')!==-1){
+                        const droppable = $(this);
+                        var distance = findDistance(draggable, droppable); 
+                        if (distance <= 50) { 
+                            if(!droppable.attr('id'))
+                                droppable.attr('id', 'close');
+                            droppable.css({"stroke": "white", "stroke-width": "2" });
                         }
-                    });
-                    $('#newpath').remove();
-                    $('.draggable').each(function() {
-                        if(draggable.attr('class').indexOf('container')!=-1 && $(this).attr('class').indexOf('container')!=-1 &&!$(this).closest(draggable).length){
-                            const path = draggable.children('path:first');
-                            const paths = $(this).children('path:first');
-                            const height = parseFloat(findHeight(V_REGEX, paths.attr('d')));
-                            const selfHeight = parseFloat(findHeight(V_REGEX, path.attr('d')))+25;
-                            let direction=[1, -1, 2];
-                            for (let index = 0; index < direction.length; index++) {
-                                const element = direction[index];
-                                let distance = findCustomeDistance(draggable, $(this), V_REGEX, paths, element); 
-                                if (distance <= 120 && $('#newpath').length==0) { 
-                                    var newPath = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
-                                    newPath.setAttribute('d', path.attr('d'));
-                                    newPath.setAttribute('id', 'newpath');
-                                    newPath.setAttribute('fill', '#868686');
-                                    newPath.setAttribute('visibility', 'visible');
-                                    if(element==2){
-                                        $(this).append(newPath);
-                                        clones.setBlocks(clones.getBlocks().not(draggable));
-
-                                        newPath.setAttribute('transform', 'translate('+17+','+ 50+')');
-                                        alterVerticalLength($(this), path.attr('d'), selfHeight, 1)
-                                    }else{
-                                        const traslate =  ($(this).attr('transform').match(TRANS_REGEX)[1].split(","));  
-                                        //let transform = 'translate('+traslate[0]+','+((element==-1 ? selfHeight: parseFloat(traslate[1])+height+25 )*element)+')';
-                                        let transform = 'translate('+traslate[0]+','+(parseFloat(traslate[1])+((height+25)*element))+')';
-                                        newPath.setAttribute('transform',  transform);
+                        else{
+                            droppable.css({"stroke": "none", "stroke-width": "none"});
+                        }
+                        if(droppable.attr('id')=='closed' && droppable.css('stroke')=='none'){
+                            droppable.removeAttr('id');
+                            clones.addBlock(draggable);
+                        let d = draggable.find('path').attr("d");
+                        let dlength =  parseFloat(d.match(H_REGEX)[1]);
+    
+                            alterParentsLength(droppable, dlength, IF_LK_REGEX, -1);
+                        }
+                    }
+                });
+                $('.draggable').each(function() {
+                    translateAndSet();
+    
+                    if(draggable.attr('class').indexOf('container')!=-1 && $(this).attr('class').indexOf('container')!=-1 &&!$(this).closest(draggable).length){
+                        const path = draggable.children('path:first');
+                        const paths = $(this).children('path:first');
+                        const height = parseFloat(findHeight(V_REGEX, paths.attr('d')));
+                        const selfHeight = parseFloat(findHeight(V_REGEX, path.attr('d'))) + (draggable.attr('class').indexOf('print')!=-1 ? 8 : 25);
+                        let direction=[1, -1, 2];
+                        for (let index = 0; index < direction.length; index++) {
+                            const element = direction[index];
+                            let distance = findCustomeDistance(draggable, $(this), V_REGEX, paths, element); 
+                            if (distance <= 120 && $('#newpath').length==0) { 
+                                ch = $(this);
+                                chdirection = element
+                                var newPath = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
+                                newPath.setAttribute('d', path.attr('d'));
+                                newPath.setAttribute('id', 'newpath');
+                                newPath.setAttribute('fill', '#868686');
+                                newPath.setAttribute('visibility', 'visible');
+                                if(element==2){
+                                    $(this).append(newPath);
+                                    clones.setBlocks(clones.getBlocks().not(draggable));
+    
+                                    newPath.setAttribute('transform', 'translate('+17+','+ 50+')');
+                                    alterVerticalLength($(this), path.attr('d'), selfHeight, 1, 'm')
+                                }else{
+                                    const traslate =  ($(this).attr('transform').match(TRANS_REGEX)[1].split(","));  
+                                    //let transform = 'translate('+traslate[0]+','+((element==-1 ? selfHeight: parseFloat(traslate[1])+height+25 )*element)+')';
+                                    let transform = 'translate('+traslate[0]+','+(parseFloat(traslate[1])+(element==1? ((height)+($(this).attr('class').indexOf('print')!=-1 ? 8 : 25) ):-selfHeight))+')';
+                                    newPath.setAttribute('transform',  transform);
+                                    if(!visited){ 
+                                        alterVerticalLength($(this).parent(), path.attr('d'), selfHeight, 1, 'l')
+                                        visited = true;
                                     }
-                                    if(element==-1){
-                                        $(this).before(newPath);
-                                         
-                                    }
-                                    if(element==1){ 
-                                        $(this).after(newPath);
-                                    }
+                                }
+                                if(element==-1){
+                                    $(this).before(newPath);
+                                     
+                                }
+                                if(element==1){ 
+                                    $(this).after(newPath);
                                 }
                             }
                         }
-                    });
-
-                },
-                stop: function(event, ui) {
-                    /// 
-                    let C_Code = clones.translate();
-                    ///
-                    var draggable = $(this);
-                    if(event.pageX<sidebarWidth){
-                        clones.setBlocks(clones.getBlocks().not(draggable));
-                        draggable.animate({opacity: 0}, 500, function() {draggable.remove(); });
-                    }else if(draggable.offset().left<sidebarWidth){
-                        draggable.attr('transform', 'translate(' + sidebarWidth+',' + ui.offset.top + ')');
+                        if(ch){
+                            const distance = findCustomeDistance(draggable, ch, V_REGEX, paths, chdirection); 
+    
+                            if(distance > 190 ){
+                                if(chdirection == 2)
+                                    alterVerticalLength(ch, path.attr('d'), selfHeight, -1, 'm')
+                                chdirection = 0
+                                $('#newpath').remove();
+                                ch = null;
+                            }
+                        }
                     }
-                    let d = draggable.find('path').attr("d");
-        
-                    $('.draggable').each(function() {
-                        let droppable = $(this);
-                        if($('#newpath').length){
-                            $('#newpath').parent().append(draggable);
-                            draggable.attr('transform', $('#newpath').attr('transform'));
-                            $('#newpath').remove();
-                        }
-                    });
-                    $('.drobable').each(function() {
-                        let droppable = $(this);
-                        if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
-                            droppable.after(draggable)
-                            let d = draggable.find('path').attr("d");
-                            let dlength =  parseFloat(d.match(H_REGEX)[1]);
-                            alterParentsLength(droppable, dlength, IF_LK_REGEX, 1);
-                            const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
-                            draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
-                            droppable.attr("id", 'closed');
-                            clones.setBlocks(clones.getBlocks().not(draggable));
-
-                        }
-                       
-                    });
+                });
+    
+            },
+            stop: function(event, ui) {
+                const clone = $(this);
+                $('#Am-workspace').removeClass('dragging')
+                if (!clone.parent().is("#Am-workspace")) { 
+                    clone.appendTo('#Am-workspace');
+                }   
+                /// 
+    
+                ///
+                visited = false;
+                var draggable = $(this);
+                if(event.pageX<sidebarWidth){
+                    clones.setBlocks(clones.getBlocks().not(draggable));
+                    draggable.animate({opacity: 0}, 500, function() {draggable.remove(); });
+                }else if(draggable.offset().left<sidebarWidth){
+                    draggable.attr('transform', 'translate(' + sidebarWidth+',' + ui.offset.top + ')');
                 }
-              });
+                let d = draggable.find('path').attr("d");
+    
+                $('.draggable').each(function() {
+                    let droppable = $(this);
+                    if($('#newpath').length){
+                        $('#newpath').parent().append(draggable);
+                        draggable.attr('transform', $('#newpath').attr('transform'));
+                        $('#newpath').remove();
+                    }
+                });
+                $('.drobable').each(function() {
+                    let droppable = $(this);
+                    if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
+                        droppable.after(draggable)
+                        let d = draggable.find('path').attr("d");
+                        let dlength =  parseFloat(d.match(H_REGEX)[1]);
+                        alterParentsLength(droppable, dlength, IF_LK_REGEX, 1);
+                        const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
+                        draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
+                        droppable.attr("id", 'closed');
+                        clones.setBlocks(clones.getBlocks().not(draggable));
+    
+                    }
+                   
+                });
+            }
+          });
+    });
+  
+        /*
+        start: function(e, ui){
+            var clone = ui.helper;
+            clone.attr('transform', 'translate('  + e.clientX + ',' + e.clientY + ')');
+            $('svg').addClass('dragging')
+
+            ////////////////////////////
+
+          
+      
+        },
+        stop: function(event, ui) {
+            $('svg').removeClass('dragging');
+            var clone = ui.helper
+
+          
+          
 
             if(event.pageX<sidebarWidth){
                 clone.animate({opacity: 0}, 500, function() {clone.remove();});
@@ -300,35 +363,47 @@ $(document).ready(function() {
                 clone.attr('transform', 'translate(' + sidebarWidth+',' + ui.offset.top + ')');
             }
         } 
-    });
-    
+        */
+
     $('#flex').on('keydown', function(event) {
-        if($(this).width()!=25){
 
-            let direction = 1;
-            if(event.keyCode == 8)
-            direction=-1;
-            const inputWidth = $(this).width();
-            console.log($(this).val())
-            edit.children().first().css('width', inputWidth);
-            edit.children().last().text($(this).text());
-            if(edit.next().length!=0)
-            edit.next().attr('transform','translate('+(parseFloat(edit.next().attr('transform').match(TRANS_REGEX)[1].split(",")[0])+8*direction) +',0)')
-            
-            let path = edit.parent().find('path');
-            if(path.length==0)
-                path = edit.parent().parent().find('path')
-            
-            let d = path.attr('d');
-            let match;
-            match = H_REGEX.exec(d) 
-            let matchedString = match[0];
-            let newString = `H ${parseFloat(matchedString.split(' ')[1])+(8*direction)}`;
-            d = d.replace(matchedString, newString);
-            path.attr("d", d);
-            alterParentsLength(edit, 8, IF_LK_REGEX, direction);
+        var charCode = (event.which) ? event.which : event.keyCode;
+        if (!(charCode > 31 && (charCode < 48 || charCode > 57)));
+            else{
+
+            if($(this).width()!=25){
+                let direction = 1;
+                if(event.keyCode == 8)
+                direction=-1;
+                const inputWidth = $(this).width();
+                edit.children().first().css('width', inputWidth);
+                if(edit.next().length!=0)
+                edit.next().attr('transform','translate('+(parseFloat(edit.next().attr('transform').match(TRANS_REGEX)[1].split(",")[0])+8*direction) +',0)')
+                if(edit.parent().attr('id')!='printBlock'){
+                    let path = edit.parent().find('path');
+                    if(path.length==0)
+                    path = edit.parent().parent().find('path')
+                    
+                    let d = path.attr('d');
+                    let match;
+                    match = H_REGEX.exec(d) 
+                    let matchedString = match[0];
+                    let newString = `H ${parseFloat(matchedString.split(' ')[1])+(8*direction)}`;
+                    d = d.replace(matchedString, newString);
+                    path.attr("d", d);
+                }
+                alterParentsLength(edit, 8, IF_LK_REGEX, direction);
+            }  
         }
-
+ 
     });
+    $('#flex').on('keyup', function(event) {
+        let text = $(this).text();
+        if (text !== undefined) { 
+            text = text.replace(/\n/, ''); // add the replacement string as empty string
+            edit.children().last().text(text);
+            translateAndSet();
+        }
+    });
+
 });
-print('hello world!');
