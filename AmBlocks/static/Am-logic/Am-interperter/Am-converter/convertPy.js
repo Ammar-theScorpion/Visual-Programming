@@ -75,18 +75,24 @@ export class ConverterPy{
       
     
     generateReapetStatement(ifNode){
-        const condition = ifNode.condition;
-        let conditionValue = condition.left.value;
+      const condition = ifNode.condition;
+      let conditionValue = 'false';
+      if (conditionValue != condition) {
+        conditionValue = condition.left.value;
         conditionValue += condition.operater.value;
         conditionValue += condition.right.value;
-        const body = [...ifNode.body];
-        let bodyValue = '';
-        if(body){
-            while(body.length){
-                bodyValue += this.generateCode(body.shift());
-            }
+      }else
+        conditionValue='False'
+      const body = !ifNode.body?undefined: [...ifNode.body];
+      let bodyValue = '';
+      if (body) {
+        while (body.length) {
+          bodyValue += '\t'+this.generateCode(body.shift(), level + 1);
         }
-        return( `while ${conditionValue}:\n\t${bodyValue}\n`)
+      }
+      const indentation = level>=0?'\t'.repeat(level):"";
+      return `${indentation}while ${conditionValue}:\n${indentation}${bodyValue}`;
+
     }
     generateElseStatement(ifNode){
         const body = ifNode.body;

@@ -16,9 +16,9 @@
    </head>
    {% endblock mainscript %}
    <div class="sidebar" >
-      
       {% block block %}
-                                                
+             
+ 
       {% if 'printBlock' in id %}
          <g class="draggable print-container" style="position:fixed;" id="printBlock" >
             <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
@@ -31,30 +31,57 @@
             
          </g>
       {% endif %}
-
       {% if 'ifBlock' in id %}
          <g class="draggable if-container" id="one-condition" data-category="control" data-shapes="c-block c-1" data-id="control_if" >
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
-            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(12,24)">create </text>
-            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle"  dy="0" x="4" transform="translate(16,24)" > table </text>
-            <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#CF8b17" transform="translate(120,8)"></path>
+            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(8,24)">if </text>
+            <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#CF8b17" transform="translate(50,8)"></path>
+            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle"  dy="0" x="4" transform="translate(124,24)" > then </text>
+
+            
          </g>
       {% endif %}
 
+      {% if 'multiConditionBlock' in id %}
+      <g class="draggable operation-logic condition-container" id="multiConditionBlock" data-id="text"  data-argument-type="text">
+         <path d="m 0,0 m 20,0 H 156.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
+         <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#1e8f14" transform="translate(20,4)"></path>
+         
+         
+         <g class="am-drop select"  transform="translate(72, 10)" style="cursor: text;">
+            <rect  rx="4" ry="4" x="0" y="0" height="18" width="31"></rect>
+            <text class="Am-text ope" x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ></text>
+            <text x="23" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ▾ </text>
+            <foreignObject x="-80" y="50" width="200" height="250" visibility="hidden">
+               <div xmlns="http://www.w3.org/1999/xhtml">
+                  <div class="operation-head">
+                  </div>
+                     <div class="operation-list input-mimic">        
+                        <p><</p>
+                        <p><=</p>
+                        <p>==</p>
+                        <p>&&</p>
+                        <p>||</p>
+                     </div>
+                  </div>
+            </foreignObject>
+         </g>
+         <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#1e8f14" transform="translate(115,4)"></path>
+          
+      </g>
+   {% endif %}
       {% if 'conditionalBlock' in id %}
 
          <g class="draggable operation-logic" id="conditionalBlock" data-id="text"  data-argument-type="text">
-            <path d="m 0,0 m 20,0 H 156.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
-            <image href="{% static '/Am-images/variable.png' %}" height="15" x="19" y="12" width="15"></image>
-
-               <g class="Am-edit" transform="translate(40,7)" style="display: block;">
+            <path d="m 0,0 m 20,0 H 140.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
+               <g class="Am-edit" transform="translate(30,7)" style="display: block;">
                   <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
                   <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
                </g>
             <g class="move-input" transform="translate(0,0)">
             
-            <g class="am-drop select"  transform="translate(72, 10)" style="cursor: text;">
+            <g class="am-drop select"  transform="translate(65, 10)" style="cursor: text;">
                <rect  rx="4" ry="4" x="0" y="0" height="18" width="31"></rect>
                <text class="Am-text" x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ></text>
                <text x="23" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ▾ </text>
@@ -72,13 +99,11 @@
                      </div>
                </foreignObject>
             </g>
-               <g class="Am-edit" transform="translate(110,7)" style="display: block;">
+               <g class="Am-edit" transform="translate(108,7)" style="display: block;">
                   <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
                   <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
                </g>
-               <g transform="translate(0,0)">
-                  <image href="{% static '/Am-images/variable.png' %}" height="15" x="142" y="12" width="15"></image>
-               </g>
+          
          </g>
          </g>
       {% endif %}
@@ -87,7 +112,6 @@
 
          <g class="draggable operation"  data-id="text" transform="translate(5,500)" data-argument-type="text">
             <rect stroke="#389438" fill="#59C059" width="170" height="40" rx="4" ry="4" x="1" y="0"></rect>
-            <image href="{% static '/Am-images/variable.png' %}" height="15" x="15" y="12" width="15"></image>
 
             <g class="am-drop select" transform="translate(20, 0)" style="cursor: text;">
                <g transform="translate(15, 5)">
@@ -157,7 +181,6 @@
                      </div>
                </foreignObject>
             </g>
-            <image href="{% static '/Am-images/variable.png' %}" height="15" x="142" y="12" width="15"></image>
          </g>
 
          </g>
@@ -175,7 +198,6 @@
          {% endif %}
 
       {% if 'elseBlock' in id  %}
-
          <g  class="draggable else-container" data-category="control" data-shapes="c-block c-1" data-id="control_else" transform="translate(5,350)">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
@@ -210,7 +232,6 @@
                   <input class="input"></input>
                </div>
             </foreignObject>
-            <image href="{% static '/Am-images/variable.png' %}" height="15" x="-1" y="12" width="15"></image>
          </g>
       </g>
 

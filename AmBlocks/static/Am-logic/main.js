@@ -2,7 +2,12 @@ import {Blocks} from "./Am-interperter/front-back.js";
 
 $(document).ready(function() {
     var clones = Blocks.getInstance();
- 
+    class BlockInfo{
+        constructor(){
+            this.block=null;
+            this.direction=0;
+        }
+    }
     function findDistance(fElement, Selement, height=0, direction=0){
         let f=0, s=0;
         let ftop = fElement.offset().top
@@ -72,11 +77,19 @@ $(document).ready(function() {
             }
             let d = $(this).attr("d");
             let match;
-            while(match = regex.exec(d)) {
+            if(regex==IF_LK_REGEX){
+
+                while(match = regex.exec(d)) {
+                    let matchedString = match[0];
+                    let newString = `-2 H ${parseFloat(matchedString.split(' ')[1])+(draggableLength*0.72)*direction}`;
+                    d = d.replace(matchedString, newString);
+                }
+            }else{
+                match = regex.exec(d)
                 let matchedString = match[0];
-                let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength*0.72)*direction}`;
+                let newString = `H ${parseFloat(matchedString.split(' ')[1])+(draggableLength*0.72)*direction}`;
                 d = d.replace(matchedString, newString);
-          }
+            }
           $(this).attr("d", d);
       });
     }
@@ -89,7 +102,6 @@ $(document).ready(function() {
             code += C_Code;
             code += '`'
         }
-        console.log(code);
         language = code;
         language_type();
     }
@@ -102,9 +114,11 @@ $(document).ready(function() {
     const sidebarWidth = $('.left-section').width()+38;
     let gClicked=null;
     let ch= null;
+    let chdrag= null;
     let chdirection=0;
     var edit = null;  
     var visited = false;
+    let info = new BlockInfo();
     $(document).keydown(function(event) {
         if (event.which === 67 && event.ctrlKey) {
             if(gClicked!=null){
@@ -194,25 +208,28 @@ $(document).ready(function() {
         });
         
         clones.getBlocks().draggable({
-            zIndex: 999999,
+            zIndex: 0,
             start: function(event, ui) {
+                
+                translateAndSet();
                 const clone = $(this);
            
-                translateAndSet();
-                /*
-                let clone = $(this);
-                $(this).css('position','absolute');
-                $('#Am-workspace').addClass('dragging')
-                */
-                
             },
             drag: function(event, ui) {
-                const draggable =  $(this);
                 translateAndSet();
                 
-                draggable.attr('transform', 'translate('  + ui.offset.left + ',' + ui.offset.top + ')');
+                const draggable = $(this);
+                if (!draggable.parent().is("#Am-workspace")) { 
+                    draggable.appendTo('#Am-workspace');
+                } 
+                const workspaceOffset = $("#Am-workspace").offset();
+                const left = ui.offset.left - workspaceOffset.left;
+                const top = ui.offset.top - workspaceOffset.top;
+                draggable.attr('transform', 'translate(' + left + ',' + top + ')');
+
+
                 $('.drobable').each(function() {
-                    if(draggable.attr('class').indexOf('operation-logic')!==-1){
+                    if(draggable.attr('class').indexOf('operation-logic')!==-1 && !$(this).closest(draggable).length){
                         const droppable = $(this);
                         var distance = findDistance(draggable, droppable); 
                         if (distance <= 50) { 
@@ -228,7 +245,9 @@ $(document).ready(function() {
                             clones.addBlock(draggable);
                         let d = draggable.find('path').attr("d");
                         let dlength =  parseFloat(d.match(H_REGEX)[1]);
-    
+                        if(droppable.parent().attr('id') == 'multiConditionBlock')
+                            alterParentsLength(droppable, dlength, H_REGEX, -1);
+                        else
                             alterParentsLength(droppable, dlength, IF_LK_REGEX, -1);
                         }
                     }
@@ -238,15 +257,19 @@ $(document).ready(function() {
     
                     if(draggable.attr('class').indexOf('container')!=-1 && $(this).attr('class').indexOf('container')!=-1 &&!$(this).closest(draggable).length){
                         const path = draggable.children('path:first');
+                        let stringPath = path.attr('d');
+                        stringPath+=' '+draggable.find('.draggable').find('path:first').attr('d');
+                        console.log(stringPath)
                         const paths = $(this).children('path:first');
                         const height = parseFloat(findHeight(V_REGEX, paths.attr('d')));
-                        const selfHeight = parseFloat(findHeight(V_REGEX, path.attr('d'))) + (draggable.attr('class').indexOf('print')!=-1 ? 8 : 25);
+                        const selfHeight = parseFloat(findHeight(V_REGEX, stringPath)) + (draggable.attr('class').indexOf('print')!=-1 ? 8 :15*(draggable.find('.draggable').length+1));
                         let direction=[1, -1, 2];
                         for (let index = 0; index < direction.length; index++) {
                             const element = direction[index];
                             let distance = findCustomeDistance(draggable, $(this), V_REGEX, paths, element); 
                             if (distance <= 120 && $('#newpath').length==0) { 
                                 ch = $(this);
+                                chdrag = draggable;
                                 chdirection = element
                                 var newPath = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
                                 newPath.setAttribute('d', path.attr('d'));
@@ -262,7 +285,7 @@ $(document).ready(function() {
                                 }else{
                                     const traslate =  ($(this).attr('transform').match(TRANS_REGEX)[1].split(","));  
                                     //let transform = 'translate('+traslate[0]+','+((element==-1 ? selfHeight: parseFloat(traslate[1])+height+25 )*element)+')';
-                                    let transform = 'translate('+traslate[0]+','+(parseFloat(traslate[1])+(element==1? ((height)+($(this).attr('class').indexOf('print')!=-1 ? 8 : 25) ):-selfHeight))+')';
+                                    let transform = 'translate( 0'+','+(element==1 ? (height+25) : -selfHeight)+')';
                                     newPath.setAttribute('transform',  transform);
                                     if(!visited){ 
                                         alterVerticalLength($(this).parent(), path.attr('d'), selfHeight, 1, 'l')
@@ -270,24 +293,33 @@ $(document).ready(function() {
                                     }
                                 }
                                 if(element==-1){
-                                    $(this).before(newPath);
+                                    $(this).prepend(newPath);
                                      
                                 }
                                 if(element==1){ 
-                                    $(this).after(newPath);
+                                    $(this).append(newPath);
                                 }
                             }
                         }
                         if(ch){
-                            const distance = findCustomeDistance(draggable, ch, V_REGEX, paths, chdirection); 
-    
-                            if(distance > 190 ){
-                                if(chdirection == 2)
-                                    alterVerticalLength(ch, path.attr('d'), selfHeight, -1, 'm')
-                                chdirection = 0
-                                $('#newpath').remove();
-                                ch = null;
-                            }
+                            let distance = 0;
+                            let parents = [];
+                             parents.push(ch.parent())
+                            parents.push(ch);
+                            for (let index = 0; index < parents.length; index++) {
+                                const element = parents[index];
+                                if($(element).prop("tagName")=='svg')
+                                    continue;
+                                distance = findCustomeDistance(chdrag, element, V_REGEX, paths, chdirection);
+                                if(distance > 190 ){
+                                
+                                    if(chdirection == 2)
+                                        alterVerticalLength(element, path.attr('d'), selfHeight, -1, 'm')
+                                    chdirection = 0
+                                    $('#newpath').remove();
+                                    ch = null;
+                                }
+                            } 
                         }
                     }
                 });
@@ -305,17 +337,17 @@ $(document).ready(function() {
                 visited = false;
                 var draggable = $(this);
                 if(event.pageX<sidebarWidth){
-                    clones.setBlocks(clones.getBlocks().not(draggable));
-                    draggable.animate({opacity: 0}, 500, function() {draggable.remove(); });
+                    //clones.setBlocks(clones.getBlocks().not(draggable));
+                    //draggable.animate({opacity: 0}, 500, function() {draggable.remove(); });
                 }else if(draggable.offset().left<sidebarWidth){
-                    draggable.attr('transform', 'translate(' + sidebarWidth+',' + ui.offset.top + ')');
+                   // draggable.attr('transform', 'translate(' + sidebarWidth+',' + ui.offset.top + ')');
                 }
                 let d = draggable.find('path').attr("d");
     
                 $('.draggable').each(function() {
                     let droppable = $(this);
                     if($('#newpath').length){
-                        $('#newpath').parent().append(draggable);
+                        ch.append(draggable);
                         draggable.attr('transform', $('#newpath').attr('transform'));
                         $('#newpath').remove();
                     }
@@ -323,10 +355,20 @@ $(document).ready(function() {
                 $('.drobable').each(function() {
                     let droppable = $(this);
                     if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
-                        droppable.after(draggable)
                         let d = draggable.find('path').attr("d");
                         let dlength =  parseFloat(d.match(H_REGEX)[1]);
-                        alterParentsLength(droppable, dlength, IF_LK_REGEX, 1);
+                        if(droppable.next().length!=0){
+                            droppable.next().attr('transform','translate('+(dlength+45) +',10)')
+                            droppable.next().next().attr('transform','translate('+(dlength+80) +',4)')
+                        }
+                        droppable.after(draggable)
+            
+                        if(droppable.parent().attr('id') == 'multiConditionBlock'){
+                         
+                            alterParentsLength(droppable, dlength, H_REGEX, 1);
+                        }
+                        else
+                            alterParentsLength(droppable, dlength, IF_LK_REGEX, 1);
                         const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
                         draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
                         droppable.attr("id", 'closed');
@@ -382,7 +424,7 @@ $(document).ready(function() {
                 if(edit.parent().attr('id')!='printBlock'){
                     let path = edit.parent().find('path');
                     if(path.length==0)
-                    path = edit.parent().parent().find('path')
+                        path = edit.parent().parent().find('path')
                     
                     let d = path.attr('d');
                     let match;

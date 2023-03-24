@@ -59,7 +59,7 @@ export class Blocks {
     }
 
     getBlocksAsString(currentElement, at=1, childat=1){
-        let textCode="";
+        let textCode='';
         let saveLastBlock = '';
         let textAt = currentElement.querySelector(`text:nth-of-type(${at})`);
         if(textAt)
@@ -67,14 +67,24 @@ export class Blocks {
         while(textAt && textAt.length){
             at++;
             // process block
-            if(textAt.indexOf('then')!==-1 || textAt.indexOf('else')!==-1){
-                textCode+=textAt+' {';
-                let nextchild = currentElement.querySelector(`.draggable:nth-of-type(${childat})`);
-                while(nextchild){
-                    textCode+=this.getBlocksAsString(nextchild, 1, 1);
+            if(currentElement.id == 'multiConditionBlock'){
+                textCode+= '(';
+                let nextchild = currentElement.querySelectorAll('.draggable');
+                for (let index = 0; index < nextchild.length; index++) {
+                    const element = nextchild[index];
+                    textCode+=this.getBlocksAsString(element, 1, 1) + ')'+ currentElement.querySelector('.ope').textContent ;
                     childat++;
-                    nextchild = currentElement.querySelector(`.draggable:nth-of-type(${childat})`);
-                }textCode+='}';
+                }textAt='';
+            }
+            if(textAt.indexOf('then')!==-1 || textAt.indexOf('else')!==-1 ){
+                textCode+= textAt+ '{';
+                let nextchild = currentElement.querySelectorAll('.draggable');
+                for (let index = 0; index < nextchild.length; index++) {
+                    const element = nextchild[index];
+                    textCode+=this.getBlocksAsString(element, 1, 1);
+                    childat++;
+                }
+                textCode+='}';
             // process normalBlock
             }
             else if(textAt.indexOf('print')!=-1 || this.isInput(textAt)){
@@ -95,7 +105,7 @@ export class Blocks {
             }if(textAt==saveLastBlock)
                 saveLastBlock = '';
             else{
-                textAt = currentElement.querySelector(`text:nth-of-type(${at})`);
+                textAt = currentElement.querySelector(`.Am-text:nth-of-type(${at})`);
                 if(textAt)
                     textAt = textAt.textContent;
             }
@@ -114,15 +124,13 @@ export class Blocks {
         // if 50>60 then { Ammar=3 if x<b then { if xx<bx then { repeat i<10 { v } } }z=1 }
         // { Ammar=3 if x<b then { if xx<bx then { repeat i<10 { v } else { u=1 } } }  else { tt=44 } z=1 }
         // = " print('dsd') if x<b then { if xx<bx then { repeat i<10 { v } else { u=1 } } }  else { tt=44 } z=1"; 
-        let src = "int x = '5' x=5*4 if x<b then { int c = 's'  }";
-      /*  for(const b of this.blocks){
+        let src = "";
+        /*for(const b of this.blocks){
             let child = b;
-             
             src += this.getBlocksAsString(child);
-
-        }console.log(src);*/
-        //src = this.generateVarType(src.split(' '));     
-
+        }console.log(src);
+        src = this.generateVarType(src.split(' '));    */
+        src = 'int x = 3 print x' 
         const languages = (this.covert.covertString(src));
         return languages;
     }

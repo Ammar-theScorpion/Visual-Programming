@@ -5,7 +5,7 @@ from io import StringIO
 import sys
 # Create your views here.
 
-def renderTutorials(request, tname):
+def renderTutorials(request, tname, result = None):
     form = UserCode()
 
     tutorial = Tutorial.objects.get(tname=tname)
@@ -14,11 +14,15 @@ def renderTutorials(request, tname):
         if form.is_valid():
             form.save()
             result = test_code(tutorial.valid_code, form.cleaned_data['user_code'])
+            text = tutorial.block_id.split(' ')
+            dic=[]
+            for id in text:
+                dic.append(id)
+            context = {'tutorial': tutorial, 'id':dic, 'form': form, 'result':result[0]}
+            return render(request, 'blocks.html', context)
             if result:
                 next_tutorial = Tutorial.objects.filter(sequence__gt=tutorial.sequence).first()
-                print(next_tutorial)
                 if next_tutorial:
-                    print(next_tutorial)
                     return redirect(reverse('tutorial:renderTutorials', args=[next_tutorial.tname]))
             else:
                 return render(request, '404.html', {})
@@ -30,7 +34,7 @@ def renderTutorials(request, tname):
     dic=[]
     for id in text:
         dic.append(id)
-    context = {'tutorial': tutorial, 'id':dic, 'form': form}
+    context = {'tutorial': tutorial, 'id':dic, 'form': form, 'result':result}
 
     return render(request, 'blocks.html', context)
 
@@ -67,5 +71,4 @@ def test_code(valid_code, user_code):
         user_result = user_output.getvalue().strip()
     
     # Compare their output
-    print(valid_code, valid_result)
-    return valid_result == user_result
+    return (user_result, valid_result == user_result)

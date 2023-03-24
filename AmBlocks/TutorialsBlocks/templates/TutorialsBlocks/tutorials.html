@@ -221,6 +221,9 @@
 			<p id ='setcode' style="height: 100%;" >
 		
 			</p>
+			<p style="height: 10%">
+				{{result}}
+			</p>
 		<form method="post">
 			{% csrf_token %}
 			<input type="hidden" name="user_code" id="user_code_input">
@@ -239,6 +242,7 @@
   <script>
 		let language = '';
 		let lang_id=0;
+
 	  const blocks = $('.draggable');
 	  	let space = 0;
 		blocks.each(function(){
