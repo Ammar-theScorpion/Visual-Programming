@@ -2,6 +2,8 @@ import {Blocks} from "./Am-interperter/front-back.js";
 
 $(document).ready(function() {
     var clones = Blocks.getInstance();
+    let currentElement =0;
+
     class BlockInfo{
         constructor(){
             this.block=null;
@@ -30,6 +32,15 @@ $(document).ready(function() {
             match = regex.exec(d);
         }
         return height;
+    }
+    function findLength(d){
+        let length = 0
+        let match = IF_LK_REGEX.exec(d);
+        while (match !== null) {
+            length += parseFloat(match[0].split(' ')[2]);
+            match = IF_LK_REGEX.exec(d);
+        }
+        return length;
     }
     function findCustomeDistance(fElement, Selement, regex, path, direction){
         const d = path.attr('d');
@@ -72,16 +83,17 @@ $(document).ready(function() {
 
         paths.each(function() {
             let next = $(this).parent().children().last();
-            if(next.is('text')){
+            /*if(next.is('text')){
                 next.attr('transform','translate('+(parseFloat(next.attr('transform').match(TRANS_REGEX)[1].split(",")[0]) + (draggableLength*0.72)*direction) +',24)')
-            }
+            }*/
             let d = $(this).attr("d");
             let match;
             if(regex==IF_LK_REGEX){
 
                 while(match = regex.exec(d)) {
                     let matchedString = match[0];
-                    let newString = `-2 H ${parseFloat(matchedString.split(' ')[1])+(draggableLength*0.72)*direction}`;
+                    //let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength)*direction}`;
+                    let newString = `-2 H ${parseFloat(draggableLength)}`;
                     d = d.replace(matchedString, newString);
                 }
             }else{
@@ -94,16 +106,33 @@ $(document).ready(function() {
       });
     }
 
-    function translateAndSet(){
-        let C_Code_List = clones.translate();
+    window.translateAndSet =function(){
+        let C_Code_List = ['',''];
         let code = '';
-        for (let index = 0; index < C_Code_List.length; index++) {
-            let C_Code = C_Code_List[index];
+
+        if(step==1 && stepped){
+            C_Code_List = clones.translateSteps(lang, currentElement);
+            if(currentElement+1<clones.blocks.length)
+                currentElement++;
+            else
+                currentElement=0;
+        }
+        else if(step!=1){
+            C_Code_List = clones.translate(lang);
+        }
+        const language_list = C_Code_List[0];
+        for (let index = 0; index < language_list.length; index++) {
+            let C_Code = language_list[index];
             code += C_Code;
             code += '`'
         }
-        language = code;
-        language_type();
+        if(code!=='``'){
+
+            language = code;
+            language_type();
+        }
+        const error = C_Code_List[1];
+        document.getElementById('error').innerHTML = error;
     }
 
     const H_REGEX      = /H ([0-9.]+)/;
@@ -139,6 +168,28 @@ $(document).ready(function() {
         }
     });
 
+    $('.create-list').click(function(){
+        var foreignObject = $('#list');
+        if (foreignObject.attr('visibility') === 'visible') {
+            foreignObject = foreignObject.clone();
+            $('#list').parent().append(foreignObject);
+        } 
+        const name = window.prompt('List Name')
+        let d = foreignObject.children('path:first').attr("d");
+        foreignObject.find('.listname').text(name)
+        let match = ''
+        while(match=IF_LK_REGEX.exec(d)){
+
+            let matchedString = match[0];
+            //let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength)*direction}`;
+            let newString = `-2 H ${65+name.length*8+58}`;
+            d = d.replace(matchedString, newString);
+        }
+        foreignObject.attr('visibility', 'visible');
+        foreignObject.children('path:first').attr("d", d);
+
+        setBlock()
+    });
     $('.make-var').keydown(function(event){
         if(event.keyCode === 13){
             $('.make-var').attr('visibility', 'hidden')
@@ -183,7 +234,7 @@ $(document).ready(function() {
         text.text(currentText)
     });
 
-   
+
     $('.draggable').click(function(){
         var clone = $(this).clone();
         if (!clone.parent().is("#Am-workspace")) { 
@@ -197,7 +248,7 @@ $(document).ready(function() {
                 var leftValue = $(this).position().left;
                 var topValue = $(this).position().top;
                 $('#flex').css('left', leftValue + 'px');
-                $('#flex').css('ttopValueop',  + 'px');
+                $('#flex').css('top',  topValue  + 'px');
                 $('#inner').text($(this).children().last().text());
                 if($('#flex').css('display')=='none'){
                     $('#flex').css('display','block');
@@ -206,7 +257,33 @@ $(document).ready(function() {
         $('#inner').on("blur", function() {
             $('#flex').css('display','none');
         });
-        
+
+        ////////////////////// LIST /////////////////////////
+        $('.drop_content').click(function(){
+            var foreignObject = $(this).parent().children('svg');
+            if (foreignObject.attr('visibility') === 'visible') {
+                foreignObject.attr('visibility', 'hidden');
+            } else {
+                foreignObject.attr('visibility', 'visible');
+    
+            }
+        });
+
+        $('.clickable').click(function(){
+            var clone = $(this).clone();
+            const appendto = $(this).parent().parent();
+            console.log(clones.blocks.find('.op'));
+            clones.blocks = clones.blocks.not('.op');
+            $('.op').remove();
+            clone.addClass('op')
+            clone.appendTo(appendto);
+            clones.addBlock(clone);
+            const length = findLength(appendto.children('path:first').attr('d'))
+            clone.attr('transform', 'translate(' + parseFloat(length) + ',' + 3 + ')');
+            $(this).parent().attr('visibility', 'hidden');
+            translateAndSet();
+        })
+
         clones.getBlocks().draggable({
             zIndex: 0,
             start: function(event, ui) {
@@ -254,74 +331,85 @@ $(document).ready(function() {
                 });
                 $('.draggable').each(function() {
                     translateAndSet();
-    
-                    if(draggable.attr('class').indexOf('container')!=-1 && $(this).attr('class').indexOf('container')!=-1 &&!$(this).closest(draggable).length){
-                        const path = draggable.children('path:first');
-                        let stringPath = path.attr('d');
-                        stringPath+=' '+draggable.find('.draggable').find('path:first').attr('d');
-                        console.log(stringPath)
-                        const paths = $(this).children('path:first');
-                        const height = parseFloat(findHeight(V_REGEX, paths.attr('d')));
-                        const selfHeight = parseFloat(findHeight(V_REGEX, stringPath)) + (draggable.attr('class').indexOf('print')!=-1 ? 8 :15*(draggable.find('.draggable').length+1));
-                        let direction=[1, -1, 2];
-                        for (let index = 0; index < direction.length; index++) {
-                            const element = direction[index];
-                            let distance = findCustomeDistance(draggable, $(this), V_REGEX, paths, element); 
-                            if (distance <= 120 && $('#newpath').length==0) { 
-                                ch = $(this);
-                                chdrag = draggable;
-                                chdirection = element
-                                var newPath = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
-                                newPath.setAttribute('d', path.attr('d'));
-                                newPath.setAttribute('id', 'newpath');
-                                newPath.setAttribute('fill', '#868686');
-                                newPath.setAttribute('visibility', 'visible');
-                                if(element==2){
-                                    $(this).append(newPath);
-                                    clones.setBlocks(clones.getBlocks().not(draggable));
-    
-                                    newPath.setAttribute('transform', 'translate('+17+','+ 50+')');
-                                    alterVerticalLength($(this), path.attr('d'), selfHeight, 1, 'm')
-                                }else{
-                                    const traslate =  ($(this).attr('transform').match(TRANS_REGEX)[1].split(","));  
-                                    //let transform = 'translate('+traslate[0]+','+((element==-1 ? selfHeight: parseFloat(traslate[1])+height+25 )*element)+')';
-                                    let transform = 'translate( 0'+','+(element==1 ? (height+25) : -selfHeight)+')';
-                                    newPath.setAttribute('transform',  transform);
-                                    if(!visited){ 
-                                        alterVerticalLength($(this).parent(), path.attr('d'), selfHeight, 1, 'l')
-                                        visited = true;
+                    if(draggable.attr('id')!='function'){
+                        
+                        if(!$(this).closest(draggable).length){
+                            const path = draggable.children('path:first');
+                            let stringPath = path.attr('d');
+                            stringPath+=' '+draggable.find('.draggable').find('path:first').attr('d');
+                            const paths = $(this).children('path:first');
+                            const height = parseFloat(findHeight(V_REGEX, paths.attr('d')))+ ($(this).attr('class').indexOf('container')==-1 ? 8 :25);
+                            const selfHeight = parseFloat(findHeight(V_REGEX, stringPath)) + (draggable.attr('class').indexOf('container')==-1 ? 8 :25);
+                            let direction=[1, -1, 2];
+                            let index = 0;
+                            if($(this).attr('id')=='function')
+                                index = 2;
+                            for (; index < direction.length; index++) {
+                                const element = direction[index];
+                                let distance = findCustomeDistance(draggable, $(this), V_REGEX, paths, element); 
+                                if (distance <= 120 && $('#newpath').length==0) { 
+                                     
+
+                                    ch = $(this);
+                                    chdrag = draggable;
+                                    chdirection = element
+                                    var newPath = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
+                                    newPath.setAttribute('d', path.attr('d'));
+                                    newPath.setAttribute('id', 'newpath');
+                                    newPath.setAttribute('fill', '#868686');
+                                    newPath.setAttribute('visibility', 'visible');
+                                    if(element==2){
+                                        $(this).append(newPath);
+                                        clones.setBlocks(clones.getBlocks().not(draggable));
+        
+                                        newPath.setAttribute('transform', 'translate('+17+','+ 50+')');
+                                        alterVerticalLength($(this), path.attr('d'), selfHeight, 1, 'm')
+                                    }else{
+                                        //const traslate =  ($(this).attr('transform').match(TRANS_REGEX)[1].split(","));  
+                                        //let transform = 'translate('+traslate[0]+','+((element==-1 ? selfHeight: parseFloat(traslate[1])+height+25 )*element)+')';
+                                       
+                                        if(!visited){ 
+                                            alterVerticalLength($(this).parent(), path.attr('d'), selfHeight, 1, 'l')
+                                            visited = true;
+                                        }
+                                    }
+                                    if(element==-1){
+                                        $(this).prepend(newPath);
+                                        let transform = 'translate( 0'+','+(-height) +')';
+                                        newPath.setAttribute('transform',  transform);
+                                        
+                                    }
+                                    if(element==1){ 
+                                        $(this).append(newPath);
+                                        let transform = 'translate( 0'+','+(height) +')';
+                                        newPath.setAttribute('transform',  transform);
                                     }
                                 }
-                                if(element==-1){
-                                    $(this).prepend(newPath);
-                                     
-                                }
-                                if(element==1){ 
-                                    $(this).append(newPath);
-                                }
+                            }
+                            if(ch){
+                                let distance = 0;
+                                let parents = [];
+                                parents.push(ch.parent())
+                                parents.push(ch);
+                                for (let index = 0; index < parents.length; index++) {
+                                    const element = parents[index];
+                                    if($(element).prop("tagName")=='svg')
+                                        continue;
+                                    distance = findCustomeDistance(chdrag, element, V_REGEX, paths, chdirection);
+                                    
+                                    if(distance > 190 ){
+                                    
+                                        if(chdirection == 2)
+                                            alterVerticalLength(element, path.attr('d'), selfHeight, -1, 'm')
+                                        chdirection = 0
+                                        $('#newpath').remove();
+                                        ch = null;
+                                    }
+                                } 
                             }
                         }
-                        if(ch){
-                            let distance = 0;
-                            let parents = [];
-                             parents.push(ch.parent())
-                            parents.push(ch);
-                            for (let index = 0; index < parents.length; index++) {
-                                const element = parents[index];
-                                if($(element).prop("tagName")=='svg')
-                                    continue;
-                                distance = findCustomeDistance(chdrag, element, V_REGEX, paths, chdirection);
-                                if(distance > 190 ){
-                                
-                                    if(chdirection == 2)
-                                        alterVerticalLength(element, path.attr('d'), selfHeight, -1, 'm')
-                                    chdirection = 0
-                                    $('#newpath').remove();
-                                    ch = null;
-                                }
-                            } 
-                        }
                     }
+
                 });
     
             },
@@ -359,7 +447,7 @@ $(document).ready(function() {
                         let dlength =  parseFloat(d.match(H_REGEX)[1]);
                         if(droppable.next().length!=0){
                             droppable.next().attr('transform','translate('+(dlength+45) +',10)')
-                            droppable.next().next().attr('transform','translate('+(dlength+80) +',4)')
+                          //  droppable.next().next().attr('transform','translate('+(dlength+80) +',4)')
                         }
                         droppable.after(draggable)
             
@@ -379,6 +467,18 @@ $(document).ready(function() {
                 });
             }
           });
+          clones.getBlocks().filter('.clickable').each(function(){
+              
+              $(this).click(function(){
+                  console.log("$(this)")
+                   var clone = $(this).clone();
+                   clone.appendTo($(this).parent().parent());
+                   translateAndSet();
+                   clones.addBlock(clone);
+                   clone.attr('transform', 'translate(' + 150 + ',' + 0 + ')');
+           })
+        });
+
     });
   
         /*
@@ -408,24 +508,22 @@ $(document).ready(function() {
         */
 
     $('#flex').on('keydown', function(event) {
-
+        let direction = 1;
+        if(event.keyCode == 8)
+            direction=-1;
         var charCode = (event.which) ? event.which : event.keyCode;
-        if (!(charCode > 31 && (charCode < 48 || charCode > 57)));
-            else{
-
             if($(this).width()!=25){
-                let direction = 1;
-                if(event.keyCode == 8)
-                direction=-1;
+            
                 const inputWidth = $(this).width();
-                edit.children().first().css('width', inputWidth);
+                const inputText = edit.children().first();
+                inputText.css('width', inputWidth);
                 if(edit.next().length!=0)
-                edit.next().attr('transform','translate('+(parseFloat(edit.next().attr('transform').match(TRANS_REGEX)[1].split(",")[0])+8*direction) +',0)')
-                if(edit.parent().attr('id')!='printBlock'){
+                    edit.next().attr('transform','translate('+(50+inputWidth+20) +',24)')
+                    
+                if(edit.parent().attr('id')=='printBlock'){
                     let path = edit.parent().find('path');
                     if(path.length==0)
                         path = edit.parent().parent().find('path')
-                    
                     let d = path.attr('d');
                     let match;
                     match = H_REGEX.exec(d) 
@@ -434,15 +532,14 @@ $(document).ready(function() {
                     d = d.replace(matchedString, newString);
                     path.attr("d", d);
                 }
-                alterParentsLength(edit, 8, IF_LK_REGEX, direction);
+                alterParentsLength(edit, (50+inputWidth+60), IF_LK_REGEX, direction);
             }  
-        }
  
     });
     $('#flex').on('keyup', function(event) {
         let text = $(this).text();
         if (text !== undefined) { 
-            text = text.replace(/\n/, ''); // add the replacement string as empty string
+            text = text.replace(/\n/, ''); 
             edit.children().last().text(text);
             translateAndSet();
         }

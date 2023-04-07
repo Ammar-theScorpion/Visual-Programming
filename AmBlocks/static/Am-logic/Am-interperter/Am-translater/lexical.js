@@ -17,7 +17,14 @@ export const TokenType = {
     newLine:15,
     Float:16,
     String:17,
-    EOC : 18,
+    Def: 18,
+    Call: 19,
+    Each: 20,
+    SpecChar:21,
+    List:22,
+    Create:23,
+    Return:24,
+    EOC : 26,
   };
   const KEYWORDS = {
     if:   TokenType.If,
@@ -28,6 +35,12 @@ export const TokenType = {
     float: TokenType.Float,
     string: TokenType.String,
     print:TokenType.Print,
+    def:TokenType.Def,
+    call:TokenType.Call,
+    each:TokenType.Each,
+    list:TokenType.List,
+    create:TokenType.Create,
+    return:TokenType.Return,
   };
   
   function Token(value, type) {
@@ -40,11 +53,11 @@ export const TokenType = {
   }
   
   function isalpha(src) {
-    return src.toUpperCase() !== src.toLowerCase();
+    return src.toUpperCase() !== src.toLowerCase()|| src=='_';
   }
   
   function isskippable(str) {
-    return str === ' ' ||  str === '\t';
+    return str == " " ||  str === '\t';
   }
   
   function isint(str) {
@@ -65,7 +78,9 @@ export const TokenType = {
         tokens.push(token(src.shift(), TokenType.OpenCurly));
       } else if (src[0] === '}') {
         tokens.push(token(src.shift(), TokenType.CloseCurly));
-      } 
+      }else if (src[0] === ',' || src[0] === '[' || src[0] === ']' ) {
+        tokens.push(token(src.shift(), TokenType.SpecChar));
+      }  
       else if (src[0] === '+' || src[0] === '-' || src[0] === '*' || src[0] === '/' || 
               src[0] === '>'|| src[0] === '<'|| src[0] === '>=' || src[0] === '<=' || src[0] === '==' || src[0] === '&&' || src[0] === '||') {
         tokens.push(token(src.shift(), TokenType.BinaryOperator));

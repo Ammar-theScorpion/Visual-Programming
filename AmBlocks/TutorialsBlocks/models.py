@@ -16,5 +16,3 @@ class Tutorial(models.Model):
         f"{self.block_id}"
         )
     
-class Temp(models.Model):
-    user_code = models.TextField()

@@ -1,74 +1,40 @@
 from django.shortcuts import render, redirect, reverse
 from .models import Tutorial
-from .forms import UserCode
-from io import StringIO
-import sys
+from mainBlocks.forms import UserCodeForm
+from mainBlocks.models import Problem, Profile
+from django.contrib.auth.models import User
 # Create your views here.
 
-def renderTutorials(request, tname, result = None):
-    form = UserCode()
-
+def renderTutorials(request, tname):
+    form = UserCodeForm()
     tutorial = Tutorial.objects.get(tname=tname)
+    user = User.objects.get(username=request.user.username)
     if request.method == 'POST':
-        form = UserCode(request.POST)
+        form = UserCodeForm(request.POST)
         if form.is_valid():
-            form.save()
-            result = test_code(tutorial.valid_code, form.cleaned_data['user_code'])
-            text = tutorial.block_id.split(' ')
-            dic=[]
-            for id in text:
-                dic.append(id)
-            context = {'tutorial': tutorial, 'id':dic, 'form': form, 'result':result[0]}
-            return render(request, 'blocks.html', context)
-            if result:
-                next_tutorial = Tutorial.objects.filter(sequence__gt=tutorial.sequence).first()
-                if next_tutorial:
-                    return redirect(reverse('tutorial:renderTutorials', args=[next_tutorial.tname]))
-            else:
-                return render(request, '404.html', {})
-
+            user_code = form.cleaned_data['user_code']
+            p = Problem(problem_id=tname, submission_status="submitted", user_code=user_code)
+            p.user = user
+            p.save()
+            next_tutorial = Tutorial.objects.filter(sequence__gt=tutorial.sequence).first()
+            if next_tutorial:
+                return redirect(reverse('tutorial:renderTutorials', args=[next_tutorial.tname]))
         else:
-            form = UserCode()
+            print(form.errors)
+    else:
+        form = UserCodeForm()
 
     text = tutorial.block_id.split(' ')
     dic=[]
+    profile = user.profile
+    user_code = profile.problems.filter(problem_id = tname)
+    if user_code.exists():
+        user_code = user_code.first().user_code
+    else:
+        user_code = ''
     for id in text:
         dic.append(id)
-    context = {'tutorial': tutorial, 'id':dic, 'form': form, 'result':result}
-
+    context = {'tutorial': tutorial, 'id':dic, 'form': form, 'prev_code': user_code}
     return render(request, 'blocks.html', context)
 
-def test_code(valid_code, user_code):
-    print(user_code, valid_code)
-    """
-    Compiles and runs the given valid and user code, and checks if their output is the same.
-    Returns True if they produce the same output, False otherwise.
-    """
-    # Try compiling the valid code
-    try:
-        compiled_valid = compile(valid_code, "<string>", "exec")
-    except SyntaxError:
-        # If there's a syntax error in the valid code, we can't continue
-        return False
-    
-    # Try compiling the user code
-    try:
-        compiled_user = compile(user_code, "<string>", "exec")
-    except SyntaxError:
-        # If there's a syntax error in the user code, we can't continue
-        return False
-    
-    # Run the compiled code and capture their output
-    import io
-    from contextlib import redirect_stdout
-    
-    with io.StringIO() as valid_output, redirect_stdout(valid_output):
-        exec(compiled_valid)
-        valid_result = valid_output.getvalue().strip()
-    
-    with io.StringIO() as user_output, redirect_stdout(user_output):
-        exec(compiled_user)
-        user_result = user_output.getvalue().strip()
-    
-    # Compare their output
-    return (user_result, valid_result == user_result)
+

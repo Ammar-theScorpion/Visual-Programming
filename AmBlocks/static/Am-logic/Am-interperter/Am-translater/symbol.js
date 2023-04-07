@@ -4,7 +4,7 @@ export class Symbol{
         this.symbolTable = {};
     }
 
-    declareVar(varattr){// {{naem, [type, value]}
+    declareVar(varattr){// s{{naem, [type, value]}
         if(!this.symbolTable.hasOwnProperty(varattr[0]))
             this.symbolTable[varattr[0]] = [varattr[1][0], varattr[1][1]];
         else
@@ -19,14 +19,14 @@ export class Symbol{
         if(this.symbolTable.hasOwnProperty(varname))
             return this;
         if(this.parent==null)
-            return `${varname} is not defined yet`;
+            return null;//`${varname} is not defined yet`;
 
         return  this.parent.resolve(varname); 
     }
 
     lookUp(varName){
         let at = this.resolve(varName);
-        return at.symbolTable[varName];
+        return at!==null?at.symbolTable[varName]:at;
     }
 
 }

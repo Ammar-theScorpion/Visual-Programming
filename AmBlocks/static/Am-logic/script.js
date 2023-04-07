@@ -9,20 +9,11 @@ registerlink.addEventListener('click',()=>{
 
 wrapper.classList.add('active');
 
-
-
-
-
 });
 
 loginlink.addEventListener('click',()=>{
 
     wrapper.classList.remove('active');
-    
-    
-    
-    
-    
     });
 
 

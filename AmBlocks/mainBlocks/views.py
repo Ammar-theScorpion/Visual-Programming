@@ -4,13 +4,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from .models import Profile, Problem
 # Create your views here.
 
 def home(request):
-    return render(request, 'mainBlocks/index.html', {})
+    user = User.objects.get(username=request.user.username)
+    profile = Profile.objects.get(user=user)
+    return render(request, 'mainBlocks/index.html', {'profile':profile})
 
 def profile_request(request):
-    return render(request, 'mainBlocks/profile.html', {})
+    user = User.objects.get(username=request.user.username)
+    profile = Profile.objects.get(user=user)
+    return render(request, 'mainBlocks/profile.html', {'profile':profile, "problems":Problem.objects.all()})
 
 def login_request(request):
     page = 'login'

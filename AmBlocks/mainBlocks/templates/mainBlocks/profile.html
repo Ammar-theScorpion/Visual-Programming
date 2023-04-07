@@ -5,14 +5,14 @@
     <main class="profile-page layout layout--3">
       <div class="container">
   
-  <div class="roomList" style="background-color: #282828; border-radius: 10px;"> 
+        <div class="roomList" style="background-color: #282828; border-radius: 10px;"> 
           <div class="profile">
             <div class="profile__avatar">
               <div class="avatar avatar--large active">
                 <img src="https://randomuser.me/api/portraits/men/11.jpg" />
               </div>
               <div class="profile__info">
-                <h3>Dennis Kardasian Ivy</h3>
+                <h3>{{profile.user.username}}</h3>
                 <p>@dennis_ivy</p>
                 <a href="edit-user.html" class="btn btn--main btn--pill">Edit Profile</a>
               </div>
@@ -26,7 +26,7 @@
               </p>
             </div>
           </div>
-
+          
           <div class="roomList__header">
             <div>
               <h2>Study Rooms Hosted by dennis_ivy</a>
@@ -38,149 +38,183 @@
               <a href="profile.html" class="roomListRoom__author">
                 <div class="avatar avatar--small active">
                   <img src="https://randomuser.me/api/portraits/men/11.jpg" />
-                </div>
-                <span>@dennis_ivy</span>
-              </a>
-              <div class="roomListRoom__actions">
-                <span>3 days ago</span>
-
-              </div>
-            </div>
-            <div class="roomListRoom__content">
-              <a href="room.html">100 Days of coding challenge</a>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur ducimus harum
-                dolorem, obcaecati mollitia omnis quasi aut consequuntur enim itaque labore.
-              </p>
-            </div>
-            <div class="roomListRoom__meta">
-              <a class="roomListRoom__joined">
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                  <title>user-group</title>
-                  <path
-                    d="M30.539 20.766c-2.69-1.547-5.75-2.427-8.92-2.662 0.649 0.291 1.303 0.575 1.918 0.928 0.715 0.412 1.288 1.005 1.71 1.694 1.507 0.419 2.956 1.003 4.298 1.774 0.281 0.162 0.456 0.487 0.456 0.85v4.65h-4v2h5c0.553 0 1-0.447 1-1v-5.65c0-1.077-0.56-2.067-1.461-2.584z">
-                  </path>
-                  <path
-                    d="M22.539 20.766c-6.295-3.619-14.783-3.619-21.078 0-0.901 0.519-1.461 1.508-1.461 2.584v5.65c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-5.651c0-1.075-0.56-2.064-1.461-2.583zM22 28h-20v-4.65c0-0.362 0.175-0.688 0.457-0.85 5.691-3.271 13.394-3.271 19.086 0 0.282 0.162 0.457 0.487 0.457 0.849v4.651z">
-                  </path>
-                  <path
-                    d="M19.502 4.047c0.166-0.017 0.33-0.047 0.498-0.047 2.757 0 5 2.243 5 5s-2.243 5-5 5c-0.168 0-0.332-0.030-0.498-0.047-0.424 0.641-0.944 1.204-1.513 1.716 0.651 0.201 1.323 0.331 2.011 0.331 3.859 0 7-3.141 7-7s-3.141-7-7-7c-0.688 0-1.36 0.131-2.011 0.331 0.57 0.512 1.089 1.075 1.513 1.716z">
-                  </path>
-                  <path
-                    d="M12 16c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.859 0-7 3.141-7 7s3.141 7 7 7zM12 4c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5c0-2.757 2.243-5 5-5z">
-                  </path>
-                </svg>
-                5.3k Joined
-              </a>
-              <p class="roomListRoom__topic">Python</p>
-            </div>
-          </div>
-          <div class="roomListRoom">
-            <div class="roomListRoom__header">
-              <a href="profile.html" class="roomListRoom__author">
-                <div class="avatar avatar--small">
-                  <img src="https://randomuser.me/api/portraits/women/11.jpg" />
-                </div>
-                <span>@sulamita_ivy</span>
-              </a>
-              <div class="roomListRoom__actions">
-                <span>5 days ago</span>
-
-              </div>
-            </div>
-            <div class="roomListRoom__content">
-              <a href="room.html">JavaScript made Simple</a>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur ducimus harum
-                dolorem, obcaecati mollitia omnis quasi aut consequuntur enim itaque labore.
-              </p>
-            </div>
-            <div class="roomListRoom__meta">
-              <a href="room.html" class="roomListRoom__joined">
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                  <title>user-group</title>
-                  <path
-                    d="M30.539 20.766c-2.69-1.547-5.75-2.427-8.92-2.662 0.649 0.291 1.303 0.575 1.918 0.928 0.715 0.412 1.288 1.005 1.71 1.694 1.507 0.419 2.956 1.003 4.298 1.774 0.281 0.162 0.456 0.487 0.456 0.85v4.65h-4v2h5c0.553 0 1-0.447 1-1v-5.65c0-1.077-0.56-2.067-1.461-2.584z">
-                  </path>
-                  <path
-                    d="M22.539 20.766c-6.295-3.619-14.783-3.619-21.078 0-0.901 0.519-1.461 1.508-1.461 2.584v5.65c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-5.651c0-1.075-0.56-2.064-1.461-2.583zM22 28h-20v-4.65c0-0.362 0.175-0.688 0.457-0.85 5.691-3.271 13.394-3.271 19.086 0 0.282 0.162 0.457 0.487 0.457 0.849v4.651z">
-                  </path>
-                  <path
-                    d="M19.502 4.047c0.166-0.017 0.33-0.047 0.498-0.047 2.757 0 5 2.243 5 5s-2.243 5-5 5c-0.168 0-0.332-0.030-0.498-0.047-0.424 0.641-0.944 1.204-1.513 1.716 0.651 0.201 1.323 0.331 2.011 0.331 3.859 0 7-3.141 7-7s-3.141-7-7-7c-0.688 0-1.36 0.131-2.011 0.331 0.57 0.512 1.089 1.075 1.513 1.716z">
-                  </path>
-                  <path
-                    d="M12 16c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.859 0-7 3.141-7 7s3.141 7 7 7zM12 4c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5c0-2.757 2.243-5 5-5z">
-                  </path>
-                </svg>
-                5.3k Joined
-              </a>
-              <p class="roomListRoom__topic">Python</p>
-            </div>
-          </div>
-        </div>
-        <!-- Topics Start -->
-
-        <!-- Topics End -->
-
-        <!-- Room List Start -->
-      
-        <!-- Room List End -->
-
-        <!-- Activities Start -->
-        <div class="activities">
-          <div class="activities__header">
-            <h2>Solved Problems</h2>
-          </div>
-          <div class="activities__box">
-            <div class="activities__boxHeader roomListRoom__header">
-              <a href="profile.html" class="roomListRoom__author">
-                <div class="avatar avatar--small">
-                  <img src="https://randomuser.me/api/portraits/women/11.jpg" />
-                </div>
-                <p>
-                  @sulamita_ivy
-                  <span>5 days ago</span>
-                </p>
-              </a>
-              <div class="roomListRoom__actions">
-                <a href="#">
-                  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                    <title>delete</title>
-                    <path
-                      d="M30 4h-8v-3c0-0.553-0.447-1-1-1h-10c-0.553 0-1 0.447-1 1v3h-8v2h2v24c0 1.104 0.897 2 2 2h20c1.103 0 2-0.896 2-2v-24h2v-2h-0zM12 2h8v2h-8v-2zM26.002 30l-0.002 1v-1h-20v-24h20v24h0.002z">
+                      </div>
+                      <span>@dennis_ivy</span>
+                    </a>
+                    <div class="roomListRoom__actions">
+                      <span>3 days ago</span>
+                      
+                    </div>
+                  </div>
+                  <div class="roomListRoom__content">
+                    <a href="room.html">100 Days of coding challenge</a>
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur ducimus harum
+                      dolorem, obcaecati mollitia omnis quasi aut consequuntur enim itaque labore.
+                    </p>
+                  </div>
+                  <div class="roomListRoom__meta">
+                    <a class="roomListRoom__joined">
+                      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                        <title>user-group</title>
+                        <path
+                          d="M30.539 20.766c-2.69-1.547-5.75-2.427-8.92-2.662 0.649 0.291 1.303 0.575 1.918 0.928 0.715 0.412 1.288 1.005 1.71 1.694 1.507 0.419 2.956 1.003 4.298 1.774 0.281 0.162 0.456 0.487 0.456 0.85v4.65h-4v2h5c0.553 0 1-0.447 1-1v-5.65c0-1.077-0.56-2.067-1.461-2.584z">
+                        </path>
+                        <path
+                        d="M22.539 20.766c-6.295-3.619-14.783-3.619-21.078 0-0.901 0.519-1.461 1.508-1.461 2.584v5.65c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-5.651c0-1.075-0.56-2.064-1.461-2.583zM22 28h-20v-4.65c0-0.362 0.175-0.688 0.457-0.85 5.691-3.271 13.394-3.271 19.086 0 0.282 0.162 0.457 0.487 0.457 0.849v4.651z">
+                      </path>
+                      <path
+                      d="M19.502 4.047c0.166-0.017 0.33-0.047 0.498-0.047 2.757 0 5 2.243 5 5s-2.243 5-5 5c-0.168 0-0.332-0.030-0.498-0.047-0.424 0.641-0.944 1.204-1.513 1.716 0.651 0.201 1.323 0.331 2.011 0.331 3.859 0 7-3.141 7-7s-3.141-7-7-7c-0.688 0-1.36 0.131-2.011 0.331 0.57 0.512 1.089 1.075 1.513 1.716z">
                     </path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div class="activities__boxContent">
-              <p>replied to post “<a href="room.html">100 Days of code challenge!</a>”</p>
-              <div class="activities__boxRoomContent">
-                I’ll have to try this sometime. Really like this idea. Wanna talk about it? I ‘m....
-              </div>
-            </div>
-          </div>
-
+                    <path
+                          d="M12 16c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.859 0-7 3.141-7 7s3.141 7 7 7zM12 4c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5c0-2.757 2.243-5 5-5z">
+                        </path>
+                      </svg>
+                      5.3k Joined
+                    </a>
+                    <p class="roomListRoom__topic">Python</p>
+                  </div>
+                </div>
+                <div class="roomListRoom">
+                  <div class="roomListRoom__header">
+                    <a href="profile.html" class="roomListRoom__author">
+                      <div class="avatar avatar--small">
+                        <img src="https://randomuser.me/api/portraits/women/11.jpg" />
+                      </div>
+                      <span>@sulamita_ivy</span>
+                    </a>
+                    <div class="roomListRoom__actions">
+                      <span>5 days ago</span>
+                      
+                    </div>
+                  </div>
+                  <div class="roomListRoom__content">
+                    <a href="room.html">JavaScript made Simple</a>
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur ducimus harum
+                      dolorem, obcaecati mollitia omnis quasi aut consequuntur enim itaque labore.
+                    </p>
+                  </div>
+                  <div class="roomListRoom__meta">
+                    <a href="room.html" class="roomListRoom__joined">
+                      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                        <title>user-group</title>
+                        <path
+                        d="M30.539 20.766c-2.69-1.547-5.75-2.427-8.92-2.662 0.649 0.291 1.303 0.575 1.918 0.928 0.715 0.412 1.288 1.005 1.71 1.694 1.507 0.419 2.956 1.003 4.298 1.774 0.281 0.162 0.456 0.487 0.456 0.85v4.65h-4v2h5c0.553 0 1-0.447 1-1v-5.65c0-1.077-0.56-2.067-1.461-2.584z">
+                      </path>
+                        <path
+                        d="M22.539 20.766c-6.295-3.619-14.783-3.619-21.078 0-0.901 0.519-1.461 1.508-1.461 2.584v5.65c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-5.651c0-1.075-0.56-2.064-1.461-2.583zM22 28h-20v-4.65c0-0.362 0.175-0.688 0.457-0.85 5.691-3.271 13.394-3.271 19.086 0 0.282 0.162 0.457 0.487 0.457 0.849v4.651z">
+                      </path>
+                      <path
+                      d="M19.502 4.047c0.166-0.017 0.33-0.047 0.498-0.047 2.757 0 5 2.243 5 5s-2.243 5-5 5c-0.168 0-0.332-0.030-0.498-0.047-0.424 0.641-0.944 1.204-1.513 1.716 0.651 0.201 1.323 0.331 2.011 0.331 3.859 0 7-3.141 7-7s-3.141-7-7-7c-0.688 0-1.36 0.131-2.011 0.331 0.57 0.512 1.089 1.075 1.513 1.716z">
+                        </path>
+                        <path
+                        d="M12 16c3.859 0 7-3.141 7-7s-3.141-7-7-7c-3.859 0-7 3.141-7 7s3.141 7 7 7zM12 4c2.757 0 5 2.243 5 5s-2.243 5-5 5-5-2.243-5-5c0-2.757 2.243-5 5-5z">
+                      </path>
+                    </svg>
+                      5.3k Joined
+                    </a>
+                    <p class="roomListRoom__topic">Python</p>
+                  </div>
+                </div>
         </div>
-        <div class="activities">
-          <div class="activities__header">
-            <h2>Tutorial Acheviemnt</h2>
-          </div>
-          <div class="activities__box">
-            <a class="level_dot" id="level3" href="http://127.0.0.1:8000/tutorial/print-hello-world!/">1</a>
-            <a class="level_dot" id="level3" href="http://127.0.0.1:8000/tutorial/condition/">2</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">3</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">4</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">5</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">6</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">7</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">8</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">9</a>
-            <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">10</a>
-          </div>
+        <div>
+       <main class="layout layout--3">
 
+          <div class="container">
+              <div class="activities">
+                <div class="activities__header">
+                  <h2>Solved Problems</h2>
+                </div>
+                <div class="activities__box">
+                  <div class="progress-bar">
+                    <div class="progress" style="width: 25%;">
+                    </div>
+                  </div>
+                  <p>0 / 1 Solved</p>
+                  
+                </div>
+                
+              </div>
+              <div class="activities">
+                <div class="activities__header">
+                  <h2>Tutorial Acheviemnt</h2>
+                </div>
+                <div class="activities__box">
+                  <a class="level_dot" id="level3" href="http://127.0.0.1:8000/tutorial/print-hello-world!/">1</a>
+                  <a class="level_dot" id="level3" href="http://127.0.0.1:8000/tutorial/condition/">2</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">3</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">4</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">5</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">6</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">7</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">8</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">9</a>
+                  <a class="level_dot" id="level3" href="?lang=en&amp;level=3&amp;&amp;skin=0">10</a>
+                </div>
+                
+              </div>
+          </div>
+      </main>
+
+            <div class="submisson">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Submission ID</th>
+                    <th>Problem</th>
+                    <th>Language</th>
+                    <th>Status</th>
+                    <th>Runtime</th>
+                    <th>Submission Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for p in problems %}
+                  <tr>
+                    <td>1</td>
+                    <td>{{p.problem_id}}</td>
+                    <td>{{p.user_code}}</td>
+                    <td>Accepted</td>
+                    <td>52 ms</td>
+                    <td>{{p.submission_date}}</td>
+                  </tr>
+                  {% endfor %}
+                  <!-- Additional rows for other submissions -->
+                </tbody>
+              </table>
+              
+          </div>
         </div>
-        <!-- Activities End -->
-      </div>
-    </main>
+    </div>
+  </main>
+    <style>
+    .progress-bar {
+      background-color: rgb(187, 187, 187);
+      padding: 5px;
+      width: 50%;
+    }
+
+    .progress {
+      background-color: #535890;
+      height: 10px;
+      text-align: end;
+    }
+
+    .submisson {
+      background-color: #282828;
+      height: 100%;
+      width: 100%;
+    }
+   table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+    </style>
   {% endblock %}

@@ -10,17 +10,55 @@
    <link rel="stylesheet" href="{% static '/Am-style/if.css' %}">
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-   <script type="module" src="{% static '/Am-logic/main.js' %}"></script>
+   <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
       
-    
    </head>
    {% endblock mainscript %}
    <div class="sidebar" >
       {% block block %}
-             
- 
+      {% if 'functionBlock' in id %}
+      <g class="draggable function-container" id="function">
+         <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 210 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 210 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
+         fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(8,24)">to </text>
+         <g class="Am-edit" transform="translate(50,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="100" ></rect>
+            <text class="Am-text" fill="#1e8f14" x="5" y="17">do something</text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle"  dy="0" x="4" transform="translate(170,24)" > with: </text>
+      </g>
+
+      <g class="draggable call" style="position:fixed;" id="caller" >
+         <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">call </text>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="85.564815521240234" transform="translate(8, 24) ">do something</text>
+         
+      </g>
+      {% endif %}   
+      
+      {% if 'eachBlock' in id %}
+      <g class="draggable if-container" id="each" >
+         <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 160 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 70 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 160 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
+         fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(30,24)">for each </text>
+         <g class="Am-edit" transform="translate(70,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
+            <text class="Am-text" fill="#1e8f14" x="5" y="17">i</text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle"  dy="0" x="4" transform="translate(110,24)" > in </text>
+         <g class="Am-edit" transform="translate(130,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
+            <text class="Am-text" fill="#1e8f14" x="5" y="17"></text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(8,60)">do</text>
+         
+      </g>
+   {% endif %}
+
+      
       {% if 'printBlock' in id %}
-         <g class="draggable print-container" style="position:fixed;" id="printBlock" >
+         <g class="draggable print" style="position:fixed;" id="print" >
             <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
             </path>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">print</text>
@@ -30,6 +68,139 @@
             </g>
             
          </g>
+
+
+         <g class="draggable"  id="list"   visibility="hidden" >
+            <path stroke="#392D52" fill="#745BA5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 123.828125 v 10 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 10 H 29.5 l -6,4 -3,0 -6,-4 H 8 a 8,8 0 0,1 -8,-8 z "></path>
+            <g class="drop_content" style="cursor: pointer;" transform="translate(3,8)">
+               <rect rx="4" ry="4" height="16" width="16"></rect>
+               <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
+               </path>
+               <circle  r="2.7" cx="8" cy="8"></circle>
+            </g>
+            <text  y="12.5" transform="translate(26,12)">List</text>
+            <text class="listname" y="12.5" transform="translate(65,12)"></text>
+   
+               <svg  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
+               xmlns:xlink="http://www.w3.org/1999/xlink"
+               xmlns:html="http://www.w3.org/1999/xhtml"
+               version="1.1" y="45" x="20" visibility="hidden" >
+               <rect height="350" width="180" class="MutatorBackground"></rect>
+
+               <g class="clickable list_clear" transform="translate(10,5)">
+                  <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 84.25 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+                  <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 120 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+         
+                  </path>
+                  
+                  <text class="opname" y="12.5" transform="translate(10,5)">Clear </text>
+               </g>
+         
+            <g class="list_count clickable" transform="translate(10,40)">
+               <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 84.25 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+               <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 120 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+      
+               </path>
+               
+               <text class="opname" y="12.5" transform="translate(10,5)">Length </text>
+            </g>
+      
+      
+            <g class="list_append clickable" transform="translate(10,75)">
+               <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 100 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+               <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 120 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+      
+               </path>
+               <text class="opname" y="12.5" transform="translate(10,5)">Append  </text>
+      
+               <g class="Am-edit" transform="translate(80,3)" style="display: block;">
+                  <rect rx="4" ry="4" fill="#fff" x="0" y="0" height="20" width="20"></rect>
+                  <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
+               </g>
+            </g>
+      
+            <g class="list_insertat clickable" transform="translate(10,110)">
+            <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 100 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+            <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 140 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+   
+            </path>
+            <text class="opname" y="12.5" transform="translate(10,5)">insert At </text>
+            <g class="Am-edit" transform="translate(75,3)" style="display: block;">
+               <rect rx="4" ry="4" fill="#fff" x="0" y="0" height="20" width="20"></rect>
+               <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>  
+            </g>
+            <text class="blocklyText" y="12.5" transform="translate(95,5)">, </text>
+            <g class="Am-edit" transform="translate(100,3)" style="display: block;">
+               <rect rx="4" ry="4" fill="#fff" x="0" y="0" height="20" width="20"></rect>
+               <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
+            </g>
+            <text class="blocklyText" y="12.5" transform="translate(120,5)">)  </text>
+   
+            </g>
+
+            <g class="list_pop clickable" transform="translate(10, 145)">
+               <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 40 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+               <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 80 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+      
+               </path>
+               <text class="opname" y="12.5" transform="translate(10,5)">Pop </text>
+               <g class="Am-edit" transform="translate(50,3)" style="display: block;">
+                  <rect rx="4" ry="4" fill="#fff" x="0" y="0" height="20" width="20"></rect>
+                  <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
+               </g>
+      
+            </g>
+
+            <g class="list_remove clickable" transform="translate(10,180)">
+               <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 40 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+               <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 120 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+      
+               </path>
+               <text class="opname" y="12.5" transform="translate(10,5)">Remove </text>
+               <g class="Am-edit" transform="translate(85,3)" style="display: block;">
+                  <rect rx="4" ry="4" fill="#fff" x="0" y="0" height="20" width="20"></rect>
+                  <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
+               </g>
+      
+            </g>
+
+         <g class="list_sort clickable" transform="translate(10, 215)">
+            <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 40 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+            <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 80 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+   
+            </path>
+            <text class="opname" y="12.5" transform="translate(10,5)">Sort </text>
+         </g>
+   
+         <g class="list_reverse clickable" transform="translate(10, 250)">
+            <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 40 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+            <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 90 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+   
+            </path>
+            <text class="opname" y="12.5" transform="translate(10,5)">Reverse</text>
+         </g>
+   
+         <g class="list_index clickable" transform="translate(10,285)">
+            <path class="blocklyPathDark" transform="translate(1,1)" fill="#FFAB19" d="m 0,0 H 40 v 5 c 0,10 -8,-8 -8,7.5 s 8,-2.5 8,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z"></path>
+            <path class="blocklyPath" fill="#FFAB19" d="m 0,0 H 100 v 5 c 0,10 0,0 0,10 s 0,10  0,7.5 v 4 H 0 V 20 c 0,-10 -8,8 -8,-7.5 s 8,2.5 8,-7.5 z">
+   
+            </path>
+            <text class="opname" y="12.5" transform="translate(10,5)">Index</text>
+            <g class="Am-edit" transform="translate(65,3)" style="display: block;">
+               <rect rx="4" ry="4" fill="#fff" x="0" y="0" height="20" width="20"></rect>
+               <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
+            </g>
+   
+         </g>
+         </svg>
+       
+         </g>
+         <g class="a create-list" style="cursor: pointer;">
+            <rect stroke="#392D52" fill="#745BA5" fill-opacity="1" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
+            <text class="input-mimic" x="60" y="16" text-anchor="middle"  fill="#fff">Create list</text>
+   
+         </g>
+
       {% endif %}
       {% if 'ifBlock' in id %}
          <g class="draggable if-container" id="one-condition" data-category="control" data-shapes="c-block c-1" data-id="control_if" >
@@ -213,9 +384,7 @@
 
       </g>
       {% endif %}
-
       {% if 'makeVarBlock' in id  %}
-      
       <g class="a make-var" trasform="translate(5, 200)" visibility="hidden">
          <rect stroke="#389438" fill="#59C059" width="160" height="40" rx="4" ry="4" x="1" y="1"></rect>
          <g transform="translate(15,0)">

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'mainBlocks',
     'TutorialsBlocks',
     'MasterBlocks',
+    'GameBlocks',
 ]
 
 MIDDLEWARE = [
