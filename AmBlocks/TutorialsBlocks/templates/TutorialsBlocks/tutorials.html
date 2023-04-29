@@ -7,6 +7,8 @@
   {% block mainscript %}
     
   {% endblock mainscript %}
+  
+
 	<style>
 	body {
 		font-family: sans-serif;
@@ -173,7 +175,7 @@
 }
  
 .codesspace{
-	height: 65%;
+	height: 100%;
 	width: 100%;
 	border-top: solid 6px #f0f0f0;
 
@@ -183,7 +185,10 @@
 	</style>
 </head>
 <body>
+	{% block varside%}
+	{% endblock varside %}
 	<div class="left-section">
+		
 		<h2>Blocks</h2>
 		<svg  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
 		xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -205,7 +210,7 @@
 	  </div>
 	  <p>{{tutorial.body}}</p>
 	  <div class="codesspace">
-			<svg id="Am-workspace" xmlns="http://www.w3.org/2000/svg"
+			<svg class="Am-workspace main" xmlns="http://www.w3.org/2000/svg"
 			xmlns:xlink="http://www.w3.org/1999/xlink"
 			xmlns:html="http://www.w3.org/1999/xhtml"
 			version="1.1" width="100%" height="100%">
@@ -213,16 +218,18 @@
 	  </div>
 
 	</div>
-		<div class="workspace">
-			<div>
-				<button onclick="lang_id = 0; language_type()">C++</button>
-				<button onclick="lang_id = 1; language_type()">Python</button>
-			</div>	
-			
-			<p id ='setcode' style="height: 100%;" >
-				{{prev_code}}
-			</p>
-			<p id='error' style="height: 10%"> </p>
+
+	<div class="workspace">
+		<div>
+			<button onclick="lang_id = 0; language_type()">C++</button>
+			<button onclick="lang_id = 1; language_type()">Python</button>
+		</div>	
+
+		
+		<p id ='setcode' style="height: 100%;" >
+			{{prev_code}}
+		</p>
+		<p id='error' style="height: 10%"> </p>
 		<form method="post">
 			{% csrf_token %}
 			<input type="hidden" name="user_code" id="user_code_input"/>
@@ -236,86 +243,9 @@
 			</div>
 		</form>
 	</div>
-	 
-  
 		<div id="flex" style="display: none; font: normal 11pt sans-serif;">
 			<div id="inner" contenteditable="true" spellcheck="false"><div>
 		</div>
   </body>
-
-  <script>
-
-	let language = '';
-	let lang_id=0;
-	var lang='C++';
-	var code = '{{prev_code|safe}}';
-	var step = '{{step|safe}}';
-	const blocks = $('.draggable');
-	let stepped = false
-
-	function setBlock(){
-		let space = 0;
-		const blocks = $('.draggable');
-		
-		blocks.each(function(){
-			$(this).attr('transform', 'translate('  + 0 + ',' + space + ')');
-			space+=130;
-		});
-	}
-		$('form button').click(function(event){
-			console.log(event.target.innerHTML)
-			if(event.target.innerHTML.indexOf('step')!==-1){
-				stepped = true;
-				window.translateAndSet()
-			}
-			event.preventDefault();
-			const userCodeInput = document.getElementById('user_code_input');
-			document.getElementById("setcode").innerHTML = language.split('`')[1];
-			const text =  document.getElementById('setcode').innerHTML;
-			console.log(text)
-			userCodeInput.value = text.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
-			var csrftoken = $("input[name='csrfmiddlewaretoken']").val();
-			$.ajaxSetup({
-				beforeSend: function(xhr, settings) {
-					if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-						xhr.setRequestHeader('X-CSRFToken', csrftoken);
-				}
-			}
-		});
-		$.ajax({
-			url: 'http://127.0.0.1:8000/test_code/',
-				method:'POST',
-				contentType: 'text/plain', // to prevent Django from treating the ajax as a form form the Query
-				data: {
-					'text':text,
-					'tname':'44',
-				},
-				success: function(response){
-					let inner =  document.querySelector('#error').innerHTML;
-					if (inner=="undefined")
-					document.querySelector('#error').innerHTML = response;
-					else
-					document.querySelector('#error').innerHTML+=response;
-					if(response[response.length-1] == 't'){
-						$('form button').html('Submit');
-						$('form button').unbind('click');
-					}
-				}
-			})
-		});
-		function language_type(){
-			/*const button = event.target;
-			lang = button.innerHTML;*/
-			var code = language.split('`')[lang_id];
-			var codeNode = document.createElement("pre");
-			codeNode.style.whiteSpace = "pre-wrap";
-			codeNode.textContent = code;
-			document.getElementById("setcode").innerHTML = "";
-			document.getElementById("setcode").appendChild(codeNode);
-		}
-		
-		</script>
-		<script type="module" type="text/javascript" src="{% static '/Am-logic/blocks.js' %}">
-	</script>
-
+ 
 </html>  

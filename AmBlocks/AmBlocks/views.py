@@ -1,4 +1,5 @@
 from TutorialsBlocks.models import Tutorial
+from MasterBlocks.models import Problem
 from django.http import HttpResponse
 import urllib.parse
 def test_code(request):
@@ -7,24 +8,22 @@ def test_code(request):
 
     # Split the string on the '&' character to separate the parameters
     param_strings = decoded_str.split('&')
-
+    print(param_strings)
     # Create a dictionary to store the parameter names and values
     params = {}
 
     # Split each parameter string on the '=' character to extract the name and value
-    for param_str in param_strings:
-        param_name, param_value = param_str.split('=')
-        params[param_name] = param_value
+    user_code = param_strings[0].split('=', 1)[1]
+    tname = param_strings[1].split('=', 1)[1]
 
     # Extract the values of the text and tname parameters
-    user_code = params['text']
-    tname = params['tname']
 
-    print(user_code)  # Output: print(1)\n\n
+    print(user_code)  # Output: user code
     print(tname)  # Output: 44
     valid_code=''
     try:
         valid_code = Tutorial.objects.get(tname=tname).valid_code
+        valid_code = Problem.objects.get(pname=tname).valid_code
                 
     except:
         pass

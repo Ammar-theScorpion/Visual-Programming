@@ -24,20 +24,14 @@ export class ConverterPy{
         return('print('+ printValue+')')+'\n';
     }
     generateBinaryExpression(ExpressionNode){
-        return(ExpressionNode.left.value+ ' '+ ExpressionNode.operater.value + ' '+ ExpressionNode.right.value);
+        return(ExpressionNode.left.value+ ' '+ ExpressionNode.operater + ' '+ ExpressionNode.right.value);
     }
 
     generateBody(node, level, type, cond=true){
-      let condition = '';
+      const condition = node.condition;
       let conditionValue = 'false';
-      if(cond){
-        condition = node.condition;
-        if (conditionValue != condition) {
-            conditionValue = condition.left.value;
-            conditionValue += condition.operater.value;
-            conditionValue += condition.right.value;
-        }else
-          conditionValue='False'
+      if (conditionValue != condition) {
+        conditionValue = this.getExpressionString(condition);
       }
       const body = !node.body?undefined: [...node.body];
       let bodyValue = '\t'+'pass';
@@ -78,9 +72,30 @@ export class ConverterPy{
               return this.generateListStatement(node, level);
           case 'opListStatement':
               return this.generateOpListStatement(node, level);
+              case 'multiBinary':
+                return this.getExpressionString(node, level);
           default:
-            return node.value;
+              return typeof(node.error)=='string'?node.error:node.value;
          }
+      }
+
+      getExpressionString(expression) {
+        let expressionStr = '';
+        traverseExpression(expression);
+      
+        function traverseExpression(node) {
+          if (node.kind === 'BinaryExpression') {
+            expressionStr += '(';
+            traverseExpression(node.left);
+            expressionStr += node.operater + ' ';
+            traverseExpression(node.right);
+            expressionStr += ') ';
+          } else {
+            expressionStr += node.value + ' ';
+          }
+        }
+      
+        return '(' + expressionStr.trim() + ')';
       }
       generateOpListStatement(node, level){
         const listName = node.listName;
@@ -97,17 +112,17 @@ export class ConverterPy{
         return op;
       }
       generateListStatement(node, level){
-        return `${node.listName} = []\n`;
+        return `${node.varname} = []\n`;
       }
       generateEachStatement(node, level){
-        const body = node.body;
+        const body = !node.body?undefined: [...node.body];
         let bodyValue = '';
         if (body) {
           while (body.length) {
             bodyValue += this.generateCode(body.shift(), level + 1);
           }
         }
-        return `for (char ${node.varname} : ${node.varname_over}):\n ${bodyValue} \n`;
+        return `for (${node.iterateable_type} ${node.varname} : ${node.varname_over}):\n ${bodyValue} \n`;
       }
       generateCallStatement(node, level){
         return `${node.function_name}(${node.argsv})\n`;
@@ -127,16 +142,16 @@ export class ConverterPy{
         return node.left.value + ' = '+ this.generateCode(node.right)+'\n';
       }
       generateDeclarationStatements(node, level){
-        return node.varname+' = '+this.generateCode(node.varBody[1])+'\n';
+        return node.varname+' = '+'None'+'\n';
       }
-      generateIfStatement(ifNode, level) {
-        this.generateBody(ifNode, level, 'if');
-      }
+    generateIfStatement(ifNode, level) {
+        return this.generateBody(ifNode, level, 'if');
+    }
       
-    generateReapetStatement(reNode){
-      this.generateBody(reNode, level, 'while');
+    generateReapetStatement(reNode, level){
+      return this.generateBody(reNode, level, 'while');
     }
     generateElseStatement(elseNode, level){
-      this.generateBody(elseNode, level, 'else', false);
+      return this.generateBody(elseNode, level, 'else', false);
     }
 }

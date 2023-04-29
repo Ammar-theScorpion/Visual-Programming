@@ -1,0 +1,99 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'Am-style/game.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
+       
+
+{% endblock links %}
+
+{% block title %}
+    Am-Game
+{% endblock title %}
+
+{% block content %}
+    <div style="display: flex;">
+
+        <div style="width: 500px;">
+            <canvas id="game" width="500" height="500"></canvas>
+        </div>
+        
+        <svg id="Am-workspace"  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            xmlns:html="http://www.w3.org/1999/xhtml"
+            version="1.1" width="100%" height="100%">
+            <filter id="my-filter">
+                <feGaussianBlur stdDeviation="4" />
+              </filter>
+              
+            <g class="draggable print" style="position:fixed;" id="move">
+                <path stroke="none" fill="#5ba58c"fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 215.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                </path>
+                <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) " fill="#fff">move</text>
+                <g class="Am-edit" transform="translate(60,12)" style="display: block;">
+                    <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="70" ></rect>
+                    <text class="Am-text" fill="#1e8f14" x="5" y="17">forward</text>
+                </g>
+                <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(130, 24) " fill="#fff">by</text>
+                <g class="Am-edit" transform="translate(170,12)" style="display: block;">
+                    <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="40" ></rect>
+                    <text class="Am-text" fill="#1e8f14" x="5" y="17">100</text>
+                </g>
+            </g>
+            <g class="draggable turn" style="position:fixed;" id="turn" transform="translate(0, 60)">
+                <path stroke="none" fill="#5ba58c" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 215.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                </path>
+                <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) " fill="#fff">turn</text>
+                <g class="Am-edit" transform="translate(60,12)" style="display: block;">
+                    <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="50" ></rect>
+                    <text class="Am-text" fill="#1e8f14" x="5" y="17">right</text>
+                </g>
+                <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(110, 24) " fill="#fff">by</text>
+                <g class="Am-edit" transform="translate(150,12)" style="display: block;">
+                    <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="40" ></rect>
+                    <text class="Am-text" fill="#1e8f14" x="5" y="17">100</text>
+                </g>
+            </g>
+            <g class="draggable color" style="position:fixed;" id="color" transform="translate(10, 120)">
+                <path stroke="none" fill="#5ba58c" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 140.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                </path>
+                <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(20, 24) " fill="#fff">set color to</text>
+                <g onclick="tuggle()" transform="translate(94.85679626464844, 15)" style="cursor: pointer;">
+                    <rect class="coloring" rx="4" ry="4" x="0" y="0" height="16" width="26" fill-opacity: 1; fill="#fff"></rect>
+                </g>
+                <g  class="table" transform="translate(80, 40)" visibility="hidden">
+                   <foreignObject x="0" y="0" width="60" height="60">
+                       <div xmlns="http://www.w3.org/1999/xhtml" style="border: 3px solid; border-color:  #000; max-height: 300px; position: absolute;">
+                           <table onclick="setColor(event)" style="border-collapse: collapse; width: 50px; height: 50px;" >
+                               <tr role="row">
+                                   <td title="#ff0000" style="background-color: rgb(255, 0, 0);">
+                           </td>
+                        <td title="#ffcc33"  style="background-color: rgb(255, 204, 51);"></td>
+                        <td title="#ffff00" style="background-color: rgb(255, 255, 0);"></td>
+                        </tr>
+                        <tr role="row">
+                           <td title="#009900" style="background-color: rgb(0, 153, 0);"></td>
+                            <td title="#3333ff" style="background-color: rgb(51, 51, 255);"></td>
+                            <td title="#cc33cc" style="background-color: rgb(204, 51, 204);"></td></tr>
+                            <tr role="row">
+                               <td title="#ffffff"  style="background-color: rgb(255, 255, 255);"></td>
+                                <td title="#999999" style="background-color: rgb(153, 153, 153);"></td>
+                                <td title="#000000" style="background-color: rgb(0, 0, 0);">
+                               </td></tr>
+                           </table>
+                       </div>
+                    </foreignObject>
+                    
+               </g>
+             </g>
+            </svg>
+    </div>
+    <button onclick="translateDrawingBlocks()" id="runButton" style="border: 1px solid #dd4b39; background-color: #dd4b39;color: #fff; font-size: large; margin: 5px; padding: 10px;  border-radius: 4px; text-align: center;" class="primary" title="Run the program you wrote.">
+        <img src="{% static 'Am-images/play-button.png' %}" width="25" height="25"> Run Program
+      </button>
+    <script src="{% static 'Am-logic/game/game.js' %}" ></script>
+{% endblock %}
+

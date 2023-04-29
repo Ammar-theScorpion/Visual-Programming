@@ -24,6 +24,7 @@ export const TokenType = {
     List:22,
     Create:23,
     Return:24,
+    CreateL:25,
     EOC : 26,
   };
   const KEYWORDS = {
@@ -39,7 +40,8 @@ export const TokenType = {
     call:TokenType.Call,
     each:TokenType.Each,
     list:TokenType.List,
-    create:TokenType.Create,
+    allfather:TokenType.Create,
+    allfatherL:TokenType.CreateL,
     return:TokenType.Return,
   };
   
@@ -53,7 +55,7 @@ export const TokenType = {
   }
   
   function isalpha(src) {
-    return src.toUpperCase() !== src.toLowerCase()|| src=='_';
+    return src.toUpperCase() !== src.toLowerCase() || src=='_';
   }
   
   function isskippable(str) {
@@ -70,19 +72,16 @@ export const TokenType = {
     const tokens = [];
     const src = sourceCode.split('');
     while (src.length > 0) {
-      if (src[0] === '(') {
-        tokens.push(token(src.shift(), TokenType.OpenParen));
-      } else if (src[0] === ')') {
-        tokens.push(token(src.shift(), TokenType.CloseParen));
-      }  else if (src[0] === '{') {
+ 
+     if (src[0] === '{') {
         tokens.push(token(src.shift(), TokenType.OpenCurly));
       } else if (src[0] === '}') {
         tokens.push(token(src.shift(), TokenType.CloseCurly));
-      }else if (src[0] === ',' || src[0] === '[' || src[0] === ']' ) {
+      }else if (src[0] === ',' || src[0] === '[' || src[0] === ']' || src[0] === '(' || src[0] === ')' || src[0] === '!') {
         tokens.push(token(src.shift(), TokenType.SpecChar));
       }  
       else if (src[0] === '+' || src[0] === '-' || src[0] === '*' || src[0] === '/' || 
-              src[0] === '>'|| src[0] === '<'|| src[0] === '>=' || src[0] === '<=' || src[0] === '==' || src[0] === '&&' || src[0] === '||') {
+              src[0] === '>' || src[0] === '<'|| src[0] === '&' || src[0] === '|' || src[0] === '%') {
         tokens.push(token(src.shift(), TokenType.BinaryOperator));
       }  
       else if (src[0] === '=') {

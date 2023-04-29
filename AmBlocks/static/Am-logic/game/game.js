@@ -1,107 +1,134 @@
-/*function start(){
-    let canvas = document.querySelector('canvas');
-    console.log(canvas);
-    let context = canvas.getContext('2d');
-    context.fillStyle = '#fff'
-    context.beginPath();
-    //context.moveTo(0,0);
-    //context.lineTo(100,100);
-    context.strokeStyle = '#fff'
-    context.lineWidth = 3
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    context.moveTo(195, 180);
-    context.lineTo(200, 170);
-    context.lineTo(205, 180);
-    context.stroke();
-
-}   
- 
-document.onload =  start();*/
-// Assuming you have a canvas element with id "myCanvas"
-class Point{
-    constructor(x, y){
-        this.x = x
-        this.y = y
-    }
-}
+var step = 'no translation';
+///////////// *Draw Lines and the main character* //////////////
 const canvas = document.querySelector('canvas');
-const context = canvas.getContext("2d");
-context.strokeStyle='#fff'
-context.lineWidth = 3
+const context = canvas.getContext('2d');
+// Circle properties
+let circleX = 250;
+let circleY = 250;
+const circleRadius = 20;
+const circleColor = 'black';
 
-function drawArc(x, y) {
-    context.beginPath();
-    context.arc(x, y, 15, 0, 2 * Math.PI);
-    context.save();
-    context.rotate(0);
+// Triangle properties
+const triangleSize = 10;
+const triangleColor = 'white';
+let triangleAngle = 0;
+
+// Line properties
+let lines = [];
+let lineStartX = circleX;
+let lineStartY = circleY - circleRadius;
+let lineEndX = circleX;
+let lineEndY = circleY - circleRadius;
+const lineWidth = 5;
+let lineColor = 'white';
+
+
+function restoreDefaults(){
+    circleX = 250;
+    circleY = 250;
+    triangleAngle = 0;
+    lineStartX = circleX;
+    lineStartY = circleY - circleRadius;
+    lineEndX = circleX;
+    lineEndY = circleY - circleRadius;
+    drawCanvas()
+}
+// Move circle forward
+function moveForward(byDistance) {
+    const angleRadians = triangleAngle * Math.PI / 180;
+    const deltaX = Math.sin(angleRadians) * byDistance;
+    const deltaY = Math.cos(angleRadians) * byDistance;
+
+    // Update circle position
+    circleX += deltaX;
+    circleY -= deltaY;
+
+    // Update line positions
+    lineStartX = lineEndX;
+    lineStartY = lineEndY;
+    lineEndX = circleX;
+    lineEndY = circleY;
     
-    context.translate(x, y);
-    context.moveTo(-5, -20);
-    context.lineTo(0, -30);
-    context.lineTo(5, -20);
-    context.closePath();
-    context.stroke();
+    // Add line to array
+    lines.push({
+        startX: lineStartX,
+        startY: lineStartY,
+        endX: lineEndX,
+        endY: lineEndY,
+        color: lineColor
+    });
+
+
+    // Redraw canvas
+    drawCanvas();
 }
 
-function animate(newX, newY) {
+// Turn triangle left
+function turnLeft() {
+    triangleAngle -= 45;
 
-    drawArc(newX, newY);
-    //let inNewXDir = Math.sqrt(Math.pow((x-newX), 2) + Math.pow((y-newY), 2));
-    //x += inNewXDir/x;
-    //y += inNewXDir/y;
-    console.log(newX)
+
+    // Redraw canvas
+    drawCanvas();
 }
 
-function move_at(newx, newy){
+// Draw canvas
+function drawCanvas() {
+    // Clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    context.beginPath();
-    for (let index = 0; index < points.length; index+=2) {
-        const element = points[index];
-        context.moveTo(element.x, element.y)
-        const element1 = points[index+1];
-        context.lineTo(element1.x, element1.y)
-    }
-    context.closePath();
-    context.stroke();
+    // Draw lines
+    lines.forEach(function(line) {
+        context.beginPath();
+        context.moveTo(line.startX, line.startY);
+        context.lineTo(line.endX, line.endY);
+        context.lineWidth = lineWidth;
+        context.strokeStyle = line.color;
+        context.stroke();
+    });
 
-    context.save()
+    // Draw circle
     context.beginPath();
-    context.arc(newx, newy, 15, 0, 2 * Math.PI);
-    context.translate(newx, newy);
-    context.moveTo(-5, -20);
-    context.lineTo(0, -30);
-    context.lineTo(5, -20);
-    context.closePath();
+    context.arc(circleX, circleY, circleRadius, 0, 2 * Math.PI);
+    context.fillStyle = circleColor;
+    context.fill();
+    context.lineWidth = 3
+    context.strokeStyle = '#fff';
     context.stroke();
-    context.restore()
-    
+    // Draw triangle
+    context.translate(circleX, circleY);
+    context.rotate(triangleAngle * Math.PI / 180);
+    context.beginPath();
+    context.moveTo(0, -circleRadius - triangleSize);
+    context.lineTo(triangleSize, -circleRadius);
+    context.lineTo(-triangleSize, -circleRadius);
+    context.closePath();
+    context.fillStyle = triangleColor;
+    context.fill();
+    context.rotate(-triangleAngle * Math.PI / 180);
+    context.translate(-circleX, -circleY);
+}
+
+// Initial canvas draw
+drawCanvas();
+
+///////////// *Draw Lines and the main character* //////////////
+
+function tuggle(){
+    const table = document.getElementsByClassName('table');
+    if ($(table).attr('visibility') === 'visible') {
+        $(table).attr('visibility', 'hidden');
+    } else {
+        $(table).attr('visibility', 'visible');
+    }
 
 }
-let x = 200;
-let y = 200;
-let newx=x+100;
-let newy=y+100;
-let points = [];
-points.push(new Point(x, y)); 
-points.push(new Point(newx, newy)); 
-move_at(x, newy);
-y=newy
-points.push(new Point(x, y)); 
-points.push(new Point(newx, newy)); 
-move_at(newx, y);
-x=newx
-newy=newy-100;
-points.push(new Point(x, y)); 
-points.push(new Point(newx, newy)); 
- 
-move_at(x, newy);
-newx=x-100
-points.push(new Point(x, y)); 
-points.push(new Point(newx, newy)); 
-move_at(newx, newy);
 
-//context.translate(0, 0);
-//context.rotate(Math.PI/2)
-//move_at(0, 0);
+function setColor(event){
+    lineColor = event.target.style.backgroundColor;
+    $('.coloring').attr('fill', lineColor);
+
+}
+
+///////////// *Draw Lines and the main character* //////////////
+

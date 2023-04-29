@@ -40,6 +40,25 @@ export class Converter{
         }
         return [include_str+code_str, codepy];
     }
+    generateFunction(node){
+      switch(node){
+        case 'append':
+            return 'push_back'
+        case 'length':
+            return 'size'
+        case 'pop':
+            return 'pop_back'
+        case 'remove':
+            return 'earse'
+          default:
+            return node;
+      }
+    }
+    CPlusSentex(node){
+      if(node=='insert' || node[0] == 'remove')
+        return true
+      return false;
+    }
     generateCode(node, level) {
         switch (node.kind) {
           case 'ifStatement':
@@ -68,12 +87,14 @@ export class Converter{
               return this.generateOpListStatement(node, level);
           case 'returnStatement':
               return this.generateReturnStatement(node, level);
+          case 'multiBinary':
+              return this.getExpressionString(node, level);
           default:
-              return node.value;
+              return typeof(node.error)=='string'?node.error:node.value;
        }
       }
       generateReturnStatement(node, level){
-        return `return ${node.returnValue};`
+        return `return ${node.statement};`
       }
       generateOpListStatement(node, level){
         const listName = node.listName;
@@ -82,16 +103,26 @@ export class Converter{
         if (body) {
           while (body.length) {
             let bodyValue = '';
-            bodyValue += body.shift();
-            op += `.${bodyValue}`;
+            let val = body.shift();
+            val=val.split('(');
+
+            if(val[0] == 'sort')
+              op=val[0]+'('+listName+'.begin(), '+listName+'.end())';
+            else{
+              if(this.CPlusSentex(val[0]))
+              bodyValue += this.generateFunction(val[0])+'('+listName+'.begin() + '+val[1];
+              else
+              bodyValue += this.generateFunction(val[0])+'('+val[1];
+              op += `.${bodyValue}`;
+            }
           }
-          op += `\n`;
+          op += `;\n`;
         }
         return op;
       }
-      generateListStatement(node, level){
-        return `std::vector<int> ${node.listName};\n`;
-      }
+    generateListStatement(node, level){
+        return `std::vector<${node.list_type}> ${node.listName};\n`;
+    }
     generateEachStatement(node, level){
       const body = node.body;
       let bodyValue = '';
@@ -100,7 +131,7 @@ export class Converter{
           bodyValue += this.generateCode(body.shift(), level + 1);
         }
       }
-      return `for (char ${node.varname} : ${node.varname_over}){\n ${bodyValue} \n}`;
+      return `for (${node.iterateable_type} ${node.varname} : ${node.varname_over}){\n ${bodyValue} \n}`;
     }
     generateCallStatement(node, level){
       return `${node.function_name}(${node.argsv})\n`;
@@ -110,23 +141,50 @@ export class Converter{
       let bodyValue = '';
       if (body) {
         while (body.length) {
-          bodyValue += this.generateCode(body.shift(), level + 1);
+          bodyValue += this.generateCode(body.shift(), level + 1)+'\n\t';
         }
       }
-      return `void ${node.name} {\n\t${bodyValue}\n}`;
+      let args = '';
+      const paramenters = node.params;
+      let params = [];
+      for (let dict of paramenters) {
+        for (let key in dict) {
+            params.push(`${dict[key]} ${key}`);
+          }
+        }
+      args+= params.join(', ');
+      return `${node.type} ${node.name} (${args}) {\n\t${bodyValue}\n}`;
 
     }
     generateassignmentStatement(node, level){
-        return node.left.value + ' = '+ this.generateCode(node.right);
+        return node.left.value + ' = '+ this.generateCode(node.right)+';\n';
       }
     generateDeclarationStatements(node, level){
-      return node.varBody[0] +' '+ node.varname+' = '+this.generateCode(node.varBody[1])+';\n';
+      return node.varBody[0] +' '+ node.varname+';\n';
     }
 
     generateBinaryExpression(ExpressionNode){
-        return ExpressionNode.left.value+ ' '+ ExpressionNode.operater.value + ' '+ ExpressionNode.right.value;
+        return ExpressionNode.left.value+ ' '+ ExpressionNode.operater + ' '+ ExpressionNode.right.value;
     }
-
+    getExpressionString(expression) {
+      let expressionStr = '';
+      traverseExpression(expression);
+    
+      function traverseExpression(node) {
+        if (node.kind === 'BinaryExpression') {
+          expressionStr += '(';
+          traverseExpression(node.left);
+          expressionStr += node.operater + ' ';
+          traverseExpression(node.right);
+          expressionStr += ') ';
+        } else {
+          expressionStr += node.value + ' ';
+        }
+      }
+    
+      return '(' + expressionStr.trim() + ')';
+    }
+    
     generatePrintStatement(printNode){
         const printValue = printNode.printValue.replace(',','<<');
         return 'std::cout << '+ printValue+';\n';
@@ -135,9 +193,7 @@ export class Converter{
         const condition = ifNode.condition;
         let conditionValue = 'false';
         if (conditionValue != condition) {
-          conditionValue = condition.left.value;
-          conditionValue += condition.operater.value;
-          conditionValue += condition.right.value;
+          conditionValue = this.getExpressionString(condition);
         }
         const body = ifNode.body;
         let bodyValue = '';
@@ -151,35 +207,24 @@ export class Converter{
       }
       
     
-    generateReapetStatement(ifNode){
-        const condition = ifNode.condition;
-        let conditionValue = condition.left.value;
-        conditionValue += condition.operater.value;
-        conditionValue += condition.right.value;
-        const body = [...ifNode.body];
-        let bodyValue = '';
-        if(body){
-            while(body.length){
-                bodyValue += this.generateCode(body.shift());
-            }
+    generateReapetStatement(ifNode, level){
+      const condition = ifNode.condition;
+      let conditionValue = 'false';
+      if (conditionValue != condition) {
+        conditionValue = this.getExpressionString(condition);
+      }
+      const body = ifNode.body;
+      let bodyValue = '';
+      if (body) {
+        while (body.length) {
+          bodyValue += '\t'+this.generateCode(body.shift(), level + 1);
         }
-        return `${indentation}if( ${conditionValue} ){\n\t${bodyValue}}`;
+      }
+      const indentation = level>=0?'\t'.repeat(level):"";
+      return `${indentation}while(${conditionValue}){\n${'\t'.repeat(level+1)}${bodyValue}}`;
     }
     
-    generateReapetStatement(ifNode){
-        const condition = ifNode.condition;
-        let conditionValue = condition.left.value;
-        conditionValue += condition.operater.value;
-        conditionValue += condition.right.value;
-        const body = ifNode.body;
-        let bodyValue = '';
-        if(body){
-            while(body.length){
-                bodyValue += this.generateCode(this.moveNode(body));
-            }
-        }
-        return `while ( ${conditionValue} ) {\n${bodyValue}}\n`
-    }
+
     generateElseStatement(ifNode){
         const body = ifNode.body;
         let bodyValue = '';
