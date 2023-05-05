@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import Http404
 from .models import Problem
+import socket
+import pickle
 # Create your views here.
 
 def error_404(request, exception=None):
@@ -13,14 +15,12 @@ def renderProblems(request):
 
 
 def problem(request, pname):
-    try:
-        problem = Problem.objects.get(pname=pname)
-        context = {'problem':problem}
-        dic = [ 'functionBlock', 'callBlock']
-        context = {'id':dic}
-        return render(request, 'blocks.html', context)
-    except:
-        return error_404(request)
+    
+    problem = Problem.objects.get(pname=pname)
+    context = {'problem':problem}
+    dic = [ 'eachBlock', 'listBlock', 'printBlock' , 'functionBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock', 'elseBlock']
+    context = {'id':dic}
+    return render(request, 'blocks.html', context)
         #raise Http404('problem does not exist')
     
     

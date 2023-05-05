@@ -1,6 +1,11 @@
 import {Blocks} from "./Am-interperter/front-back.js";
 
 $(document).ready(function() {
+ 
+    var scripts = document.getElementsByTagName('script');
+    var index = scripts.length - 1;
+    var myScript = scripts[index];
+    console.log(myScript)
     var clones = Blocks.getInstance();
     let currentElement =0;
     setBlock()
@@ -186,7 +191,7 @@ $(document).ready(function() {
             let newString = `-2 H ${65+name.length*8+58}`;
             d = d.replace(matchedString, newString);
         }
-        foreignObject.attr('visibility', 'visible');
+     
         foreignObject.children('path:first').attr("d", d);
 
         const clone = ($('.make-var'));
@@ -197,16 +202,14 @@ $(document).ready(function() {
             clones.addBlock(clone.clone());
         setBlock()
         translateAndSet();
+        foreignObject.click();
     });
     $('.create-function').click(function(){
         var foreignObject = $('#function');
-        foreignObject = foreignObject.clone(true);
         const name = window.prompt('Function Name')
  
       
-        foreignObject.attr('visibility', 'visible');
         foreignObject.find('.name').text(name)
-        console.log(name.length)
         foreignObject.find('.Am-edit:first rect').attr('width', (name.length+1.5)*8);
         foreignObject.find('.Am-text:nth-of-type(2)').attr('transform', 'translate('+(name.length*8+65)+',24)')
 
@@ -222,10 +225,7 @@ $(document).ready(function() {
         foreignObject.children('path:first').attr("d", d);
 
         var call = $('#caller');
-        call = call.clone(true);
         call.find('.name').text(name)
-        call.attr('visibility', 'visible');
-
 
         d = call.children('path:first').attr("d");
         match = ''
@@ -237,8 +237,10 @@ $(document).ready(function() {
             d = d.replace(matchedString, newString);
         }
         call.children('path:first').attr("d", d)
-        $('svg:first').append(foreignObject)
-        $('svg:first').append(call)
+        foreignObject.click();
+        call.click();
+    
+
     });
     $('.make-var').keydown(function(event){
         if(event.keyCode === 13){
@@ -250,23 +252,52 @@ $(document).ready(function() {
     
     clones.getBlocks().click(function() {
         gClicked = $(this)
-        console.log(2)
     });
  
-
+    $('.button-30').click(function(){
+        let block = $(this).text().split(' ');
+        if(block.length>1)
+            block = block[1];
+        if(block!=='list' && block!=='function')
+            $(`.draggable#${block}`).click();
+    });
+    
 
     $('.draggable').click(function(){
         var clone = $(this).clone();
-        if (!clone.parent().is(".Am-workspace")){
-            let appendto = $(".Am-workspace:first");
+        if (!clone.parent().is(".Am-workspace.main")){
+            let appendto = $(".Am-workspace.main");
             if(appendto.attr('visibility') !== 'visible')
                 appendto = $(".Am-workspace.main");
+            clone.attr('visibility', 'visible');
             clone.appendTo(appendto);
             clones.addBlock(clone);
             translateAndSet();
 
             //// * FUNCTION * /////
-
+            clone.find('.prompt').click(function(){
+                const assignement = $(this).parent();
+                const pos =  parseFloat(($(this).next().attr('transform').match(TRANS_REGEX)[1].split(","))[0]);  
+                let path = assignement.find('path:first').attr('d');
+                let match = /-2 H [0-9.][0-9.]+/g.exec(path)
+                let newLength;
+                if(assignement.children('.pr').length === 0){
+                    newLength = '-2 H '+ (parseFloat(match[0].split(' ')[2])+115);
+                    var text = $(document.createElementNS("http://www.w3.org/2000/svg", 'text')); 
+                    text.attr('class', 'Am-text pr');
+                    text.text('prompt uesr with ');
+                    text.attr('transform', 'translate('+(95)+',25)')
+                    $(this).next().attr('transform', 'translate('+(pos+115)+',11)')
+                    $(this).after(text);
+                    
+                }else{
+                    $(this).next().attr('transform', 'translate('+(pos-115)+',11)')
+                    $('.pr').remove();
+                    newLength = '-2 H '+ (parseFloat(match[0].split(' ')[2]) - 115);
+                }
+                path = path.replace(match, newLength);
+                assignement.find('path:first').attr("d", path);    
+            })
             clone.find('.drop_params').click(function(){
                 var foreignObject = $(this).parent().find('.parameters');
                 if (foreignObject.attr('visibility') === 'visible') {
@@ -321,21 +352,20 @@ $(document).ready(function() {
                 const rects = current_function.find('.parameters').find('rect:lt(3)');
                 rects.each(function(){
                     $(this).attr('height', 200+children.length*45)
-                    console.log(parseFloat($(this).attr('height')))
                 })
                 current_function.find('svg').attr('height',  200+children.length*40)
 
                 // Modifiy Call
-                let callFunction = $('svg').find('.call').filter(function(){
-                    console.log($(this).find('.name').text() , current_function.find('.name').text())
-                    return $(this).find('.name').text() == current_function.find('.name').text();
+                let callFunction = $('.Am-workspace.main').find('.call').filter(function(){
+                    console.log( $(this).find('.name').text() , current_function.find('.name').text())
+                    return $(this).find('.name:first').text() == current_function.find('.name').text();
                 }) 
-                console.log($('svg'))
-                callFunction.children('.name').nextAll().remove();
+                console.log(callFunction.children('.name:first').nextAll())
+                callFunction.children('.name:first').nextAll().remove().empty();
 
                 let parameter_names = var_names.split(', ');
                 match = IF_LK_REGEX.exec(path)
-                let start_x =90;
+                let start_x = 90;
                 for (let index = 0; index < parameter_names.length; index++) {
                     const element = parameter_names[index];
 
@@ -349,7 +379,7 @@ $(document).ready(function() {
                     start_x += element.length*13;
                     //Create anew text in SVG's namespace
                     
-                    let clonetext = $('.Am-edit.global').clone();
+                    let clonetext = $('.Am-edit.global:first').clone();
                     clonetext.attr('visibility','visible')
                     clonetext.attr('transform', 'translate('+(start_x)+',12)')
                     start_x+=30;
@@ -382,7 +412,6 @@ $(document).ready(function() {
                     let clone = $('.al').clone(true);
                     clone.addClass('cloneal');
                     clone.attr('visibility', 'visible');
-                    console.log($(this).parent())
                     $(this).parent().find('svg:first').append(clone);
                 }
                 else{
@@ -455,10 +484,9 @@ $(document).ready(function() {
             drag: function(event, ui) {
                 translateAndSet();
                 const draggable = $(this);
-                let appendto = $(this).find('.Am-workspace');
+                let appendto = $('.Am-workspace');
                 if(appendto.attr('visibility') !== 'visible')
                     appendto = $(".codesspace .Am-workspace");
-                console.log(appendto)
                 ///////////////////////// MOVEMENT //////////////////////
 
                 /*const draggab = $("#Am-workspace");
@@ -548,7 +576,6 @@ $(document).ready(function() {
                                         }
                                         const traslate =  $(newPath).position().top;  
                                         $(this).find('.chain').each(function(){
-                                            console.log($(this))
                                             const traslate2 = $(this).position().top;  
                                             if(traslate==traslate2){
                                                 transform = 'translate( 0'+','+(onground_height+onmouse_height) +')';
@@ -801,22 +828,23 @@ $(document).ready(function() {
 
                 let path = edit.parent().find('path').attr('d');
                 let fill_path = '-2 H ';
-                let match = IF_LK_REGEX.exec(path);
-                if(match===null){
-                    match = H_REGEX.exec(path);
-                    fill_path = ' H ';
+                let match ;
+                while(match = IF_LK_REGEX.exec(path)){
+                    
+                    if(match===null){
+                        match = H_REGEX.exec(path);
+                        fill_path = ' H ';
+                    }
+                    let newLength = fill_path + (direction*7.5 + parseFloat(match[0].split(' ')[2]));
+                    path = path.replace(match[0], newLength);
                 }
-                let newLength = fill_path + (parseFloat(inputWidth)-35 + parseFloat(edit.parent().attr('transform').match(TRANS_REGEX)[1].split(',')[0]));
-                path = path.replace(match[0], newLength);
-                console.log(edit.parent())
-                edit.parent().find('path').attr("d", path);    
+                edit.closest('.draggable').find('path:first').attr("d", path);    
 
                 let next = edit.next();
-                let distance = 30;
+                let distance = parseFloat((edit.attr('transform').match(TRANS_REGEX)[1].split(","))[0]) + inputWidth;
                 while(edit.next().length!=0){
                     const position = (next.attr('transform').match(TRANS_REGEX)[1].split(",")); 
-                    console.log(distance)
-                    next.attr('transform','translate('+ (distance+inputWidth) +','+position[1]+')')
+                    next.attr('transform','translate('+ (distance+direction*8) +','+position[1]+')')
                     next = next.next();
                     distance = parseFloat((next.attr('transform').match(TRANS_REGEX)[1].split(","))[0]);
                 }
@@ -828,6 +856,18 @@ $(document).ready(function() {
         let text = $(this).text();
         if (text !== undefined) { 
             text = text.replace(/\n/, ''); 
+            if(edit.closest('.draggable').attr('class').indexOf('function')!==-1){
+                let callFunction = $('svg').find('.call').filter(function(){
+                    return $(this).find('.name').text() == edit.closest('.draggable').find('.name').text();
+
+                }) 
+                callFunction.find('.name').text(text);
+                let path = callFunction.find('path:first').attr('d');
+                let match =  /-2 H [0-9.][0-9.]+/g.exec(path)
+                let newLength = '-2 H '+ (parseFloat(match[0].split(' ')[2]) + 8);
+                path = path.replace(match, newLength);
+                callFunction.find('path:first').attr("d", path);
+            }
             edit.children().last().text(text);
             translateAndSet();
         }
@@ -876,16 +916,18 @@ $(document).ready(function() {
     // *this section handels code submission and ordering the blocks* //
 
     let language = '';
-    let lang_id=0;
     var lang='C++';
     var code = '{{prev_code|safe}}';
-    let stepped = false
-    let step = 2;
+    let stepped = true
+    console.log(window.step)
 	  window.translateAndSet =function(){
 		  if(step!='no translation'){
 			let C_Code_List = ['',''];
 			let code = '';
-
+            if(window.lang_id == 1)
+                lang = 'Python'
+            else
+                lang = 'C++'
 			if(step==1 && stepped){
 				C_Code_List = clones.translateSteps(lang, currentElement);
 				if(currentElement+1<clones.blocks.length)
@@ -894,30 +936,23 @@ $(document).ready(function() {
 					currentElement=0;
 			}
 			else if(step!=1){
+                console.log(lang)
 				C_Code_List = clones.translate(lang);
 			}
 
-				const language_list = C_Code_List[0];
-				for (let index = 0; index < language_list.length; index++) {
-				let C_Code = language_list[index];
-				code += C_Code;
-				code += '`'
-			}
+            code = C_Code_List[0];
 			if(code!=='``'){
-				
 				language = code;
 				language_type();
 			}
 			const error = C_Code_List[1];
 			document.getElementById('error').innerHTML = error;
-		}else{
-           
-        }
+		}
     }
     
     const blocks = $('.draggable');
  
-    function setBlock(){
+    function setBlock(){            
        let space = 0;
        const blocks = $('.draggable');
        
@@ -928,18 +963,17 @@ $(document).ready(function() {
             }
        });
     }
+    
        $('form button').click(function(event){
-          console.log(event.target.innerHTML)
+          //console.log(event.target.innerHTML)
           if(event.target.innerHTML.indexOf('step')!==-1){
              stepped = true;
              window.translateAndSet()
           }
           event.preventDefault();
           const userCodeInput = document.getElementById('user_code_input');
-          document.getElementById("setcode").innerHTML = language.split('`')[1];
-          let text =  document.getElementById('setcode').innerHTML;
-          text = text.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
-          console.log(text)
+          let text = language.replace(/input/g, 'custom_input');
+          //text = '\nprint(0)\nv=custom_input("enter v1")\nprint(v)\nprint(0)\nv=custom_input("enter v2")\n\nhv=custom_input("enter v3")\n'
           var csrftoken = $("input[name='csrfmiddlewaretoken']").val();
           $.ajaxSetup({
              beforeSend: function(xhr, settings) {
@@ -957,6 +991,10 @@ $(document).ready(function() {
                 'tname':'44',
              },
              success: function(response){
+                if(response == 'prompt'){
+                    let response = window.prompt('hi');
+
+                }
                 let inner =  document.querySelector('#error').innerHTML;
                 if (inner=="undefined")
                 document.querySelector('#error').innerHTML = response;
@@ -968,11 +1006,27 @@ $(document).ready(function() {
                 }
              }
           })
+          var socket = new WebSocket('ws://127.0.0.1:8080');
+          socket.addEventListener('open', function (event) {
+            console.log('Socket connected!');
+          });
+      
+          socket.addEventListener('message', function (event) {
+                console.log('Message received: ' + event.data);
+                socket.send(window.prompt(event.data)) 
+          });
+      
+          socket.addEventListener('close', function (event) {
+              console.log('Socket closed!');
+          });
+        
+  
        });
-       function language_type(){
+       window.language_type=function (){
           /*const button = event.target;
           lang = button.innerHTML;*/
-          var code = language.split('`')[lang_id];
+
+          var code = language
           var codeNode = document.createElement("pre");
           codeNode.style.whiteSpace = "pre-wrap";
           codeNode.textContent = code;
@@ -982,7 +1036,6 @@ $(document).ready(function() {
        function toggleSidebar() {
        var sidebar = document.getElementById("sidebar1");
        var arrow = document.querySelector(".arrow");
-       console.log(sidebar.style.left)
        if (sidebar.style.left == "0px") {
           sidebar.style.left = "-400px";
           arrow.style.transform = "rotate(0deg)";
@@ -994,5 +1047,8 @@ $(document).ready(function() {
           arrow.style.left="400px"
        }
        }
- 
+       function processMessage(s){
+            console.log(s);
+
+       }
 });

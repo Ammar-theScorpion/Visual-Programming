@@ -201,9 +201,9 @@ export class Parser{
         let body={};
         this.move();
         let printValue = '';
-        while(this.validToken() && this.getCurrentToken().value!='\n'){
-            printValue += this.move().value;
-        }
+            while(this.validToken() && this.getCurrentToken().value!='\n'){
+                printValue += this.move().value;
+            }
         if(this.validToken() ){
             this.move();
         }
@@ -280,34 +280,47 @@ export class Parser{
 
         if(this.getCurrentToken().type==TokenType.Equals){
             this.move();
-            const right = this.parse_additive_expr(env);
-            if(right['kind']){
-                if(right.value==left.value)
-                    return {error:(`Cannot assign a variable to iself\n`)};
+            let right;
+            // check for prompt
+            if(this.getCurrentToken().value == 'prompt'){
+                this.move();this.move();this.move();
+                let prompt = `'Enter ${left.value}'`  
+                if(this.getCurrentToken().type!=TokenType.EOC && this.getCurrentToken().type !== TokenType.newLine)
+                    prompt = this.move().value;
+                right='input('+prompt+')'.replace("\n", '')
 
-                if(right.value){
-                    const lookup = env.lookUp(left.value)
-                    let value = '';
-                    if(right.kind=='Identifier'){
-                        if(env.lookUp(right.value) == null)
-                            return {error:(`${right.value} is not decalred yet\n`)};
-                        value = env.lookUp(right.value)[0]
-                    }
-                    else{
-                        value = this.getVarType(right.value);
-                        if(value=='string'){
-                            lookup[1] = right.value.replace(/'/g, '\"');
-                            right.value = lookup[1]
+            }else{
+                 right = this.parse_additive_expr(env);
+                if(right['kind']){
+                    if(right.value==left.value)
+                        return {error:(`Cannot assign a variable to iself\n`)};
+
+                    if(right.value!=null){
+                        const lookup = env.lookUp(left.value)
+                        let value = '';
+                        if(right.kind=='Identifier'){
+                            if(env.lookUp(right.value) == null)
+                                return {error:(`${right.value} is not decalred yet\n`)};
+                            value = env.lookUp(right.value)[0]
                         }
+                        else{
+                            value = this.getVarType(right.value);
+                            if(value=='string'){
+                                lookup[1] = right.value.replace(/'/g, '\"');
+                                right.value = lookup[1]
+                            }
 
+                        }
+                        if(lookup[0] !=='void*' &&  value != lookup[0]&& this.lang=='C++'){
+                                return {error:(`${left.value} is ${lookup[0]}. Cannot change data type in C++`)};
+                        }
+                        lookup[0] = value;
+                        env.isset(true);
                     }
-                    lookup[0] = value;
-                    env.isset(true);
+
                 }
-                      /*  if(this.getVarType(right.value) != lookup[0]&&this.lang=='C++'){
-                            return {error:(`${left.value} is ${lookup[0]}. Cannot change data type in C++`)};
-                        }*/
             }
+
             left = {
                 kind:'assignmentStatement',
                 left,
@@ -384,17 +397,18 @@ export class Parser{
             case TokenType.String:
                 return {kind:'String', value:this.move().value};
             default:
-                return {kind: 'Number', value: 0}
+                return {kind: 'Number', value: null}
         }
     }
     pasre_call_statement(env){
         this.move();
         const function_name = this.move().value;
-        let argsv='';
+        let argsv=[];
         let argsk='';
         let paramenters = SymbolFunction.lookUp(function_name);
         if(paramenters===undefined)
             return {error:`call block should be under the function '${function_name}'`}
+        let f =0
         while(this.validToken() && this.getCurrentToken().value!='\n'){
             const argu_name = this.move();
             let val = this.move().value;
@@ -402,11 +416,12 @@ export class Parser{
             val = this.parse_multitive_expr();
             if(val==='!')
                 return {error:`missing one potential argument '${argu_name.value}'`}
-            paramenters[0][argu_name.value] = this.getVarType(val.value);
-            argsv += val.value;
+            paramenters[f++][argu_name.value] = this.getVarType(val.value);
+            argsv.push(val.value);
             argsk += val.kind ;
 
         }this.move();
+        argsv = argsv.join(', ');
         const body={
             kind:'CallStatement',
             function_name,
@@ -424,9 +439,6 @@ export class Parser{
         const error =  this.generateBodyError(env, varname_over, 2);
         if(error!=true)return error
         //check the type
-            for (let index = 0; index < array.length; index++) {
-                const element = array[index];
-            }
         varname_over = varname_over.value
         const lookup = env.lookUp(varname_over);
         const var_type = lookup[3];
@@ -454,6 +466,8 @@ export class Parser{
                 body.body.push(statement);
             }else
                 body['body'] = [statement];
+            this.line ++;
+
         }
         this.move();
         return body;
@@ -481,6 +495,10 @@ export class Parser{
         };
         this.current_scope = name;
         while (this.inBody() && this.validToken()) { 
+            if(this.getCurrentToken().value=='\n'){
+                this.move();
+                continue;
+            }
             const statement = this.parse_statement(function_env);
             if(statement.kind=='returnStatement'){
                 return_type = this.getVarType(statement.statement);
@@ -521,6 +539,8 @@ export class Parser{
                 body.body.push(statement);
             }else
                 body['body'] = [statement];
+            this.line ++;
+
         }
         if(!this.inBody())
             this.move();
@@ -566,6 +586,8 @@ export class Parser{
                 body.body.push(statement);
             }else
                 body['body'] = [statement];
+            this.line ++;
+
         }
         if(!this.inBody())
             this.move();

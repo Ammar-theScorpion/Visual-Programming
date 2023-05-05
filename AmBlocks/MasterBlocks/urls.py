@@ -3,6 +3,6 @@ from .views import*
 
 urlpatterns = [
     path('', renderProblems, name='renderProblems'),
-    path('problem/<str:pname>/', problem, name='problem'),
+    path('<str:pname>/', problem, name='problem'),
     path('free-style/', mainCompiler, name='mainCompiler')
 ]

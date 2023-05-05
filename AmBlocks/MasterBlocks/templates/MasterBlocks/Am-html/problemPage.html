@@ -1,16 +1,12 @@
 {% extends 'main.html' %}
+{% load static %}
+
+  {% block links %}
+  <link rel="stylesheet" href="{% static 'Am-style/problem.css' %}" />
+
+  {% endblock links %}
     {% block content %}
  
-    <nav class="navbar">
-        <ul id="navlist">
-            <li>Sign up</li>
-            <li>Editorial</li>
-            <li>Solutions</li>
-            <li>Submission</li>
-            <li>Items</li>
-        </ul>
-
-    </nav>
 
     <div class="contain">
     <div class="scroll">

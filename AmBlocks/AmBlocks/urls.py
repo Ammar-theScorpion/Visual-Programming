@@ -18,11 +18,11 @@ from django.urls import path, include
 from .views import test_code
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('problems/', include("MasterBlocks.urls")),
     path('', include('mainBlocks.urls')),
     path('game/', include('GameBlocks.urls')),
     path('users/', include("mainBlocks.urls")),
     path('stepbystep/', include("StepBlock.urls")),
-    path('problems/', include("MasterBlocks.urls")),
     path('tutorial/', include("TutorialsBlocks.urls")),
     path('test_code/', test_code, name='test_code'),
 

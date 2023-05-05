@@ -30,7 +30,7 @@ export class ConverterPy{
     generateBody(node, level, type, cond=true){
       const condition = node.condition;
       let conditionValue = 'false';
-      if (conditionValue != condition) {
+      if (condition !== undefined && conditionValue != condition) {
         conditionValue = this.getExpressionString(condition);
       }
       const body = !node.body?undefined: [...node.body];
@@ -75,7 +75,7 @@ export class ConverterPy{
               case 'multiBinary':
                 return this.getExpressionString(node, level);
           default:
-              return typeof(node.error)=='string'?node.error:node.value;
+            return typeof(node.error)=='string'?node.error:(node.value !== undefined? node.value : node);
          }
       }
 
@@ -112,7 +112,7 @@ export class ConverterPy{
         return op;
       }
       generateListStatement(node, level){
-        return `${node.varname} = []\n`;
+        return `${node.listName} = []\n`;
       }
       generateEachStatement(node, level){
         const body = !node.body?undefined: [...node.body];
@@ -122,7 +122,7 @@ export class ConverterPy{
             bodyValue += this.generateCode(body.shift(), level + 1);
           }
         }
-        return `for (${node.iterateable_type} ${node.varname} : ${node.varname_over}):\n ${bodyValue} \n`;
+        return `for ${node.varname} in ${node.varname_over}:\n\t${bodyValue} \n`;
       }
       generateCallStatement(node, level){
         return `${node.function_name}(${node.argsv})\n`;
@@ -135,8 +135,18 @@ export class ConverterPy{
           while (body.length) {
             bodyValue += this.generateCode(body.shift(), level + 1);
           }
+
         }
-        return `def ${node.name} (${node.args}):\n\t ${bodyValue} \n`;
+        let args = '';
+      const paramenters = node.params;
+      let params = [];
+      for (let dict of paramenters) {
+        for (let key in dict) {
+            params.push(`${key}`);
+          }
+        }
+      args+= params.join(', ');
+        return `def ${node.name} (${args}):\n\t ${bodyValue} \n`;
       }
       generateassignmentStatement(node, level){
         return node.left.value + ' = '+ this.generateCode(node.right)+'\n';

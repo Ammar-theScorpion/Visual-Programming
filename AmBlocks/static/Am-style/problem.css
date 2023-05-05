@@ -19,11 +19,6 @@
 }
 */
 
-.navbar {
-    position: relative;
-    background-color:rgb(148, 148, 148);
-   
-}
 
 #navlist {
    list-style: none;
@@ -57,7 +52,7 @@
   height: 100vh;
   text-align: justify;
   padding: 20px;
-  width:75%;
+  width:100%;
   overflow:auto;
   
 }
@@ -84,7 +79,7 @@ span:not(.scroll p span.keyword){
 .answer{
   background-color: #f8f8f8;
   height:100vh;
- width:75%;
+ width:100%;
  display: flex;
  position: relative;
 }

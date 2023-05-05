@@ -58,7 +58,7 @@ export class Blocks {
         return type + statement.join('');
     }
     getChildren(currentElement, search){
-        let nextchild = currentElement.querySelectorAll(`.${search}`);
+        let nextchild = currentElement.querySelectorAll(`:scope > .${search}`);
         let code = '';
         for (let index = 0; index < nextchild.length; index++) {
             const element = nextchild[index];
@@ -127,7 +127,7 @@ export class Blocks {
                 return textCode+'\n';
             }
             else if(currentElement.id == 'function'){
-                const function_name = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(' ', '_');
+                const function_name = currentElement.querySelector('.Am-edit.fname .Am-text').textContent.replace(' ', '_');
                 const variables = currentElement.querySelector('.Am-text:nth-of-type(2)').textContent.replace('with:', '');
 
                 textCode += 'def '+ function_name +' ' + variables+ '{';
@@ -155,12 +155,11 @@ export class Blocks {
             }else if(currentElement.id=='caller'){
                 const call =  currentElement.querySelector(`.Am-text:nth-of-type(${2})`).textContent.replace(' ', '_');
                 const args = currentElement.querySelectorAll('.Am-text');
-                const edit_args = currentElement.querySelectorAll('.Am-edit');
 
                 let arguements = '';
-                for (let index = 0; index < edit_args.length; index++) {
-                    arguements += args[index+2].textContent+' ';
-                    arguements += '!'+edit_args[index].querySelector('.Am-text').textContent + ' ';
+                for (let index = 2; index < args.length; index+=2) {
+                    arguements += args[index].textContent+' ';
+                    arguements += '!'+args[index+1].textContent + ' ';
                     
                 }
                 textCode += 'call '+call+' ' + arguements + '\n';
@@ -183,8 +182,15 @@ export class Blocks {
             }else if (currentElement.id == 'assigmnemt' || currentElement.id == 'operation'){
                 const varName =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
                 const allAmText = currentElement.querySelectorAll('.Am-text');
-                const equalto = allAmText[allAmText.length - 1].textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
                 let operater = allAmText[1].textContent;
+                let equalto = allAmText[2].textContent;//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
+                let prompt = allAmText[allAmText.length-1].textContent;
+                if(equalto !== prompt){
+                    operater += equalto;
+                    return `${varName} = ${equalto} ${prompt} \n`;
+                }else{
+                    equalto = equalto.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
+                }
                 textCode += varName +` ${operater} `+ equalto;
                 return textCode+'\n';
 

@@ -56,11 +56,6 @@ img {
   width: 100%;
 }
 
-a {
-  display: inline-block;
-  color: var(--color-main);
-  text-decoration: none;
-}
 
 /*========== components ==========*/
 .container {

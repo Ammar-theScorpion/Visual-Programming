@@ -6,15 +6,17 @@
 <html lang="en">
    {% block mainscript %}
 <head>
- 
+   <script>
+      window.step = '{{step|safe}}'
+   </script>
    <link rel="stylesheet" href="{% static '/Am-style/if.css' %}">
+   <link rel="stylesheet" href="{% static 'Am-style/front/home.css' %}" />
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+   <script src="https://cdn.socket.io/4.4.0/socket.io.min.js"></script>
    <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
-      
    </head>
    {% endblock mainscript %}
-
 
 
    {% block varside%}
@@ -29,6 +31,23 @@
    {% endblock varside %}
 
       {% block block %}
+      <button class="button-30" role="button">print</button>
+      <button class="button-30 create-function" role="button">create function</button>
+      <button class="button-30" role="button">for each</button>
+      <button class="button-30 create-list" role="button">create list</button>
+      <button class="button-30 create-var" role="button">create var</button>
+      <button class="button-30" role="button">if</button>
+      <button class="button-30" role="button">assigmnemt</button>
+      <button class="button-30" role="button">operation</button>
+      <button class="button-30" role="button">else</button>
+
+
+
+      <svg class="Am-workspace" xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      version="1.1" width="100%" height="50px">
+      
       <g class="draggable return" style="position:fixed;" visibility="hidden" id="return" transform="translate(8,200)">
          <path stroke="#3373CC" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
          </path>
@@ -40,15 +59,19 @@
       </g>
 
 
-      <g class="al" transform="translate(10,120)" >
-         <g class="a create-function" style="cursor: pointer;" >
+      <g class="Am-edit global" transform="translate(120,12)" style="display: block;" visibility="hidden">
+         <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="23" ></rect>
+         <text class="Am-text name" fill="#1e8f14" x="5" y="17">1</text>
+      </g>
+      <g visibility="hidden" transform="translate(10,120)" >
+         <g class="create-function" style="cursor: pointer;" >
             <rect stroke="#392D52" fill="#745BA5" fill-opacity="1" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
             <text class="input-mimic" x="60" y="16" text-anchor="middle"  fill="#fff">Create function</text>
             
          </g>
          
       </g>
-      <g class="al" transform="translate(10,60)" >
+      <g class="al" visibility="hidden" transform="translate(10,60)" >
          <g class="a create-list" style="cursor: pointer;" >
             <rect stroke="#392D52" fill="#745BA5" fill-opacity="1" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
             <text class="input-mimic" x="60" y="16" text-anchor="middle"  fill="#fff">Create list</text>
@@ -56,7 +79,7 @@
          </g>
          
       </g>
-      <g class="al" transform="translate(10,5)" > 
+      <g class="al" visibility="hidden" transform="translate(10,5)" > 
          <g class="a create-var" transform="translate(0,35)" style="cursor: pointer;">
             <rect stroke="#389438" fill="#59C059" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
             <text class="input-mimic" x="60" y="16" text-anchor="middle"  fill="#fff">Create varialbe</text>
@@ -66,14 +89,11 @@
       <g class="a make-var" trasform="translate(5, 200)" visibility="hidden" id="make_var">
          <text class="varname" x="94" y="24" text-anchor="middle"  fill="#000"></text>
       </g>
-      <g class="Am-edit global" transform="translate(120,12)" style="display: block;" visibility="hidden">
-         <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="23" ></rect>
-         <text class="Am-text name" fill="#1e8f14" x="5" y="17">1</text>
-      </g>
       {% if 'functionBlock' in id %}
-      <g class="draggable function-container if-like thick" id="function" visibility="hidden">
+      <g class="draggable function-container if-like thick" visibility="hidden" id="function">
          <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 145 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 70 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 145 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
-         fill="#995ba5" />
+         fill="#995ba5" ></path>
+
          <svg  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:html="http://www.w3.org/1999/xhtml"
@@ -81,26 +101,6 @@
          <rect stroke="#392D52" fill="#745ba53e" height="100" width="160" class="MutatorBackground"></rect>
 
          </svg>
-         <g class="drop_content create" style="cursor: pointer;" transform="translate(3,52)" >
-            <rect rx="4" ry="4" height="16" width="16"></rect>
-            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
-            </path>
-            <circle  r="2.7" cx="8" cy="8"></circle>
-         </g>
-         <g class="drop_params" style="cursor: pointer;" transform="translate(3,8)">
-            <rect rx="4" ry="4" height="16" width="16"></rect>
-            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
-            </path>
-            <circle  r="2.7" cx="8" cy="8"></circle>
-         </g>
-         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(25,24)">to </text>
-         <g class="Am-edit" transform="translate(50,12)" style="display: block;">
-            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="23" ></rect>
-            <text class="Am-text name" fill="#1e8f14" x="5" y="17"></text>
-         </g>
-         <text class="Am-text" y="2"  dy="0" x="4" transform="translate(80,24)" > with: </text>
-    
-         
          <g class="parameters" transform="translate(0,100)"  visibility="hidden">
             <rect rx="4" ry="4"  fill="#995ba5" width="355" height="210"></rect>
             <rect rx="4" ry="4" y="5" x="5"  stroke="" width="345" height="200"></rect>
@@ -120,13 +120,34 @@
             <svg class="Am-workspace" xmlns="http://www.w3.org/2000/svg"
                xmlns:xlink="http://www.w3.org/1999/xlink"
                xmlns:html="http://www.w3.org/1999/xhtml"
-               version="1.1" width="150px" height="400px">
+               version="1.1" width="150px" height="400px" >
                   <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 100 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 100 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
                   fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
                   <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(50,15)">inputs </text>
                </svg>
             </g>
          </g>
+         <g class="drop_content create" style="cursor: pointer;" transform="translate(3,52)" >
+            <rect rx="4" ry="4" height="16" width="16"></rect>
+            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
+            </path>
+            <circle  r="2.7" cx="8" cy="8"></circle>
+         </g>
+         <g class="drop_params" style="cursor: pointer;" transform="translate(3,8)">
+            <rect rx="4" ry="4" height="16" width="16"></rect>
+            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
+            </path>
+            <circle  r="2.7" cx="8" cy="8"></circle>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(25,24)">to </text>
+         <g class="Am-edit fname" transform="translate(50,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="23" ></rect>
+            <text class="Am-text name" fill="#1e8f14" x="5" y="17"></text>
+         </g>
+         <text class="Am-text" y="2"  dy="0" x="4" transform="translate(80,24)" > with: </text>
+    
+         
+
 
       </g>
       <g class="draggable call" style="position:fixed;" id="caller"  visibility="hidden">
@@ -140,7 +161,7 @@
       {% endif %}   
       
       {% if 'eachBlock' in id %}
-      <g class="draggable if-container thick" id="each" >
+      <g class="draggable if-container thick " id="each" visibility="hidden" transform="translate(8,200)">
          <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 160 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 70 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 160 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
          fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
          <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(30,24)">for each </text>
@@ -159,7 +180,9 @@
    {% endif %}
 
       {% if 'printBlock' in id %}
-         <g class="draggable print"  visibility="hidden" style="position:fixed;" id="print">
+    
+    
+         <g class="draggable print"  transform="translate(8,300)"  style="position:fixed;" visibility="hidden" id="print">
             <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
             </path>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">print</text>
@@ -297,7 +320,7 @@
 
 
       {% if 'ifBlock' in id %}
-         <g class="draggable if-container if-like"  id="if">
+         <g class="draggable if-container if-like"   visibility="hidden" id="if">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
 
@@ -325,7 +348,7 @@
       {% endif %}
 
       {% if 'multiConditionBlock' in id %}
-      <g class="draggable operation-logic condition-container" id="multiConditionBlock">
+      <g class="draggable operation-logic condition-container" visibility="hidden" id="multiConditionBlock">
          <path d="m 0,0 m 20,0 H 156.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
          <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#1e8f14" transform="translate(20,4)"></path>
          
@@ -354,7 +377,7 @@
    {% endif %}
       {% if 'conditionalBlock' in id %}
 
-         <g class="draggable operation-logic" id="condition" >
+         <g class="draggable operation-logic" visibility="hidden" id="condition" >
             <path d="m 0,0 m 20,0 H 140.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
                <g class="Am-edit" transform="translate(30,7)" style="display: block;">
                   <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
@@ -391,14 +414,14 @@
 
          {% if 'assigmnemtBlock' in id %}
 
-         <g class="draggable operation" style="position:fixed;" id="assigmnemt" >
+         <g class="draggable operation" style="position:fixed;"visibility="hidden" id="assigmnemt" >
             <path stroke="#389438" fill="#59C059" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
             </path>
             <g class="Am-edit" transform="translate(15,11)" style="display: block;">
                <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
                <text class="Am-text" fill="#1e8f14" x="5" y="17"></text>
             </g>
-            <g class="am-drop select"  transform="translate(55, 15)" style="cursor: text;">
+            <g class="am-drop select prompt"  transform="translate(55, 15)" style="cursor: text;">
                <rect  rx="4" ry="4" x="0" y="0" height="18" width="31"></rect>
                <text class="Am-text" x="15" y="10" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> = </text>
             </g>
@@ -413,7 +436,7 @@
          {% endif %}
          {% if 'operationBlock' in id %}
 
-         <g class="draggable operation" style="position:fixed;" id="operation" >
+         <g class="draggable operation" visibility="hidden" style="position:fixed;" id="operation" >
             <path stroke="#389438" fill="#59C059" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
             </path>
             <g class="Am-edit" transform="translate(15,11)" style="display: block;">
@@ -436,7 +459,7 @@
 
          {% if 'whileBlock' in id %}
 
-         <g class="draggable while-container if-like" id="while">
+         <g class="draggable while-container if-like"  visibility="hidden" id="while">
             <path  stroke-width="2" stroke="#CF8B17" fill="#FFAB19" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 156 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 64 c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 h -8  a 4,4 0 0,0 -4,4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z"></path>
             <text class="Am-text" text-anchor="middle" dominant-baseline="middle" dy="0" x="40" transform="translate(8, 24) "> repeat&nbsp;until </text>
                <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#CF8B17" transform="translate(95.17500305175781,8)"></path>
@@ -444,7 +467,7 @@
          {% endif %}
 
       {% if 'elseBlock' in id  %}
-         <g  class="draggable else-container" id="else">
+         <g  class="draggable else-container" visibility="hidden" id="else">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
             <g class="drop_content create" style="cursor: pointer;" transform="translate(0,35)">
@@ -491,6 +514,8 @@
          </g>
 
       {% endif %}
+	  </svg>
+
    </svg>
   
       {% endblock block %}

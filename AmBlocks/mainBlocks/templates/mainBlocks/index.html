@@ -1,159 +1,136 @@
 {% extends 'main.html' %}
+{% load static %}
+{% block links %}
 
+
+<link rel="stylesheet" href="{% static 'Am-style/front/datatable.css' %}" />
+<link rel="stylesheet" href="{% static 'Am-style/front/card.css' %}">
+
+<script src="{% static 'Am-logic/front/datatable.js' %}"></script>
+
+{% endblock links %}
   {% block content %}
 
-    <main class="layout layout--3">
-      <div class="container">
-        <!-- Topics Start -->
-        <div class="topics">
-          <div class="topics__header">
-            <h2>Browse Topics</h2>
-          </div>
-          <ul class="topics__list">
-            <li>
-              <a href="/" class="active">All <span>553</span></a>
-            </li>
-            <li>
-              <a href="/">Python <span>232</span></a>
-            </li>
-            <li>
-              <a href="/">JavaScript <span>122</span></a>
-            </li>
-            <li>
-              <a href="/">React <span>57</span></a>
-            </li>
-            <li>
-              <a href="/">Database <span>90</span></a>
-            </li>
-          </ul>
-          <a class="btn btn--link" href="topics.html">
-            More
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-              <title>chevron-down</title>
-              <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
-            </svg>
-          </a>
+  <div class="container">
+    
+    <main class="page-content">
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Tutorial</h2>
+          <p class="copy">Learn to use all of programming blocks </p>
+          <button class="btn"><a href="http://127.0.0.1:8000/tutorial/print-hello-world!/">Start Now </a></button>
         </div>
-        <!-- Topics End -->
-
-        <!-- Room List Start -->
-        <div class="roomList">
-          <div class="mobile-menu">
-            <form class="header__search">
-              <label>
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                  <title>search</title>
-                  <path
-                    d="M32 30.586l-10.845-10.845c1.771-2.092 2.845-4.791 2.845-7.741 0-6.617-5.383-12-12-12s-12 5.383-12 12c0 6.617 5.383 12 12 12 2.949 0 5.649-1.074 7.741-2.845l10.845 10.845 1.414-1.414zM12 22c-5.514 0-10-4.486-10-10s4.486-10 10-10c5.514 0 10 4.486 10 10s-4.486 10-10 10z"
-                  ></path>
-                </svg>
-                <input placeholder="Search for posts" />
-              </label>
-            </form>
-            <div class="mobile-menuItems">
-              <a class="btn btn--main btn--pill" href="#">Browse Topics</a>
-              <a class="btn btn--main btn--pill" href="#">Recent Activities</a>
-            </div>
-          </div>
-          <div class="roomList__header">
-            <div>
-              <h2>Study Room</h2>
-              <p>7,439 Rooms available</p>
-            </div>
-            <a class="btn btn--main" href="create-room.html">
-              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                <title>add</title>
-                <path
-                  d="M16.943 0.943h-1.885v14.115h-14.115v1.885h14.115v14.115h1.885v-14.115h14.115v-1.885h-14.115v-14.115z"
-                ></path>
-              </svg>
-              Create Room
-            </a>
-          </div>
-          <div class="roomListRoom">
-            <div class="swiper-slide w-auto swiper-slide-active" data-swiper-slide-index="0"
-             style="width: 140px; margin-right: 24px;">
-             <a class="flex flex-col" href="http://127.0.0.1:8000/problems/" a
-             ria-label="LeetCode 75">
-             <div class="h-[116px] w-[116px] md:aspect-w-1 md:aspect-h-1 md:h-auto md:w-auto">
-              <span class="relative inline-block overflow-hidden rounded md:rounded-[13px] shadow-level1 dark:shadow-dark-level1">
-                <img src="https://assets.leetcode.com/users/images/3ee57a8e-be51-47bb-8e29-eb2151fc25bf_1655498807.6539922.png" 
-                class="object-cover md:h-full md:w-full h-[116px] w-[116px]" alt="LeetCode 75 Study Plan to Ace Interviews"></span>
-              </div><span class="pt-1 text-center text-xs md:pt-2 md:text-sm text-label-1 dark:text-dark-label-1 w-[116px] md:aspect-w-1 md:h-auto md:w-auto">
-                Free Style Code</span></a></div>
-          </div>
-          <div class="roomListRoom">
-            <div class="swiper-slide w-auto swiper-slide-next" data-swiper-slide-index="1" style="width: 140px; margin-right: 24px;"><a class="flex flex-col" href="http://127.0.0.1:8000/tutorial/print-hello-world!" aria-label="Algorithm"><div class="h-[116px] w-[116px] md:aspect-w-1 md:aspect-h-1 md:h-auto md:w-auto"><span class="relative inline-block overflow-hidden rounded md:rounded-[13px] shadow-level1 dark:shadow-dark-level1"><img src="https://assets.leetcode.com/users/images/a4da2027-f24d-4f5c-a422-acbee37a57f2_1631074524.9040322.webp" class="object-cover md:h-full md:w-full h-[116px] w-[116px]" alt="14 Days Study Plan to Crack Algo"></span></div><span class="pt-1 text-center text-xs md:pt-2 md:text-sm text-label-1 dark:text-dark-label-1 w-[116px] md:aspect-w-1 md:h-auto md:w-auto">14 Days Study Plan to Crack Algo</span></a></div>
-          </div>
-        </div>
-        <!-- Room List End -->
-
-        <!-- Activities Start -->
-        <div class="activities">
-          <div class="activities__header">
-            <h2>Recent Activities</h2>
-          </div>
-          <div class="activities__box">
-            <div class="activities__boxHeader roomListRoom__header">
-              <a href="profile.html" class="roomListRoom__author">
-                <div class="avatar avatar--small">
-                  <img src="https://randomuser.me/api/portraits/women/11.jpg" />
-                </div>
-                <p>
-                  @sulamita_ivy
-                  <span>5 days ago</span>
-                </p>
-              </a>
-              <div class="roomListRoom__actions">
-                <a href="#">
-                  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                    <title>remove</title>
-                    <path
-                      d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"
-                    ></path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div class="activities__boxContent">
-              <p>replied to post “<a href="room.html">100 Days of code challenge!</a>”</p>
-              <div class="activities__boxRoomContent">
-                I’ll have to try this sometime. Really like this idea. Wanna talk about it? I ‘m....
-              </div>
-            </div>
-          </div>
-
-          <div class="activities__box">
-            <div class="activities__boxHeader roomListRoom__header">
-              <a href="profile.html" class="roomListRoom__author">
-                <div class="avatar avatar--small active">
-                  <img src="https://randomuser.me/api/portraits/men/13.jpg" />
-                </div>
-                <p>
-                  @mr_spshuvo
-                  <span>5 days ago</span>
-                </p>
-              </a>
-              <div class="roomListRoom__actions">
-                <a href="#">
-                  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                    <title>remove</title>
-                    <path
-                      d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"
-                    ></path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div class="activities__boxContent">
-              <p>replied to post “<a href="room.html">100 Days of code challenge!</a>”</p>
-              <div class="activities__boxRoomContent">
-                I’ll have to try this sometime. Really like this idea. Wanna talk about it? I ‘m....
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Activities End -->
       </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Problem Solver</h2>
+          <p class="copy">Start solving coding problems with blocks </p>
+          <button class="btn">Start Now</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Blocks Player</h2>
+          <p class="copy">Learn programming with a simple game </p>
+          <button class="btn"><a href="http://127.0.0.1:8000/game/">Start Now </a></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Block Steps</h2>
+          <p class="copy">Debug your code with step-by-step compilation</p>
+          <button class="btn"><a href="http://127.0.0.1:8000/stepbystep/">Start Now </a></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>
+  
+  
+  
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>   <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>   <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>
+  
+  
+  
     </main>
+  <br>
+    <hr>
+  <br>
+    <button class="button-30" role="button">Link 1</button>
+    <button class="button-30" role="button">Link 2</button>
+    <button class="button-30" role="button">Link 3</button>
+    <button class="button-30" role="button">Link 4</button>
+    <button class="button-30" role="button">Link 5</button>
+    <button class="button-30" role="button">Link 6</button>
+    <button class="button-30" role="button">Link 7</button>
+    <button class="button-30" role="button">Link 8</button>
+    <button class="button-30" role="button">Link 90</button>
+    <button class="button-30" role="button">Link 10</button>
+    <button class="button-30" role="button">Link 11</button>
+    <button class="button-30" role="button">Link 12</button>
+    <button class="button-30" role="button">Link 13</button>
+    <button class="button-30" role="button">Link 14</button>
+    <button class="button-30" role="button">Link 15</button>
+  
+  <br>
+  
+    <hr>
+  <br>
+  <div>
+  
+      <table id="myTable" class="display">
+          <thead>
+              <tr>
+                  <th>Column 1</th>
+                  <th>Column 2</th>
+                  <th>Column 3</th>
+                  <th>Column 4</th>
+                  <th>Column 5</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td><a href="http://127.0.0.1:8000/problems/isPalindrome">isPalindrome</td>
+                  <td>Row 1 Data 2</td>
+                  <td>Row 1 Data 3</td>
+                  <td>Row 1 Data 4</td>
+                  <td>Row 1 Data 5</td>
+              </tr>
+              <tr>
+                  <td>Row 2 Data 1</td>
+                  <td>Row 2 Data 2</td>
+                  <td>Row 2 Data 3</td>
+                  <td>Row 2 Data 4</td>
+                  <td>Row 2 Data 5</td>
+  
+              </tr>
+          </tbody>
+      </table>
+  
+  
+  </div>
+  
+  </div> 
     {% endblock %}

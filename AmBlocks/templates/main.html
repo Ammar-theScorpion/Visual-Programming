@@ -6,9 +6,15 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'Am-style/front/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'Am-style/front/bootstrap.css' %}" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="{% static 'Am-style/front/home.css' %}" />
+
     {% block links %}
-        <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
-        <link rel="stylesheet" href="{% static 'Am-style/index.css' %}" />
+    <link rel="stylesheet" href="{% static 'Am-style/index.css' %}" />
     {% endblock links %}
     <title>
         {% block title %}
@@ -18,6 +24,7 @@
 </head>
 
 <body>
+    {% include 'navbar.html' %}
 
 
     {% if messages %}
@@ -33,8 +40,11 @@
 
     {% endblock %}
 
-    <script src="{% static 'Am-logic/theme.js' %}">
-    </script>
+    <script src="js/jquery-3.6.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="{% static 'Am-logic/front/bootstrap.min.js' %}"></script>
+    <script src="{% static 'Am-logic/front/script.js' %}"></script>
+
 </body>
 
 </html>

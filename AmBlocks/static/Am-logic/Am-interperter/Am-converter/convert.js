@@ -27,7 +27,9 @@ export class Converter{
         this.ast = this.getAST(srcCode, env, lang).body;
         let code = [];
         this.py.ast = this.ast.slice();
-        let codepy = this.py.covertString();
+        if(lang==='Python')
+          return this.py.covertString();
+
         while(this.canMove(this.ast[0])){
             code.push(this.generateCode(this.moveNode(this.ast), -1)+'\n');
         }
@@ -38,7 +40,7 @@ export class Converter{
             include_str+=INCLUDE[key]+'\n';
           }
         }
-        return [include_str+code_str, codepy];
+        return include_str+code_str;
     }
     generateFunction(node){
       switch(node){
@@ -50,6 +52,8 @@ export class Converter{
             return 'pop_back'
         case 'remove':
             return 'earse'
+        case 'input':
+            return 'cout << '
           default:
             return node;
       }
@@ -90,7 +94,7 @@ export class Converter{
           case 'multiBinary':
               return this.getExpressionString(node, level);
           default:
-              return typeof(node.error)=='string'?node.error:node.value;
+              return typeof(node.error)=='string'?node.error:(node.value !== undefined? node.value : node);
        }
       }
       generateReturnStatement(node, level){
@@ -157,7 +161,15 @@ export class Converter{
 
     }
     generateassignmentStatement(node, level){
-        return node.left.value + ' = '+ this.generateCode(node.right)+';\n';
+        let right = node.right;
+        if(typeof right === 'string' && right.indexOf('input')!==-1){
+          right = `cout << "${right.substr(7, right.length-2-7)}";\n`
+          right += `cin >> ${node.left.value}`
+        }else{
+          right = this.generateCode(node.right);
+        }
+
+        return node.left.value + ' = '+ right +';\n';
       }
     generateDeclarationStatements(node, level){
       return node.varBody[0] +' '+ node.varname+';\n';

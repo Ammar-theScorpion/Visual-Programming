@@ -1,12 +1,10 @@
 {% extends 'main.html' %}
 {% load static %}
 
+
 {% block links %}
     <link rel="stylesheet" href="{% static 'Am-style/game.css' %}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
-       
 
 {% endblock links %}
 
@@ -21,7 +19,7 @@
             <canvas id="game" width="500" height="500"></canvas>
         </div>
         
-        <svg id="Am-workspace"  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
+        <svg class="Am-workspace main" visibility="visible" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             xmlns:html="http://www.w3.org/1999/xhtml"
             version="1.1" width="100%" height="100%">
@@ -65,7 +63,7 @@
                     <rect class="coloring" rx="4" ry="4" x="0" y="0" height="16" width="26" fill-opacity: 1; fill="#fff"></rect>
                 </g>
                 <g  class="table" transform="translate(80, 40)" visibility="hidden">
-                   <foreignObject x="0" y="0" width="60" height="60">
+                   <foreignObject x="0" y="0" width="90" height="90">
                        <div xmlns="http://www.w3.org/1999/xhtml" style="border: 3px solid; border-color:  #000; max-height: 300px; position: absolute;">
                            <table onclick="setColor(event)" style="border-collapse: collapse; width: 50px; height: 50px;" >
                                <tr role="row">
