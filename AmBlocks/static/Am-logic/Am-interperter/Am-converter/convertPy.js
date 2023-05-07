@@ -29,8 +29,8 @@ export class ConverterPy{
 
     generateBody(node, level, type, cond=true){
       const condition = node.condition;
-      let conditionValue = 'false';
-      if (condition !== undefined && conditionValue != condition) {
+      let conditionValue = 'False';
+      if (condition !== undefined && conditionValue.toLowerCase() != condition) {
         conditionValue = this.getExpressionString(condition);
       }
       const body = !node.body?undefined: [...node.body];

@@ -18,18 +18,18 @@ export class Symbol{
         at.symbolTable[varattr[0]] = varattr[1];
     }
 
-    resolve(varname){
+    resolve(varname, resolve){
         if(this.symbolTable.hasOwnProperty(varname))
             return this;
         if(this.parent==null)
             return null;//`${varname} is not defined yet`;
-
-        return  this.parent.resolve(varname); 
+        if(resolve)
+            return  this.parent.resolve(varname); 
     }
 
-    lookUp(varName){
-        let at = this.resolve(varName);
-        return at!==null?at.symbolTable[varName]:at;
+    lookUp(varName, resolve=true){
+        let at = this.resolve(varName, resolve);
+        return (at!==null && at!==undefined) ?at.symbolTable[varName]:at;
     }
 
     isset(set){
@@ -44,8 +44,6 @@ export class SymbolFunction{
         this.function_name;
         this.return_type;
         this.function_env;
-
-
     }
 
    static declareVar(name, parameters){
@@ -72,6 +70,9 @@ export class SymbolFunction{
             SymbolFunction.tracker[name] = [_list, _list.length];
         } 
     }
+    static set_scope(scope){
+        SymbolFunction.tracker[this.function_name].push({'scope': scope});
+    }
 
     static set_return_type(name, return_type){
         const p_list = SymbolFunction.tracker[name];
@@ -83,11 +84,13 @@ export class SymbolFunction{
         return p_list!==undefined?p_list[0]:p_list;
     }
 
-
 }
 
+export class SymbolClass{
+    static tracker = {};
 
+    static declareClass(c_name, private_env, public_env){
+        SymbolClass.tracker[c_name] = [private_env, public_env];
+    }
 
-
-
-
+}

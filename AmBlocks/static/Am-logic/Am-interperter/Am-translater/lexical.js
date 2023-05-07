@@ -25,7 +25,10 @@ export const TokenType = {
     Create:23,
     Return:24,
     CreateL:25,
-    EOC : 26,
+    Class:26,
+      Private:27,
+      Public:28,
+    EOC : 29,
   };
   const KEYWORDS = {
     if:   TokenType.If,
@@ -42,6 +45,9 @@ export const TokenType = {
     list:TokenType.List,
     allfather:TokenType.Create,
     allfatherL:TokenType.CreateL,
+    class:TokenType.Class,
+      private:TokenType.Private,
+      public:TokenType.Public,
     return:TokenType.Return,
   };
   

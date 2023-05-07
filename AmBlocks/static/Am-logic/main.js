@@ -5,7 +5,6 @@ $(document).ready(function() {
     var scripts = document.getElementsByTagName('script');
     var index = scripts.length - 1;
     var myScript = scripts[index];
-    console.log(myScript)
     var clones = Blocks.getInstance();
     let currentElement =0;
     setBlock()
@@ -155,15 +154,46 @@ $(document).ready(function() {
             }
         }
       });
+      function create_function_class(thing_name){
+        var foreignObject = $(`#${thing_name}`);
+        const name = window.prompt(`${thing_name} Name` )
+      
+        foreignObject.find('.name').text(name)
+        foreignObject.find('.Am-edit:first rect').attr('width', (name.length+1.5)*8);
+        foreignObject.find('.Am-text:nth-of-type(2)').attr('transform', 'translate('+(name.length*8+65)+',24)')
 
+        let d = foreignObject.children('path:first').attr("d");
+        let match = ''
+        while(match=IF_LK_REGEX.exec(d)){
+
+            let matchedString = match[0];
+            //let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength)*direction}`;
+            let newString = `-2 H ${name.length*8+67+40}`;
+            d = d.replace(matchedString, newString);
+        }
+        foreignObject.children('path:first').attr("d", d);
+        foreignObject.click();
+        return name;
+    }
     $('.create-var').click(function(){
         const name = window.prompt('varaible Name')
         const clone = $('.make-var:first').clone();
         clone.children('text').text('allfather '+name);
-        if($(this).parent().hasClass('cloneal'))
-            $('.cloneal').parent().parent().append(clone);
+        if($(this).parent().hasClass('cloneal')){
+           let parent = $('.cloneal').parent().parent();
+           // if class, append to the selected access_modifiers
+           let radio = parent.find('input');
+           if(parent.find('.access_modifiers').length !== 0){
+                radio.each(function(){
+                   if(this.checked){
+                        parent.find(this.value).after(clone);
+                   } 
+                });
+           }else
+                parent.append(clone);
+        }
         else
-            clones.addBlock(clone.clone());
+            clones.addBlock(clone.clone()); // global var
         translateAndSet();
         /*
         var foreignObject = $('.make-var');
@@ -173,6 +203,7 @@ $(document).ready(function() {
             foreignObject.attr('visibility', 'visible');
         }*/
     });
+
 
     $('.create-list').click(function(){
         var foreignObject = $('#list');
@@ -196,50 +227,36 @@ $(document).ready(function() {
 
         const clone = ($('.make-var'));
         clone.children('text').text('allfatherL '+name);
-        if($(this).parent().hasClass('cloneal'))
+        if($(this).parent().hasClass('cloneal')){
+
             $('.cloneal').parent().parent().append(clone);
-        else
+            $('.cloneal').parent().parent().append(foreignObject)
+        }
+        else{
+
             clones.addBlock(clone.clone());
-        setBlock()
+            foreignObject.click();
+        }
         translateAndSet();
-        foreignObject.click();
     });
     $('.create-function').click(function(){
-        var foreignObject = $('#function');
-        const name = window.prompt('Function Name')
- 
-      
-        foreignObject.find('.name').text(name)
-        foreignObject.find('.Am-edit:first rect').attr('width', (name.length+1.5)*8);
-        foreignObject.find('.Am-text:nth-of-type(2)').attr('transform', 'translate('+(name.length*8+65)+',24)')
-
-        let d = foreignObject.children('path:first').attr("d");
-        let match = ''
-        while(match=IF_LK_REGEX.exec(d)){
-
-            let matchedString = match[0];
-            //let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength)*direction}`;
-            let newString = `-2 H ${name.length*8+67+40}`;
-            d = d.replace(matchedString, newString);
-        }
-        foreignObject.children('path:first').attr("d", d);
-
+        const name = create_function_class('function');
         var call = $('#caller');
         call.find('.name').text(name)
 
         d = call.children('path:first').attr("d");
         match = ''
         while(match=IF_LK_REGEX.exec(d)){
-
             let matchedString = match[0];
             //let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength)*direction}`;
             let newString = `-2 H ${name.length*8+60}`;
             d = d.replace(matchedString, newString);
         }
         call.children('path:first').attr("d", d)
-        foreignObject.click();
         call.click();
-    
+    });
+    $('.create-class').click(function(){
+        create_function_class('class');
 
     });
     $('.make-var').keydown(function(event){
@@ -357,10 +374,8 @@ $(document).ready(function() {
 
                 // Modifiy Call
                 let callFunction = $('.Am-workspace.main').find('.call').filter(function(){
-                    console.log( $(this).find('.name').text() , current_function.find('.name').text())
                     return $(this).find('.name:first').text() == current_function.find('.name').text();
                 }) 
-                console.log(callFunction.children('.name:first').nextAll())
                 callFunction.children('.name:first').nextAll().remove().empty();
 
                 let parameter_names = var_names.split(', ');
@@ -614,7 +629,6 @@ $(document).ready(function() {
                                         }
                                     });
                                     if(chdirection==2){
-                                        console.log('in')
                                         alterVerticalLength($(this), onground_path, onmouse_height+all_height, -1, 'm')
                                     }
                                     chdirection = 0
@@ -815,7 +829,6 @@ $(document).ready(function() {
         */
 
     $('#flex').on('keydown', function(event) {
-        console.log($(this).width())
         let direction = 1;
         if(event.keyCode == 8)
             direction=-1;
@@ -882,7 +895,6 @@ $(document).ready(function() {
             clones.clean();
             lines = [];
             restoreDefaults()
-            console.log(lines)
         }else{
             runButton.textContent = 'Reset';
             const blocks = clones.getBlocks();
@@ -919,7 +931,6 @@ $(document).ready(function() {
     var lang='C++';
     var code = '{{prev_code|safe}}';
     let stepped = true
-    console.log(window.step)
 	  window.translateAndSet =function(){
 		  if(step!='no translation'){
 			let C_Code_List = ['',''];
@@ -936,7 +947,6 @@ $(document).ready(function() {
 					currentElement=0;
 			}
 			else if(step!=1){
-                console.log(lang)
 				C_Code_List = clones.translate(lang);
 			}
 
@@ -965,7 +975,6 @@ $(document).ready(function() {
     }
     
        $('form button').click(function(event){
-          //console.log(event.target.innerHTML)
           if(event.target.innerHTML.indexOf('step')!==-1){
              stepped = true;
              window.translateAndSet()

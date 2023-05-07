@@ -27,15 +27,15 @@ def test_code(request):
             response = await socket.recv()
             with cond_recv:
                 cond_recv.notify()
+        asyncio.get_event_loop().stop()
             
     def start_server():
         asyncio.set_event_loop(asyncio.new_event_loop())
         serverc = websockets.serve(server, "localhost", 8080)
         asyncio.get_event_loop().run_until_complete(serverc)
-        try:
-            asyncio.get_event_loop().run_forever()
-        finally:
-            asyncio.get_event_loop().close()
+        asyncio.get_event_loop().run_forever()
+        print('111')
+        asyncio.get_event_loop().close()
 
     t = threading.Thread(target=start_server)
     t.start()
@@ -94,7 +94,7 @@ def test_code(request):
             
         running = False
         user_result = user_output.getvalue()
- 
+    
     code = 'f'
     if user_result=='f':
         code = 't'

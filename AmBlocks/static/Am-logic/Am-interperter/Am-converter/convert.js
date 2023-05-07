@@ -81,6 +81,8 @@ export class Converter{
               return this.generateassignmentStatement(node, level);
           case 'functionStatement':
               return this.generateFunctionStatement(node, level);
+          case 'classStatement':
+              return this.generateClassStatement(node, level);
           case 'CallStatement':
               return this.generateCallStatement(node, level);
           case 'eachStatement':
@@ -140,6 +142,17 @@ export class Converter{
     generateCallStatement(node, level){
       return `${node.function_name}(${node.argsv})\n`;
     }
+    generateClassStatement(node, level){
+      const body = node.body;
+      let bodyValue = '';
+      if (body) {
+        while (body.length) {
+          bodyValue += this.generateCode(body.shift(), level + 1)+'\n\t';
+        }
+      }
+      return `class ${node.name}{\n\t${bodyValue}\n}`;
+
+    }
     generateFunctionStatement(node, level){
       const body = node.body;
       let bodyValue = '';
@@ -172,7 +185,12 @@ export class Converter{
         return node.left.value + ' = '+ right +';\n';
       }
     generateDeclarationStatements(node, level){
-      return node.varBody[0] +' '+ node.varname+';\n';
+      let type = 'void*'
+      let env = node.env;
+      let look = env.lookUp(node.varname);
+      if(look != null)
+        type = look[0];
+      return type +' '+ node.varname+';\n';
     }
 
     generateBinaryExpression(ExpressionNode){

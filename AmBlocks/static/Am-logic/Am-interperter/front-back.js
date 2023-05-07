@@ -9,7 +9,6 @@ export class Blocks {
     constructor() {
       this.covert = new Converter();
       this.blocks = $();
-      this.env = new Symbol();
       this.error = '';    
       this.index = 0;
     }
@@ -57,6 +56,9 @@ export class Blocks {
         }
         return type + statement.join('');
     }
+    capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
     getChildren(currentElement, search){
         let nextchild = currentElement.querySelectorAll(`:scope > .${search}`);
         let code = '';
@@ -74,11 +76,24 @@ export class Blocks {
         let textAt = currentElement.querySelector(`text:nth-of-type(${at})`);
         if(textAt)
             textAt = textAt.textContent;
-        while(textAt && textAt.length){
-            at++;
             // process block
             //
-              
+            ///     OOP         ///  
+            if(currentElement.id == 'class'){
+                const name  = this.capitalizeFirstLetter(currentElement.querySelector('.name').textContent);
+                textCode = 'class ' + name + '{';
+                let next = currentElement.querySelector('.access_modifiers');
+                textCode += next.textContent;
+                while (next.nextElementSiblinzg) {
+                    textCode += this.getBlocksAsString(next.nextElementSibling);
+                    next = next.nextElementSibling;
+                  }
+                  textCode += this.getBlocksAsString(next);
+
+                textCode+='}';
+                return textCode;
+            }
+            ///     OOP         ///  
             if(currentElement.id == 'else'){
                 textCode+= 'else'+ '{';
                 textCode+=this.getChildren(currentElement, 'make-var');
@@ -95,7 +110,7 @@ export class Blocks {
                     index++;
                 }textCode+=' then {';
                 textCode+=this.getChildren(currentElement, 'make-var');
-                textCode+=this.getChildren(currentElement, `draggable:nth-of-type(${2})`);
+                textCode+=this.getChildren(currentElement, `draggable`);
                 textCode+=' }';
                 return textCode;
             }
@@ -181,18 +196,20 @@ export class Blocks {
 
             }else if (currentElement.id == 'assigmnemt' || currentElement.id == 'operation'){
                 const varName =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
-                const allAmText = currentElement.querySelectorAll('.Am-text');
+                const allAmText = currentElement.querySelectorAll(':scope > .Am-edit > .Am-text , :scope > .am-drop > .Am-text, :scope > .Am-text');
                 let operater = allAmText[1].textContent;
                 let equalto = allAmText[2].textContent;//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
                 let prompt = allAmText[allAmText.length-1].textContent;
+                let child  = this.getChildren(currentElement, 'draggable');
+
                 if(equalto !== prompt){
                     operater += equalto;
-                    return `${varName} = ${equalto} ${prompt} \n`;
+                    return `${varName} = ${equalto} ${prompt} \n ${child}`;
                 }else{
                     equalto = equalto.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
                 }
                 textCode += varName +` ${operater} `+ equalto;
-                return textCode+'\n';
+                return textCode+'\n' + child;
 
             }else if(currentElement.id=='condition'){
                 const allAmText = currentElement.querySelectorAll('.Am-text');
@@ -238,8 +255,6 @@ export class Blocks {
                 textCode+='}'
                 return textCode;
    
-                
-            }
           /*  if(textAt.indexOf('then')!==-1 || textAt.indexOf('else')!==-1 ){
                 textCode+= textAt+ '{';
                 let nextchild = currentElement.querySelectorAll('.draggable');
@@ -299,6 +314,7 @@ export class Blocks {
         let src = '';
         //src = 'create list ammar list ammar{ append 5 } int x=2 x = "x" print ammar [1] *2+4 \n' //list ammar
         //src = 'int x=1 string y="ammar" if x*x+x>10 {} print x+x+x*x\n float z=3.14 def do_something x, y, z {print x,y,z\n return x+y+z\n } call do_something x,y,z\n' //list ammar
+
         for (; this.index < this.blocks.length; this.index++) {
             const element = this.blocks[this.index];
             src += this.getBlocksAsString(element);
@@ -308,7 +324,8 @@ export class Blocks {
         //src = 'if then { int x=4 if then { float c=22.2 if then { string vv="dfdf" }else { print c\n vd=3 } } if then {} }'
         //src = 'string x = "loop" each i g {print(i)\n}';
         this.index = 0;
-        const languages = (this.covert.covertString(src, this.env, lang));
+        let env = new Symbol();
+        const languages = (this.covert.covertString(src, env, lang));//
         return [languages, this.error];
     }
 

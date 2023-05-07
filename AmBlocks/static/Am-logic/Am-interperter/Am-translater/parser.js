@@ -1,6 +1,6 @@
 import * as Type from './ast.js' 
 import { tokenize, TokenType } from "./lexical.js";
-import { Symbol, SymbolFunction } from './symbol.js';
+import { Symbol, SymbolClass, SymbolFunction } from './symbol.js';
 export class Parser{
     constructor(){
         this.tokens = [];
@@ -116,6 +116,8 @@ export class Parser{
                 return (this.parse_print_statement(env))
             case TokenType.Def:
                 return (this.pasre_function_statement(env))
+            case TokenType.Class:
+                return (this.pasre_class_statement(env))
             case TokenType.Call:
                 return (this.pasre_call_statement(env))
             case TokenType.Each:
@@ -159,9 +161,10 @@ export class Parser{
         this.move();//{
         let opvalue = '';
         const op = this.move().value;
+        if(op === '}')
+            return body['body']=[]
         while (this.inBody() && this.validToken()) { 
-            if(this.getCurrentToken().value!='}')
-                opvalue += this.move().value;
+            opvalue += this.move().value;
         }
 
         if (body.body) {
@@ -218,7 +221,7 @@ export class Parser{
         let vartype = this.move().value;
         let kind='declarationStatements'
         const varname = this.move().value; // same scope
-        const lookup = env.lookUp(varname)
+        const lookup = env.lookUp(varname, false)
         if(lookup != null){
             vartype = lookup[0];
         }else
@@ -258,7 +261,8 @@ export class Parser{
         body = {
             kind:kind,
             varname,
-            varBody
+            varBody,
+            env
             
         }
         env.declared = false;
@@ -273,7 +277,7 @@ export class Parser{
     }
     parse_assignment(env){
         let left = this.parse_additive_expr(env);
-        if(left.kind!='BinaryExpression'){
+        if(left.kind!='BinaryExpression' && left.kind!='private' && left.kind!='public'){
             const error =  this.generateBodyError(env, left);
             if(error!=true)return error
         }
@@ -320,6 +324,7 @@ export class Parser{
 
                 }
             }
+
 
             left = {
                 kind:'assignmentStatement',
@@ -387,6 +392,9 @@ export class Parser{
                 let value = this.parse_additive_expr(env);
                 this.move();
                 return value;
+            case TokenType.Public: case TokenType.Private:
+                let valu = this.move().value
+                return {kind:`${valu}`, value:valu};
             case TokenType.Identifier:
                 return {kind:'Identifier', value:this.move().value};
             case TokenType.Equals:
@@ -472,6 +480,39 @@ export class Parser{
         this.move();
         return body;
     }
+    pasre_class_statement(env){
+        let private_env = new Symbol(env);
+        this.move();
+        const name = this.move().value;
+
+        let body={
+            kind:'classStatement',
+            name,
+        };
+        this.move(); //remove { 
+        let pr;
+        while (this.inBody() && this.validToken()) { 
+            if(this.getCurrentToken().value=='\n'){
+                this.move();
+                continue;
+            }
+            const statement = this.parse_statement(private_env);
+            if(statement.kind == 'public'){
+                pr = private_env;
+                private_env = new Symbol(env);
+            }
+            if (body.body) {
+                body.body.push(statement);
+            }else
+                body['body'] = [statement];
+            this.line ++;
+        }
+        if(!this.inBody())
+            this.move();
+        SymbolClass.declareClass(name, pr, private_env);
+
+        return body;
+    }
     pasre_function_statement(env){
         let function_env = new Symbol(env);
         let return_type = 'void';
@@ -507,12 +548,15 @@ export class Parser{
             }
             if (body.body) {
                 body.body.push(statement);
+                
             }else
                 body['body'] = [statement];
             this.line ++;
         }
         if(!this.inBody())
             this.move();
+        SymbolFunction.set_scope(return_type);
+        
         return body;
     }
 
