@@ -18,7 +18,7 @@ def problem(request, pname):
     
     problem = Problem.objects.get(pname=pname)
     context = {'problem':problem}
-    dic = [ 'eachBlock', 'listBlock', 'printBlock' , 'functionBlock','classBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock', 'elseBlock']
+    dic = [ 'eachBlock', 'listBlock', 'counterBlock','printBlock' ,'conditionalBlock','multiConditionBlock', 'functionBlock','classBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock', 'elseBlock','whileBlock', 'makeVarBlock']
     context = {'id':dic}
     return render(request, 'blocks.html', context)
         #raise Http404('problem does not exist')

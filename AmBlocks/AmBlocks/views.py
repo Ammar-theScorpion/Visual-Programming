@@ -9,7 +9,7 @@ from threading import Condition
 
 import websockets
 import asyncio
-import websockets
+
 prompt = None
 response = None
 cond_send = Condition()
@@ -34,7 +34,6 @@ def test_code(request):
         serverc = websockets.serve(server, "localhost", 8080)
         asyncio.get_event_loop().run_until_complete(serverc)
         asyncio.get_event_loop().run_forever()
-        print('111')
         asyncio.get_event_loop().close()
 
     t = threading.Thread(target=start_server)
@@ -49,12 +48,11 @@ def test_code(request):
     params = {}
 
     # Split each parameter string on the '=' character to extract the name and value
-    user_code = param_strings[0].split('=', 1)[1]
+    user_code = 'print("Hello World!")'
     tname = param_strings[1].split('=', 1)[1]
 
     # Extract the values of the text and tname parameters
 
-    print(user_code)  # Output: user code
     valid_code=''
     try:
         valid_code = Tutorial.objects.get(tname=tname).valid_code
@@ -82,21 +80,18 @@ def test_code(request):
     import io
     from contextlib import redirect_stdout
     
-    '''with io.StringIO() as valid_output, redirect_stdout(valid_output):
-        print("ds")
+    with io.StringIO() as valid_output:
         exec(compiled_valid)
-        print("ds")
-        valid_result = valid_output.getvalue() '''
-    with io.StringIO() as user_output, redirect_stdout(user_output): # open a stream for the temp io.String..buffer and redirect the out their
+        valid_result = valid_output.getvalue() 
+    with io.StringIO() as user_output: # open a stream for the temp io.String..buffer and redirect the out their
         exec(compiled_user)
-        with cond_send:
-            cond_send.notify()
-            
-        running = False
+
         user_result = user_output.getvalue()
-    
+        running = False
+    print('ser',user_result)
+    print('secx',valid_result)
     code = 'f'
-    if user_result=='f':
+    if user_result==valid_result:
         code = 't'
     return HttpResponse([user_result, code])  
 

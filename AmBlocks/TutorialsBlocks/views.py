@@ -34,6 +34,7 @@ def renderTutorials(request, tname):
         user_code = ''
     for id in text:
         dic.append(id)
+    print(dic)
     context = {'tutorial': tutorial, 'id':dic, 'form': form, 'prev_code': user_code}
     return render(request, 'blocks.html', context)
 

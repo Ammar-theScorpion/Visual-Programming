@@ -21,7 +21,7 @@ export class ConverterPy{
   }
     generatePrintStatement(printNode){
         const printValue = printNode.printValue;
-        return('print('+ printValue+')')+'\n';
+        return('print('+ this.analysOperations(printValue)+')')+'\n';
     }
     generateBinaryExpression(ExpressionNode){
         return(ExpressionNode.left.value+ ' '+ ExpressionNode.operater + ' '+ ExpressionNode.right.value);
@@ -46,12 +46,56 @@ export class ConverterPy{
       return `${indentation}${type} ${conditionValue}:\n${'\t'.repeat(level+1)}${bodyValue}`;
     }
 
+    analysOperations(ope){
+      const [methodName, argsStr] = ope.split(":");
+      const args = argsStr ? argsStr.split(",") : [];
+    
+      // Map the method name to the corresponding Python code
+      switch (methodName) {
+        case "up":
+          return `${args[0]}.upper()`;
+        case "low":
+          return `${args[0]}.lower()`;
+        case "cat":
+          return `${args[0]} + ${args[1]}`;
+        case "cnt":
+          return `${args[0]}.count('${args[1]}')`;
+        case "spt":
+          return `${args[0]}.split('${args[1]}')`;
+        case "idx":
+          return `${args[0]}.index('${args[1]}')`;
+        // Handle the special case of [:::] separator
+        case "replace":
+          if (args[1] === "[:::]") {
+            return `${args[0]}.replace('${args[1]}', ':')`;
+          } else {
+            return `${args[0]}.replace('${args[1]}', '${args[2]}')`;
+          }
+        case "slc":
+          if (args.length === 1) {
+            return `${args[0]}[:]`;
+          } 
+          else if (args.length === 2) {
+            return `${args[0]}[${args[1]}:]`;
+          } else if (args.length === 3) {
+            return `${args[0]}[${args[1]}:${args[2]}]`;
+          } else if (args.length === 4) {
+            return `${args[0]}[${args[1]}:${args[2]}:${args[3]}]`;
+          } else {
+            throw new Error(`Invalid number of arguments for slice operation`);
+          }
+      }return methodName;
+
+    }
+
     generateCode(node, level) {
         switch (node.kind) {
           case 'ifStatement':
             return this.generateIfStatement(node, level);
           case 'whileStatement':
             return this.generateReapetStatement(node, level);
+          case 'forStatement':
+            return this.generateForStatement(node, level);
           case 'else':
             return this.generateElseStatement(node, level);
           case 'printStatement':
@@ -128,36 +172,63 @@ export class ConverterPy{
         return `${node.function_name}(${node.argsv})\n`;
       }
       generateFunctionStatement(node, level){
+        const body = node.body;
         let bodyValue = 'pass';
-        if (node.body) {
-          const body = node.body.slice();
-          bodyValue = '';
+        if (body) {
+        bodyValue = '';
           while (body.length) {
-            bodyValue += this.generateCode(body.shift(), level + 1);
+            bodyValue += this.generateCode(body.shift(), level + 1)+'\n\t';
           }
-
         }
         let args = '';
-      const paramenters = node.params;
-      let params = [];
-      for (let dict of paramenters) {
-        for (let key in dict) {
-            params.push(`${key}`);
+        const paramenters = node.params;
+        let params = [];
+        for (let dict of paramenters) {
+          for (let key in dict) {
+              params.push(`${dict[key]} ${key}`);
+            }
           }
-        }
-      args+= params.join(', ');
+        args+= params.join(', ');
         return `def ${node.name} (${args}):\n\t ${bodyValue} \n`;
       }
       generateassignmentStatement(node, level){
-        return node.left.value + ' = '+ this.generateCode(node.right)+'\n';
+        return node.left.value + ' = '+ this.analysOperations(node.right.value)+'\n';
       }
       generateDeclarationStatements(node, level){
-        return node.varname+' = '+'None'+'\n';
+        let type = node.varBody[0]
+        let env = node.env;
+        let look = env.lookUp(node.varname);
+        if(look != null)
+          type = look[0];
+        return node.varname + (type!=='void*'? `= ${this.analysOperations(node.varBody[1])}`:'None')+ ';\n';
       }
     generateIfStatement(ifNode, level) {
         return this.generateBody(ifNode, level, 'if');
     }
+    generateForStatement(body, level){
+      const indexes = body.indexes;
+      let from = [];
+      let to = [];
       
+        for (let key in indexes) {
+          const index = indexes[key];
+          from.push(`${key}`);
+          to.push(`range(${index[0]}, ${index[1]}, ${index[2]})`);
+      }
+
+      let co = to.length>1? 'zip(' : '';
+      let for_ = `for ${from.join(', ')} in${co} ${to.join(', ')}${co!==''?')':''}`;
+      let bodyValue = '\t'+'pass';
+      let body_=body.body;
+      if(body_){
+        bodyValue = '';
+        while (body_.length) {
+          bodyValue += '\t'+this.generateCode(body_.shift(), level + 1);
+        }
+      }
+      const indentation = level>=0?'\t'.repeat(level):"";
+      return `${indentation}${for_}:\n${'\t'.repeat(level+1)}${bodyValue}`;
+   } 
     generateReapetStatement(reNode, level){
       return this.generateBody(reNode, level, 'while');
     }

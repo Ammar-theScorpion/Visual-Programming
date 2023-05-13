@@ -373,3 +373,14 @@ image{
     left: 72px;
   }
   
+  .goog-menuitem {
+    color: #fff;
+    font: normal 13px "Helvetica Neue", Helvetica, sans-serif;
+    font-weight: bold;
+    list-style: none;
+    margin: 0;
+    min-height: 24px;
+    padding: 4px 7em 4px 28px;
+    white-space: nowrap;
+  }
+  

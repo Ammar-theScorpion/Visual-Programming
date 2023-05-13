@@ -28,7 +28,13 @@ export const TokenType = {
     Class:26,
       Private:27,
       Public:28,
-    EOC : 29,
+    Up:29,
+    Low:30,
+    Cat:31,
+    NULL:32,
+    UN:33,
+    For:34,
+    EOC : 35,
   };
   const KEYWORDS = {
     if:   TokenType.If,
@@ -48,9 +54,15 @@ export const TokenType = {
     class:TokenType.Class,
       private:TokenType.Private,
       public:TokenType.Public,
+    'up:':TokenType.Up,
+    'low:':TokenType.Low,
+    'cat:':TokenType.Cat,
+    NULL:TokenType.NULL,
+    for:TokenType.For,
+    
     return:TokenType.Return,
   };
-  
+
   function Token(value, type) {
     this.value = value; 
     this.type = type; 
@@ -61,7 +73,7 @@ export const TokenType = {
   }
   
   function isalpha(src) {
-    return src.toUpperCase() !== src.toLowerCase() || src=='_';
+    return src.toUpperCase() !== src.toLowerCase() || src=='_'|| src==':'|| src=='(';
   }
   
   function isskippable(str) {
@@ -139,7 +151,9 @@ export const TokenType = {
 
         } else if (isskippable(src[0])) {
               src.shift();
-          }  
+          }else{
+            tokens.push(token(src.shift(), TokenType.newLine));
+          }
   
         }
     }tokens.push(token('', TokenType.EOC))

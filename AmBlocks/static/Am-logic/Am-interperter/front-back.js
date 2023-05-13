@@ -60,7 +60,7 @@ export class Blocks {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
     getChildren(currentElement, search){
-        let nextchild = currentElement.querySelectorAll(`:scope > .${search}`);
+        let nextchild = currentElement.querySelectorAll(`.${search}`);//:scope > 
         let code = '';
         for (let index = 0; index < nextchild.length; index++) {
             const element = nextchild[index];
@@ -72,7 +72,6 @@ export class Blocks {
 
     getBlocksAsString(currentElement, at=1, childat=1){
         let textCode='';
-        let saveLastBlock = 0;
         let textAt = currentElement.querySelector(`text:nth-of-type(${at})`);
         if(textAt)
             textAt = textAt.textContent;
@@ -109,8 +108,27 @@ export class Blocks {
                     textCode+=allAmText[index].textContent;
                     index++;
                 }textCode+=' then {';
-                textCode+=this.getChildren(currentElement, 'make-var');
                 textCode+=this.getChildren(currentElement, `draggable`);
+                textCode+=' }';
+                return textCode;
+            }
+            if(currentElement.id == 'counter'){
+                //for (let index = 0; index < array.length; index++) 
+                textCode+= 'for';
+                const allinputs = currentElement.querySelectorAll('svg .s');
+                let dic = {};
+                for (let index = 0; index < allinputs.length; index++) {
+                    const element = allinputs[index];
+                    const allAmText = element.querySelectorAll('.main');
+                    const from = allAmText[0].textContent;
+                    const to = allAmText[1].textContent;
+                    const by = allAmText[2].textContent;
+                    const index_name = element.querySelector('.varname').textContent;
+
+                    textCode += ` ${index_name} ${from} ${to} ${by}`;    
+                }
+                textCode+=' {';
+                textCode+=this.getChildren(currentElement, 'draggable');
                 textCode+=' }';
                 return textCode;
             }
@@ -127,6 +145,7 @@ export class Blocks {
                 textCode+=' }';
                 return textCode;
             }
+            
             if(currentElement.id == 'multiConditionBlock'){
                 let nextchild = currentElement.children;
                 for (let index = 0; index < nextchild.length; index++) {
@@ -146,7 +165,6 @@ export class Blocks {
                 const variables = currentElement.querySelector('.Am-text:nth-of-type(2)').textContent.replace('with:', '');
 
                 textCode += 'def '+ function_name +' ' + variables+ '{';
-                textCode+=this.getChildren(currentElement, 'make-var');
                 textCode+=this.getChildren(currentElement, 'draggable');
                 textCode+='}';
                 return textCode;
@@ -190,8 +208,11 @@ export class Blocks {
                 return textCode;
            
             }else if (currentElement.id == 'make_var'){
-                const varName =  currentElement.querySelector('text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')
-                textCode += varName+' ';
+                const texts = currentElement.querySelectorAll('.Am-text');
+                const varName = texts[1].textContent;
+                let equalto = texts[3].textContent;
+                equalto = ` = ${equalto.replace(/\t/g, '').replace(/\u00A0/g)}\n`
+                textCode += 'allfather '+varName+equalto;
                 return textCode;
 
             }else if (currentElement.id == 'assigmnemt' || currentElement.id == 'operation'){
