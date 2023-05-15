@@ -165,8 +165,41 @@ $(document).ready(function() {
         'atan',
         'ln',
         'log',
-        'e ^',
-        '10 ^',
+        'e^'
+    ]
+
+    const LIST_OP = [
+        'initialize',
+        'append',
+        'insert',
+        'pop',
+        'delete',
+        'clear',
+        'find',
+        'length',
+        'replace',
+    ]
+    const SET_OP = [
+        'append',
+        'pop',
+        'find',
+        'length',
+        'clear',
+        'isempty',
+        'union',
+        'intersection',
+        'difference'
+    ]
+
+
+    const HASH_OP = [
+        'insert',
+        'pop',
+        'clear',
+        'at',
+        'length',
+        'isempty',
+        'find',
     ]
 
     let gClicked=null;
@@ -188,13 +221,22 @@ $(document).ready(function() {
       });
 
       function setDropDown(block, on='string'){
-        const parent = block.closest('.draggable');
+        let parent = block.closest('.draggable');
+        if(parent.length===0)
+            parent = block.closest('.ops');
+
         let find_type = parent.attr('id');
         let find_fill = parent.find('path:first').attr('fill');
         let op;
         switch(find_type){
             case'math':
                 op = MATH_OP; break;
+            case'set':
+                op = SET_OP; break;
+            case'hash':
+                op = HASH_OP; break;
+            case'list':
+                op = LIST_OP; break;
             default:
                 op = STRING_OP; break;
         }
@@ -231,11 +273,26 @@ $(document).ready(function() {
       $(document).on('click', '.goog-menuitem', function(event) {
         const operation = $(this).find('p').text();
         let on = $(onImage).prev('.operation').first();
-        console.log(on)
         let orign = on.find('.Am-text:first').text()
         on.text(operation);
         on.click()
         $('#flex').keydown()
+        let opBlock = $(`#${on.text()}`); 
+        if(opBlock.length!==0){
+            let parent = on.closest('.draggable');
+            if(parent.length===0)
+                parent = on.closest('.ops');
+            parent = parent.find('path');
+
+            let find_fill = parent.attr('fill');
+            let find_stroke = parent.attr('stroke');
+            opBlock.find('path').attr('fill',  find_fill).attr('stroke', find_stroke)
+            opBlock.find('rect').attr('fill',  find_fill).attr('stroke', find_stroke)
+            console.log(opBlock.find('path'))
+            opBlock.click()
+        }
+        $('.DropDownDiv').css('visibility', 'hidden')
+
       })
       
       function create_function_class(thing_name){
@@ -289,8 +346,27 @@ $(document).ready(function() {
             foreignObject.attr('visibility', 'visible');
         }*/
     });
+    $('.create-hash').click(function(){
+        var hash = window.prompt('set name');
+      
+        $('#hash').attr('visibility', 'visible');
+    });
+    $('.create-set').click(function(){
+        var setname = window.prompt('set name');
+        /*var $g = $(document.createElementNS("http://www.w3.org/2000/svg", 'g')); 
 
+        $g.addClass("draggable onleft").attr("id", "set").attr('visibility',"visible");
+        var $path = $(document.createElementNS("http://www.w3.org/2000/svg", 'path')).attr("stroke", "#E64D00").attr("fill", "#FF661A").attr("fill-opacity", "1").attr("d", "m 0,0 m 20,0 H " + (setname.length * 6 + 20) + " a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z")
+        $g.append($path);
 
+        var $gTransform = $(document.createElementNS("http://www.w3.org/2000/svg", 'g')).attr("transform", "translate(" + (setname.length * 3 + 12) + ", 4)");
+        var $text = $(document.createElementNS("http://www.w3.org/2000/svg", 'text')).addClass("setname").attr("x", setname.length * 3.7).attr("y", "18").attr("dominant-baseline", "middle").attr("dy", "0").attr("text-anchor", "middle").text(setname);
+        var $image = $(document.createElementNS("http://www.w3.org/2000/svg", 'image')).addClass("image").attr("height", "12px").attr("width", "12px").attr("href", "{% static 'Am-images/drowarrow.svg' %}").attr("transform", "translate(" + (setname.length * 3.7+setname.length*6) + ",11)");
+        $gTransform.append($text).append($image);
+        $g.append($gTransform);
+        $('.Am-workspace:first').append($g);*/
+        $('#set').attr('visibility', 'visible');
+    });
     $('.create-list').click(function(){
         var foreignObject = $('#list');
         if (foreignObject.attr('visibility') === 'visible') {
@@ -395,9 +471,24 @@ $(document).ready(function() {
 
         return children;
     }
+    $(document).on('click', 'image', function(event) {
+        onImage = $(this);
+        const fill = setDropDown(onImage);
+        var foreignObject = $('.DropDownDiv');
+        if (foreignObject.css('visibility') === 'visible') {
+            foreignObject.css('visibility', 'hidden');
+        } else {
+            
+            const traslate =  $(this).offset()
+            foreignObject.css('transform', 'translate('+(parseFloat(traslate.left)-workspaceOffset.left)+'px,'+ (parseFloat(traslate.top)-450)+ 'px)');
+            foreignObject.css('box-shadow', '6px 4px 4px rgba(0, 0, 0, 0.3)');
+            foreignObject.css({'visibility': 'visible', 'background-color':fill});
+        }
 
-    $('.draggable').click(function(){
-        var clone = $(this).clone();
+    });
+    $('.draggable').click(function(event){
+        
+        var clone = $(this).removeClass('onleft').clone();
         if (!clone.parent().is(".Am-workspace.main")){
             let appendto = $(".Am-workspace.main");
             if(appendto.attr('visibility') !== 'visible')
@@ -431,6 +522,7 @@ $(document).ready(function() {
                 path = path.replace(match, newLength);
                 assignement.find('path:first').attr("d", path);    
             })
+
             clone.find('.drop_params').click(function(){
                 var foreignObject = $(this).parent().find('.parameters');
                 if (foreignObject.attr('visibility') === 'visible') {
@@ -439,22 +531,8 @@ $(document).ready(function() {
                     foreignObject.attr('visibility', 'visible');
                 }
             });
-            clone.find('image').click(function(event){
-                onImage = $(this);
-                const fill = setDropDown(onImage);
-                var foreignObject = $('.DropDownDiv');
-                if (foreignObject.css('visibility') === 'visible') {
-                    foreignObject.css('visibility', 'hidden');
-                } else {
-                    foreignObject.css({'visibility': 'visible', 'background-color':fill});
 
-                    const traslate =  $(this).offset()
-                    console.log(traslate)
-                    foreignObject.css('transform', 'translate('+(parseFloat(traslate.left)-workspaceOffset.left)+'px,'+ (parseFloat(traslate.top)-450)+ 'px)');
-                    foreignObject.css('box-shadow', '6px 4px 4px rgba(0, 0, 0, 0.3)');
-                }
-
-            });
+      
             clone.find('.-inputs').on('click', function(event) {
                 var clone = $(this).clone(true);
                 let appendto = $(this).parent().next().children('svg');
@@ -576,7 +654,7 @@ $(document).ready(function() {
                      ///////////////////////////////////// FOR LOOP COUNTER ////////////////////////
 
                 }else{
-                    let parent = $(this).closest('#list').first();
+                    let parent = $(this).closest('#initialize').first();
 
                     let children = append_onList(send);
                     let d = parent.find('path:first').attr('d');
@@ -586,6 +664,7 @@ $(document).ready(function() {
                     let re = /v ([0-9.]+)/g
                     match =  re.exec(d)
                     let newLength = fill_path + ((children.length*30+10) );
+                    d = d.replace(match[0], newLength);
                     d = d.replace(match[0], newLength);
                     parent.find('path:first').attr('d',d);
                     parent.children('.list_create').remove().empty();
@@ -689,8 +768,8 @@ $(document).ready(function() {
                 event.stopPropagation();
                 var leftValue = $(this).position().left;
                 var topValue = $(this).position().top;
-                $('#flex').css('left', leftValue + 'px');
-                $('#flex').css('top',  topValue  + 'px');
+                $('#flex').css('left', leftValue-10 + 'px');
+                $('#flex').css('top',  topValue-5  + 'px');
                 $('#inner').text($(this).children().last().text());
                 if($('#flex').css('display')=='none'){
                     $('#flex').css('display','block');
@@ -749,7 +828,33 @@ $(document).ready(function() {
                 draggable.addClass('shadow')
                 ///////////////////////// MOVEMENT //////////////////////
 
-                
+                //////////////////circleOps  
+                $('.circleOps').each(function() {
+                    if(!$(this).closest(draggable).length){
+                        const droppable = $(this);
+                        var distance = findDistance(draggable, droppable); 
+                        if (distance <= 50) { 
+                            if(!droppable.attr('id'))
+                                droppable.attr('id', 'close');
+                            droppable.css({"stroke": "white", "stroke-width": "2" });``
+                        }
+                        else{
+                            droppable.css({"stroke": "none", "stroke-width": "none"});
+                        }
+                        if(droppable.attr('id')=='closed' && droppable.css('stroke')=='none'){
+                            droppable.removeAttr('id');
+                            clones.addBlock(draggable);
+
+                            let d = draggable.find('path').attr("d");
+                            let dlength =  parseFloat(d.match(H_REGEX)[1]);
+                            /*if(droppable.parent().attr('id') == 'multiConditionBlock')
+                                alterParentsLength(droppable, dlength, H_REGEX, -1);
+                            else
+                                alterParentsLength(droppable, (dlength+18), IF_LK_REGEX, 1);*/
+                        }
+                    }
+                });
+                /////////////////circleOps
                 $('.drobable').each(function() {
                     if(draggable.attr('class').indexOf('operation-logic')!==-1 && !$(this).closest(draggable).length){
                         const droppable = $(this);
@@ -775,6 +880,7 @@ $(document).ready(function() {
                         }
                     }
                 });
+          
                 $('.draggable').each(function() {
                     translateAndSet();
                     if(draggable.attr('id')!='function' && draggable.attr('id')!='condition' && $(this).attr('id')!='condition'){
@@ -1017,6 +1123,22 @@ $(document).ready(function() {
                     }
                    
                 });
+                $('.circleOps').each(function() {
+                    let droppable = $(this);
+                    if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
+       
+                        let dlength =  parseFloat(d.match(H_REGEX)[1]);
+
+                        droppable.parent().append(draggable)
+
+                        const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
+                        draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
+                        droppable.attr("id", 'closed');
+                        clones.setBlocks(clones.getBlocks().not(draggable));
+    
+                    }
+                   
+                });
             }
           });
           clones.getBlocks().filter('.clickable').each(function(){
@@ -1111,7 +1233,7 @@ $(document).ready(function() {
                 path = path.replace(match, newLength);
                 callFunction.find('path:first').attr("d", path);
             }
-            edit.children().last().text(text);
+            edit.find('.Am-text').text(text);
             translateAndSet();
         }
     });

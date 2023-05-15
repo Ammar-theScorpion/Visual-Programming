@@ -138,11 +138,27 @@ export class Converter{
               return this.generateOpListStatement(node, level);
           case 'returnStatement':
               return this.generateReturnStatement(node, level);
+          case 'mathStatement':
+              return this.generateMathStatement(node, level);
           case 'multiBinary':
               return this.getExpressionString(node, level);
           default:
               return typeof(node.error)=='string'?node.error:(node.value !== undefined? node.value : node);
        }
+      }
+      generateMathStatement(node, level){
+        let op = node.op;
+        switch(op){
+          case 'ln':
+            op = 'log'; break;
+          case 'log':
+            op = 'log10'; break;
+          case 'e^':
+            op = 'exp'; break;
+          case '10^':
+            op = 'pow'; break;
+        }
+        return `${op}(${node.on});\n`
       }
       generateReturnStatement(node, level){
         return `return ${node.statement};`

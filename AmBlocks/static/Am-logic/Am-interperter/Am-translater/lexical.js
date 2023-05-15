@@ -34,7 +34,8 @@ export const TokenType = {
     NULL:32,
     UN:33,
     For:34,
-    EOC : 35,
+    Math:35,
+    EOC : 45,
   };
   const KEYWORDS = {
     if:   TokenType.If,
@@ -58,6 +59,7 @@ export const TokenType = {
     'low:':TokenType.Low,
     'cat:':TokenType.Cat,
     NULL:TokenType.NULL,
+    math:TokenType.Math,
     for:TokenType.For,
     
     return:TokenType.Return,
@@ -73,7 +75,7 @@ export const TokenType = {
   }
   
   function isalpha(src) {
-    return src.toUpperCase() !== src.toLowerCase() || src=='_'|| src==':'|| src=='(';
+    return src.toUpperCase() !== src.toLowerCase() || src=='_'|| src==':'|| src=='^';
   }
   
   function isskippable(str) {

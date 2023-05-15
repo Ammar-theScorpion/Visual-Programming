@@ -114,6 +114,8 @@ export class ConverterPy{
               return this.generateEachStatement(node, level);
           case 'createListStatement':
               return this.generateListStatement(node, level);
+          case 'mathStatement':
+              return this.generateMathStatement(node, level);
           case 'opListStatement':
               return this.generateOpListStatement(node, level);
               case 'multiBinary':
@@ -122,7 +124,20 @@ export class ConverterPy{
             return typeof(node.error)=='string'?node.error:(node.value !== undefined? node.value : node);
          }
       }
-
+      generateMathStatement(node, level){
+        let op = node.op;
+        switch(op){
+          case 'ln':
+            op = 'log'; break;
+          case 'log':
+            op = 'log10'; break;
+          case 'e^':
+            op = 'exp'; break;
+          case '10^':
+            op = 'pow'; break;
+        }
+        return (op!=='abs'?'math.':'')+`${op}(${node.on});\n`
+      }
       getExpressionString(expression) {
         let expressionStr = '';
         traverseExpression(expression);

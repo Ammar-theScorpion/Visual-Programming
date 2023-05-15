@@ -213,11 +213,26 @@ export class Parser{
                 return (this.pasre_opList_statement(env))
             case TokenType.Return:
                 return (this.pasre_return_statement(env))
+                
+            case TokenType.Math:
+                return this.pasre_math_statement(env)
             default:
                 return this.parse_expr(env);
         }
     }
     
+    pasre_math_statement(env){
+        this.move();
+        const op = this.move().value;
+        const on = this.move().value;
+        
+        let body={
+            kind:'mathStatement',
+            op:op,
+            on:on
+        };
+        return body;
+    }
     pasre_return_statement(env){
         let body={};
         this.move();
@@ -244,22 +259,15 @@ export class Parser{
         };
             
         this.move();//{
-        let opvalue = '';
-        const op = this.move().value;
-        if(op === '}')
-            return body['body']=[]
+        let opvalue = [];
+       
+     
         while (this.inBody() && this.validToken()) { 
-            opvalue += this.move().value;
+            opvalue.push(this.move().value);
         }
 
-        if (body.body) {
-            body.body.push(op+'('+opvalue+')');
-        }else
-            body['body'] = [op+'('+opvalue+')'];
+        body['body'] = [opvalue.join(', ')];
 
-        if(op.indexOf('append')!=-1){
-            env.lookUp(listName)[0] = this.getVarType(opvalue);
-        }
         if(!this.inBody())
             this.move();
         return body;

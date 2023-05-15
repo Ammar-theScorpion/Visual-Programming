@@ -180,6 +180,12 @@ export class Blocks {
                 //this.getVarType(printedValue);
                 return textCode;
                 
+            }else if (currentElement.id == 'math'){
+                const operation =  currentElement.querySelector('.operation').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
+                const on =  currentElement.querySelector('.Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
+                textCode += `math ${operation} ${on}`
+                return textCode;
+                
             }else if (currentElement.id == 'indexAt'){
                 const printedValue =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
                 textCode += '[' + printedValue + ']';
@@ -245,7 +251,17 @@ export class Blocks {
                 textCode += 'allfatherL ' + listName;
                 return textCode;
 
-            }else if (currentElement.id == 'list'){
+            }
+            else if (currentElement.id == 'initialize'){
+                const name = currentElement.querySelector(`.dataStructureName`).textContent.replace(' ','_');
+                const values = currentElement.querySelectorAll('.list_create .Am-edit .Am-text');
+                let v=[];
+                for (let index = 0; index < values.length; index++) {
+                    v.push(values[index].textContent);
+                }
+                return `list ${name} {${v.join(' ')}}`
+            }
+            else if (currentElement.id == 'list'){
                 const listname =  currentElement.querySelector(`.listname`).textContent.replace(' ','_');
                 textCode += 'list ' + listname;
                 let nextchild = currentElement.querySelector('.op');
