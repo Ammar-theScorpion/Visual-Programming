@@ -20,8 +20,16 @@ export class ConverterPy{
       }return codepy.join('')
   }
     generatePrintStatement(printNode){
-        const printValue = printNode.printValue;
-        return('print('+ this.analysOperations(printValue)+')')+'\n';
+      const printValue = printNode.printValue//.replace(',','<<');
+      let print = 'print(';
+      let printThings = [];
+      for (let index = 0; index < printValue.length; index++) {
+        const element = printValue[index];
+        printThings.push(this.generateCode(element));
+        
+      } 
+      return print+printThings.join(' , ')+')';
+
     }
     generateBinaryExpression(ExpressionNode){
         return(ExpressionNode.left.value+ ' '+ ExpressionNode.operater + ' '+ ExpressionNode.right.value);
@@ -84,7 +92,7 @@ export class ConverterPy{
           } else {
             throw new Error(`Invalid number of arguments for slice operation`);
           }
-      }return methodName;
+      }return methodName == 'NULL'?'None':methodName;
 
     }
 
@@ -136,7 +144,7 @@ export class ConverterPy{
           case '10^':
             op = 'pow'; break;
         }
-        return (op!=='abs'?'math.':'')+`${op}(${node.on});\n`
+        return `${op}(${this.generateCode(node.on)})`
       }
       getExpressionString(expression) {
         let expressionStr = '';
@@ -159,19 +167,42 @@ export class ConverterPy{
       generateOpListStatement(node, level){
         const listName = node.listName;
         const body = !node.body?undefined: [...node.body];
-        let op = listName;
-        if (body) {
-          while (body.length) {
-            let bodyValue = '';
-            bodyValue += body.shift();
-            op += `.${bodyValue}`;
-          }
-          op += `\n`;
+        let bodyValue ='';
+        for (let index = 0; index < body.length; index++) {
+          const element = body[index];
+          bodyValue+=this.generateCode(element);
         }
-        return op;
+        const operation = node.ops;
+        switch (operation) {
+          case 'initialize':
+            return `${listName} = [${body}]`;
+          case 'append':
+            return `${listName}.append(${bodyValue})`;
+          case 'insert':
+            return ` ${listName}.[${body[1]}] = ${body[0]}`;
+          case 'pop':
+            return `${listName}.pop()`;
+          case 'clear':
+            return `${listName}.clear()`;
+          case 'delete':
+            return `${listName}.remove(${bodyValue})`;
+          case 'isempty':
+            return `len(${listName})==0`;
+          case 'length':
+            return `len(${listName})`;
+          case 'find':
+            return `${bodyValue} in ${listName}`;
+        }
       }
       generateListStatement(node, level){
-        return `${node.listName} = []\n`;
+        let env = node.env;
+        let look = env.lookUp(node.listName);
+        let equalto = '';
+        if(look != null || look!=undefined){
+           if(look[1])
+            equalto = look[1]
+        }
+          return `${node.listName} = [${equalto}]\n`;
       }
       generateEachStatement(node, level){
         const body = !node.body?undefined: [...node.body];
@@ -210,12 +241,9 @@ export class ConverterPy{
         return node.left.value + ' = '+ this.analysOperations(node.right.value)+'\n';
       }
       generateDeclarationStatements(node, level){
-        let type = node.varBody[0]
         let env = node.env;
         let look = env.lookUp(node.varname);
-        if(look != null)
-          type = look[0];
-        return node.varname + (type!=='void*'? `= ${this.analysOperations(node.varBody[1])}`:'None')+ ';\n';
+        return node.varname + `= ${this.analysOperations(node.varBody[1])}`+ ';\n';
       }
     generateIfStatement(ifNode, level) {
         return this.generateBody(ifNode, level, 'if');

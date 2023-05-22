@@ -11,12 +11,14 @@ def renderTutorials(request, tname):
     user = User.objects.get(username=request.user.username)
     if request.method == 'POST':
         form = UserCodeForm(request.POST)
+        print(form)
         if form.is_valid():
             user_code = form.cleaned_data['user_code']
             p = Problem(problem_id=tname, submission_status="submitted", user_code=user_code)
             p.user = user
             p.save()
             next_tutorial = Tutorial.objects.filter(sequence__gt=tutorial.sequence).first()
+
             if next_tutorial:
                 return redirect(reverse('tutorial:renderTutorials', args=[next_tutorial.tname]))
         else:
@@ -34,8 +36,13 @@ def renderTutorials(request, tname):
         user_code = ''
     for id in text:
         dic.append(id)
-    print(dic)
-    context = {'tutorial': tutorial, 'id':dic, 'form': form, 'prev_code': user_code}
+    context = {
+        'my_template': 'TutorialsBlocks/tutorials.html',
+        'tutorial': tutorial,
+        'id': dic,
+        'form': form,
+        'prev_code': user_code
+    }
     return render(request, 'blocks.html', context)
 
 

@@ -8,8 +8,28 @@ export class Parser{
         this.lang = '';
         this.line = 0;
         this.current_scope = null;
+        this.reservedCppWords = ['if', 'else','int', 'float', 'string',  'each',  'class', 'private', 'public', 'NULL',  'for'];
+        this.reservedPythonWords = ['if', 'else','then', 'for', 'while', 'def', 'class', 'print', 'return', 'None'];
+        this.reservedCommonWords = this.reservedCppWords.concat(this.reservedPythonWords);
+
+       
     }
-    
+
+    isValidCppVariable(variable) {
+        var regex = new RegExp('^\\b(?!' + this.reservedCppWords.join('|') + '\\b)\\w+$');
+        return regex.test(variable);
+      }
+      
+
+    isValidPythonVariable(variable) {
+        var regex = new RegExp('^\\b(?!' + this.reservedPythonWords.join('|') + '\\b)\\w+$');
+        return regex.test(variable);
+    }
+    isValidCommonVariable(variable) {
+        var regex = new RegExp('^\\b(?!' + this.reservedCommonWords.join('|') + '\\b)\\w+$');
+        return regex.test(variable);
+      }
+
     getLexical(args){
         return tokenize(args);
     }
@@ -36,7 +56,18 @@ export class Parser{
         
         return this.translate_expression(expression.left)+expression.left.value+expression.operater.value+expression.right.value;
     }
-    getVarType(value){
+    getMathType(mth){
+        /* check mathexpression first * */
+        if(mth.kind === 'mathStatement'){
+            return this.getMathType(mth.on);
+        }return this.getVarType(mth.value);
+    }
+    getVarType(value, env=null){
+       
+        // retrun datatype based on the value
+
+        if(value==='NULL')
+
         if(value==='NULL')
             return 'void*'
         if (/^-?\d+\.\d+/.test(value)) {
@@ -54,21 +85,28 @@ export class Parser{
             }else
                 return ('error missing \'');
         }
+         if(env){
+            return env.lookUp(value)[0];
+        }
     }
 
     eatBodyError(){
         while (this.inBody() && this.validToken()) this.move();  
     }
-    generateBodyError(env, left, error_type=1){
+    generateBodyError(env, left, error_type=1, onleft=false){
+
         if(left.kind == 'Number' || left.kind == 'String'){
-        if(error_type==1)
+            if(!onleft)  
+                return left;
+            if(error_type==1)
             while(this.getCurrentToken().type!==TokenType.newLine)
-                this.move();
-        else{
-            this.eatBodyError();
-        }
+            this.move();
+            else{
+                this.eatBodyError();
+            }
             return {error:(`${left.value} should be lvalue\n`)};
         }
+
         if(env.lookUp(left.value)==null){
 
             let error = {error:(`${left.value} is not declared yet\n`)};
@@ -195,7 +233,7 @@ export class Parser{
                 return this.parse_for_statement(env);
             case TokenType.Else:
                 return this.parse_else_statement(env);
-            case TokenType.Int: case type==TokenType.Float: case TokenType.String: case TokenType.Create:
+            case TokenType.Int: case type==TokenType.Float: case TokenType.Create:
                 return this.parse_var(env) 
             case TokenType.Print:
                 return (this.parse_print_statement(env))
@@ -213,6 +251,8 @@ export class Parser{
                 return (this.pasre_opList_statement(env))
             case TokenType.Return:
                 return (this.pasre_return_statement(env))
+            case TokenType.op:
+                return (this.pasre_operation_statement(env))
                 
             case TokenType.Math:
                 return this.pasre_math_statement(env)
@@ -221,10 +261,25 @@ export class Parser{
         }
     }
     
+    pasre_operation_statement(env){
+        this.move();
+        let body = {
+            kind:'MBinaryExpression',
+        };
+        
+        while(this.validToken() && this.getCurrentToken().value!='\n'){
+            const statement = this.parse_statement(env);
+            if (body.body) {
+                body.body.push(statement);
+            }else
+                body['body'] = [statement];
+        }
+        return body;
+    }
     pasre_math_statement(env){
         this.move();
         const op = this.move().value;
-        const on = this.move().value;
+        const on = this.parse_statement(env);
         
         let body={
             kind:'mathStatement',
@@ -259,22 +314,51 @@ export class Parser{
         };
             
         this.move();//{
-        let opvalue = [];
+        let opvalue=[];
        
-     
+        let type=[];
         while (this.inBody() && this.validToken()) { 
-            opvalue.push(this.move().value);
+            let x = this.parse_statement(env);
+            if(x['error'])return x.error;
+            let val;
+            if(x.value){
+                val = this.getVarType(x.value, env);
+            }else{
+
+                val = this.getMathType(x);
+                type.push(val);
+                opvalue.push(x);
+            }
         }
 
-        body['body'] = [opvalue.join(', ')];
+        /// get list/set type
+        const firstElement = type[0];
+        let final_type = firstElement;
+        
+        for (let i = 1; i < type.length; i++) {
+            if (type[i] !== firstElement) {
+                final_type = 'std::auto';break;
+            }
+        }
+        /// get list/set type
+        try{
+            env.lookUp(listName)[0] = final_type;
+        }catch{}
 
+        body['body'] = opvalue;
+        
         if(!this.inBody())
             this.move();
+
+        body['ops'] = this.move().value; // get op type
+        body['env'] = env; // get op type
+        this.move()
         return body;
     }
     pasre_createList_statement(env){
         let body={};
         this.move();
+        const dtype = this.move().value;
         const listName = this.move().value;
         const lookup = env.lookUp(listName)
 
@@ -284,12 +368,35 @@ export class Parser{
         }else
             list_type='void*';
 
-        const valid = env.declareVar([listName, [list_type, 'null']], this.line, 'list');
+        let opvalue = [];
+        let type=[];
+        let final_type=  'void*';
+        if(this.getCurrentToken().value==='{'){
+            this.move()
+            while (this.inBody() && this.validToken()) { 
+                let x = this.parse_statement(env);
+                if(x['error'])return x.error;
+                type.push(this.getVarType(x.value, env));
+                opvalue.push(x.value);
+            }
+            
+            /// get list/set type
+            const firstElement = type[0];
+            final_type = firstElement;
+            
+            for (let i = 1; i < type.length; i++) {
+                if (type[i] !== firstElement) {
+                    final_type = 'std::auto';break;
+                }
+            }
+        }
+        const valid = env.declareVar([listName, [final_type, opvalue]], this.line, dtype);
         if(valid!=undefined)return valid;
         body={
             kind:'createListStatement',
             listName, 
             list_type, 
+            dtype, 
             env, 
         };
         return body;
@@ -297,9 +404,9 @@ export class Parser{
     parse_print_statement(env){
         let body={};
         this.move();
-        let printValue = '';
+        let printValue = [];
             while(this.validToken() && this.getCurrentToken().value!='\n'){
-                printValue += this.move().value;
+                printValue.push(this.parse_statement(env));
             }
         if(this.validToken() ){
             this.move();
@@ -323,6 +430,17 @@ export class Parser{
                 this.move();
             return {error:`Symbol '${varname[varname.length-1]}' cannot be in a var name`};
         }
+        ///******** check for reserived words ************ */
+        if(this.lang === 'C++'){ 
+            if(!this.isValidCppVariable(varname))
+                return {error:`cannot declare'${varname}' reserved word in C++`};
+
+        }else{
+            if(!this.isValidPythonVariable(varname))
+                return {error:`cannot declare'${varname}' reserved word in Python`};
+        }
+ 
+        ///******** check for reserived words ************ */
           
         const lookup = env.lookUp(varname, false)
         if(lookup != null){
@@ -385,7 +503,7 @@ export class Parser{
     parse_assignment(env){
         let left = this.parse_additive_expr(env);
         if(left.kind!='BinaryExpression' && left.kind!='private' && left.kind!='public'){
-            const error =  this.generateBodyError(env, left);
+            const error =  this.generateBodyError(env, left, true);
             if(error!=true)return error
         }
  
@@ -398,22 +516,24 @@ export class Parser{
     parse_additive_expr(env){
         //10+2-5
         let left = this.parse_multitive_expr(env); 
+        if(!(this.getCurrentToken().value === '!')){ // stop proccessing. This belongs to another block ex(abs(0)+=1)
+            while(this.getCurrentToken().value == '+' || this.getCurrentToken().value == '>' || this.getCurrentToken().value == '<'  || this.getCurrentToken().value == '%' || this.getCurrentToken().value == '&' || this.getCurrentToken().value=='|'){
+                let operater = this.move().value;
+                if(this.getCurrentToken().value=='&' || this.getCurrentToken().value=='|' || this.getCurrentToken().value=='='){
+                    operater += this.move().value;
+                }
+                const right = this.parse_statement(env);
 
-        while(this.getCurrentToken().value == '+' || this.getCurrentToken().value == '>' || this.getCurrentToken().value == '<'  || this.getCurrentToken().value == '%' || this.getCurrentToken().value == '&' || this.getCurrentToken().value=='|'){
-            let operater = this.move().value;
-            if(this.getCurrentToken().value=='&' || this.getCurrentToken().value=='|' || this.getCurrentToken().value=='='){
-                operater += this.move().value;
-            }
-            const right = this.parse_multitive_expr(env);
-
-            left = {
-                kind: "BinaryExpression",
-                left,
-                right,
-                operater 
-            };
-        }/*if(this.getCurrentToken().value=='\n')
-            this.move()*/
+                left = {
+                    kind: "BinaryExpression",
+                    left,
+                    right,
+                    operater 
+                };
+            }/*if(this.getCurrentToken().value=='\n')
+                this.move()*/
+        }else
+            this.move()
         return left;
     }
 

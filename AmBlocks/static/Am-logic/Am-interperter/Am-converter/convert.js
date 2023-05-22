@@ -7,12 +7,15 @@ const INCLUDE={
   'string':'#include<string>',
   'vector':'#include<vector>',
   'transform':'#include<algorithm>',
+  'find':'#include<algorithm>',
+  'set':'#include<set>',
 }
 export class Converter{
     constructor(){
         this.py = new ConverterPy()
         this.ast = [];
         this.parser = new Parser();
+        this.m = false;
     }
     moveNode(array){
         const prev = array.shift();
@@ -41,6 +44,8 @@ export class Converter{
             include_str+=INCLUDE[key]+'\n';
           }
         }
+        if(this.m)
+          include_str+='#include<cmath>'+'\n';
         return include_str+code_str;
     }
     generateFunction(node){
@@ -120,6 +125,8 @@ export class Converter{
             return this.generatePrintStatement(node, level);
           case 'BinaryExpression':
             return this.generateBinaryExpression(node, level);
+          case 'MBinaryExpression':
+            return this.generateMBinaryExpression(node, level);
           case 'declarationStatements':
               return this.generateDeclarationStatements(node, level);
           case 'assignmentStatement':
@@ -147,6 +154,7 @@ export class Converter{
        }
       }
       generateMathStatement(node, level){
+        this.m = true;
         let op = node.op;
         switch(op){
           case 'ln':
@@ -158,7 +166,7 @@ export class Converter{
           case '10^':
             op = 'pow'; break;
         }
-        return `${op}(${node.on});\n`
+        return `${op}(${this.generateCode(node.on)})`
       }
       generateReturnStatement(node, level){
         return `return ${node.statement};`
@@ -166,34 +174,50 @@ export class Converter{
       generateOpListStatement(node, level){
         const listName = node.listName;
         const body = node.body;
-        let op = listName;
-        if (body) {
-          while (body.length) {
-            let bodyValue = '';
-            let val = body.shift();
-            val=val.split('(');
-
-            if(val[0] == 'sort')
-              op=val[0]+'('+listName+'.begin(), '+listName+'.end())';
-            else{
-              if(this.CPlusSentex(val[0]))
-              bodyValue += this.generateFunction(val[0])+'('+listName+'.begin() + '+val[1];
-              else
-              bodyValue += this.generateFunction(val[0])+'('+val[1];
-              op += `.${bodyValue}`;
-            }
-          }
-          op += `;\n`;
+        let bodyValue='';
+        /* translate all body statements * */
+        for (let index = 0; index < body.length; index++) {
+          const element = body[index];
+          bodyValue+=this.generateCode(element);
         }
-        return op;
+        /* translate all body statements * */
+        const operation = node.ops;
+        const dtype = node.env.dtype;
+        switch (operation) {
+          case 'initialize':
+            return `${listName} = {${body}}`;
+          case 'append':
+            return `${listName}.push_back(${bodyValue})`;
+          case 'insert':
+            return dtype=='set'? `${listName}.insert(${listName}`:`${listName}.insert(${listName}.begin()+${body[1]}, ${body[0]})`;
+          case 'pop':
+            return `${listName}.pop_back()`;
+          case 'clear':
+            return `${listName}.clear()`;
+          case 'delete':
+            return `${listName}.earse(${listName}.begin() + ${this.generateCode(bodyValue)}})`;
+          case 'isempty':
+            return `${listName}.empty()`;
+          case 'length':
+            return `${listName}.size()`;
+          case 'find':
+            return `${dtype=='set'?listName`.find(${bodyValue})`: `std::find(${listName}.begin(), ${listName}.end(), ${bodyValue})`}`;
+        }
+         
       }
     generateListStatement(node, level){
       let type = 'void*'
       let env = node.env;
       let look = env.lookUp(node.listName);
-      if(look != null)
-          type = look[0];
-        return `std::vector<${type}> ${node.listName};\n`;
+      let equalto = '{}';
+      if(look != null || look!=undefined){
+         type = look[0];
+         if(look[1])
+          equalto = look[1]
+      }
+      let dt = node.dtype;
+      dt = (dt =='list'?'vector':dt);
+        return `std::${dt}<${type}> ${node.listName} = {${equalto}};\n`;
     }
     generateEachStatement(node, level){
       const body = node.body;
@@ -260,8 +284,18 @@ export class Converter{
       return type +' '+ node.varname + `= ${this.analysOperations(node.varBody[1])}`+ ';\n';
     }
 
+    generateMBinaryExpression(ExpressionNode){
+      let exp = '';
+      for(let n of ExpressionNode.body){
+        exp += this.generateCode(n)+' ';
+      }
+        return exp;
+    }
     generateBinaryExpression(ExpressionNode){
-        return ExpressionNode.left.value+ ' '+ ExpressionNode.operater + ' '+ ExpressionNode.right.value;
+        let right = ExpressionNode.right.value;
+        if(ExpressionNode.right['kind'])
+          right = this.generateCode(ExpressionNode.right);
+        return ExpressionNode.left.value+ ' '+ ExpressionNode.operater + ' '+ right;
     }
     getExpressionString(expression) {
       let expressionStr = '';
@@ -283,8 +317,15 @@ export class Converter{
     }
     
     generatePrintStatement(printNode){
-        const printValue = printNode.printValue.replace(',','<<');
-        return 'std::cout << '+ this.analysOperations(printValue)+';\n';
+        const printValue = printNode.printValue//.replace(',','<<');
+        let print = 'std::cout <<';
+        let printThings = [];
+        for (let index = 0; index < printValue.length; index++) {
+          const element = printValue[index];
+          printThings.push(this.generateCode(element));
+          
+        } 
+        return print+printThings.join(' << ');//this.analysOperations(printValue)+';\n';
     }
     generateIfStatement(ifNode, level){
         const condition = ifNode.condition;
@@ -317,8 +358,15 @@ export class Converter{
       }
       let allIndexes = [from.join(', '), to.join(', '), by.join(', ')]
       let allIndexes_res = allIndexes.join(';');
-
-      return `for(${allIndexes_res})`;
+      let body_=body.body;
+      let bodyValue = '';
+      if(body_){
+        while (body_.length) {
+          bodyValue += '\t'+this.generateCode(body_.shift(), level + 1);
+        }
+      }
+      const indentation = level>=0?'\t'.repeat(level):"";
+      return `${indentation}for(${allIndexes_res}){\n${'\t'.repeat(level+1)}${bodyValue}\n}`;
     }
     
     generateReapetStatement(ifNode, level){

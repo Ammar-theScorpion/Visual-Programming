@@ -37,11 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mainBlocks',
-    'TutorialsBlocks',
-    'MasterBlocks',
     'GameBlocks',
-
+    'MasterBlocks',
+    'TutorialsBlocks',
+    'mainBlocks',
 ]
 
 MIDDLEWARE = [

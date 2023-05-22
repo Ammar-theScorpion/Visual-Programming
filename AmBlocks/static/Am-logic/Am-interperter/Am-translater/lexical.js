@@ -35,6 +35,7 @@ export const TokenType = {
     UN:33,
     For:34,
     Math:35,
+    op:36,
     EOC : 45,
   };
   const KEYWORDS = {
@@ -121,7 +122,6 @@ export const TokenType = {
           while(src.length > 0 && src[0] != "\""){
               string+=src.shift();
           }
-          if(src.length)
           string+=src.shift();
         tokens.push(token(string, TokenType.String));
       }
@@ -143,6 +143,9 @@ export const TokenType = {
             const reserved = KEYWORDS[ident];
             if (reserved !== undefined) {
                 tokens.push(token(ident, reserved));
+                
+            }else if(TokenType[ident]){
+                tokens.push(token(ident, TokenType[ident]));
 
             } else {
                 tokens.push(token(ident, TokenType.Identifier));

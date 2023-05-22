@@ -11,6 +11,9 @@ export class Blocks {
       this.blocks = $();
       this.error = '';    
       this.index = 0;
+      this.insideSc = false;
+
+      this.env = new Symbol() /// for debug mode to store var resutls
     }
   
     static getInstance() {
@@ -43,7 +46,24 @@ export class Blocks {
             return aTop - bTop;
         });
     }
+    sortX(allOperations){
+        const elementsWithX = [];
 
+        for (let i = 0; i < allOperations.length; i++) {
+        const translationOper = allOperations[i].getAttribute('transform').match(/translate\(([^,]+),/)[1];
+        const xValue = parseFloat(translationOper);
+
+        // Push the element and its 'x' value to the array
+        elementsWithX.push({
+            element: allOperations[i],
+            xValue: xValue
+        });
+        }
+
+        elementsWithX.sort((a, b) => a.xValue - b.xValue);
+
+        return elementsWithX.map(obj => obj.element);
+    }
     isInput(params) {
         return (/['"-?0-9]/).test(params)  
     }
@@ -60,12 +80,12 @@ export class Blocks {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
     getChildren(currentElement, search){
-        let nextchild = currentElement.querySelectorAll(`.${search}`);//:scope > 
+        let nextchild = currentElement.querySelectorAll(`.${search}:scope > .${search}`);//:scope > 
         let code = '';
         for (let index = 0; index < nextchild.length; index++) {
             const element = nextchild[index];
             code+=this.getBlocksAsString(element, 1, 1);
-            this.index ++;
+            this.insideSc = true
 
         }return code;
     }
@@ -162,32 +182,39 @@ export class Blocks {
             }
             else if(currentElement.id == 'function'){
                 const function_name = currentElement.querySelector('.Am-edit.fname .Am-text').textContent.replace(' ', '_');
+                
                 const variables = currentElement.querySelector('.Am-text:nth-of-type(2)').textContent.replace('with:', '');
 
                 textCode += 'def '+ function_name +' ' + variables+ '{';
                 textCode+=this.getChildren(currentElement, 'draggable');
+                this.index+=(currentElement.querySelectorAll(`.draggable:scope > .draggable`)).length;//:scope > 
+
                 textCode+='}';
                 return textCode;
             }else if (currentElement.id == 'print'){
-                const printedValue =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
+                const printedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
                 textCode += 'print ' + printedValue + '\n';
                 //this.getVarType(printedValue);
                 return textCode;
                 
             }else if (currentElement.id == 'return'){
-                const returnedValue =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
+                const returnedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+
                 textCode += 'return ' + returnedValue + '\n';
                 //this.getVarType(printedValue);
                 return textCode;
                 
             }else if (currentElement.id == 'math'){
                 const operation =  currentElement.querySelector('.operation').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
-                const on =  currentElement.querySelector('.Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
-                textCode += `math ${operation} ${on}`
+                let on = currentElement.querySelector('.on').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+                if(on==='')
+                    on='0';
+                textCode += `math ${operation} ${on} !`
                 return textCode;
                 
             }else if (currentElement.id == 'indexAt'){
-                const printedValue =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
+                const printedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+
                 textCode += '[' + printedValue + ']';
                 return textCode;
                 
@@ -221,11 +248,63 @@ export class Blocks {
                 textCode += 'allfather '+varName+equalto;
                 return textCode;
 
-            }else if (currentElement.id == 'assigmnemt' || currentElement.id == 'operation'){
-                const varName =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
-                const allAmText = currentElement.querySelectorAll(':scope > .Am-edit > .Am-text , :scope > .am-drop > .Am-text, :scope > .Am-text');
-                let operater = allAmText[1].textContent;
-                let equalto = allAmText[2].textContent;//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
+            }else if (currentElement.id == 'operation' || currentElement.id == 'condition'){
+                let allOperations = currentElement.querySelectorAll('.draggable');
+                let allAmText = currentElement.querySelectorAll('.Am-edit:not(.op)');
+                let allOps = currentElement.querySelectorAll('.am-drop');
+
+
+                //////////////////////////////////////////////////////
+                    ////////////////// sort first ///////////////////
+                        allOperations = this.sortX(allOperations)
+                        allAmText = this.sortX(allAmText)
+                        allOps = this.sortX(allOps)
+                        let alops = []; 
+                        for (let index = 0; index < allOps.length; index++) {
+                            const element = allOps[index].querySelector('.op');
+                            alops.push(element);
+                        }allOps = alops
+                    ////////////////// sort first ///////////////////
+                //////////////////////////////////////////////////////
+
+                let alltext = '';
+                let tcounter=0;
+                let ocounter=0;
+                for (let index = 0; index < allOps.length; index++) {
+
+                    let translationEdit= 0;
+                    if(tcounter < allAmText.length)
+                        translationEdit=allAmText[tcounter].previousElementSibling.getAttribute('transform').match(/translate\(([^,]+),/)[0];
+
+                    let translationOper = 0;
+                    if(ocounter < allOperations.length)
+                        translationOper=allOperations[ocounter].getAttribute('transform').match(/translate\(([^,]+),/)[0];
+
+                    if(translationOper == translationEdit){
+                        alltext += this.getChildren(currentElement, 'draggable');
+                    }else{
+                        alltext += allAmText[tcounter].querySelector('.Am-text').textContent;
+                    }
+                    ocounter++;
+                    tcounter++;   
+                    alltext += allOps[index].textContent;
+                }
+                while(ocounter < allOperations.length){
+                    alltext += this.getChildren(currentElement, 'draggable');
+                    ocounter++;
+                }
+                if(tcounter < allAmText.length){
+                    alltext += allAmText[allAmText.length-1].querySelector('.Am-text').textContent;
+                    tcounter++;
+                }
+               return 'op '+alltext+'\n';
+            
+
+            }else if (currentElement.id == 'assigmnemt'){
+                const allAmText = currentElement.querySelectorAll('.Am-edit .Am-text') 
+                let varName = allAmText[0].textContent//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
+                let operater = currentElement.querySelector('.op').textContent;
+                let equalto = allAmText[1].textContent +this.getChildren(currentElement, 'draggable');//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
                 let prompt = allAmText[allAmText.length-1].textContent;
                 let child  = this.getChildren(currentElement, 'draggable');
 
@@ -233,33 +312,34 @@ export class Blocks {
                     operater += equalto;
                     return `${varName} = ${equalto} ${prompt} \n ${child}`;
                 }else{
-                    equalto = equalto.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
+                    equalto = equalto.replace(/\t/g, '')
                 }
                 textCode += varName +` ${operater} `+ equalto;
                 return textCode+'\n' + child;
 
-            }else if(currentElement.id=='condition'){
-                const allAmText = currentElement.querySelectorAll('.Am-text');
-                const firstOper = allAmText[0].textContent;
-                const operation = allAmText[1].textContent;
-                const lastOper = allAmText[2].textContent;
-                textCode += firstOper +' '+ operation + ' ' + lastOper;
-                return textCode+'\n';
+            } else if (currentElement.id == 'create_list'|| currentElement.id == 'create_set'){
+                const listName = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
 
-            }else if (currentElement.id == 'create_list'){
-                const listName =  currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
-                textCode += 'allfatherL ' + listName;
-                return textCode;
-
-            }
-            else if (currentElement.id == 'initialize'){
-                const name = currentElement.querySelector(`.dataStructureName`).textContent.replace(' ','_');
-                const values = currentElement.querySelectorAll('.list_create .Am-edit .Am-text');
+                textCode += 'allfatherL ' +currentElement.id.split('_')[1]+' '+ listName+' ';
+                const values = currentElement.querySelectorAll('.op.Am-edit .Am-text');
                 let v=[];
                 for (let index = 0; index < values.length; index++) {
                     v.push(values[index].textContent);
                 }
-                return `list ${name} {${v.join(' ')}}`
+                if(v.length!==0)
+                    return `allfatherL ${currentElement.id.split('_')[1]} ${listName} {${v.join(' ')}}\n`
+                return textCode;
+
+            }
+            else if (currentElement.classList.contains('ops')){
+                const name = currentElement.querySelector(`.dataStructureName`).textContent.replace(' ','_');
+                const values = currentElement.querySelector('.op.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+
+                /*let v=[];
+                for (let index = 0; index < values.length; index++) {
+                    v.push(values[index].textContent);
+                }*/
+                return `list ${name} {${values}} ${currentElement.id}\n`
             }
             else if (currentElement.id == 'list'){
                 const listname =  currentElement.querySelector(`.listname`).textContent.replace(' ','_');
@@ -276,7 +356,7 @@ export class Blocks {
                 }
                 textCode+='{'
                 if(opname!=null){ 
-                    this.index ++;
+                    //this.index ++;
                     opname = opname.textContent.toLowerCase();
                 }
                 if(opvalue!==''){
@@ -355,6 +435,7 @@ export class Blocks {
         for (; this.index < this.blocks.length; this.index++) {
             const element = this.blocks[this.index];
             src += this.getBlocksAsString(element);
+
         }
         //src = this.generateVarType(src.split(' '));    
         //src += this.generateVarType('print f'.split(' '));
@@ -367,6 +448,7 @@ export class Blocks {
     }
 
     translateSteps(lang, current_block){
+        this.sortChildren();
         if(current_block>=this.blocks.length)return[''];
         const translateBlock = this.getBlocksAsString(this.blocks[current_block]);
         const languages = (this.covert.covertString(translateBlock, this.env, lang));

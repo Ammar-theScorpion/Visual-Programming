@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 def step_code(request):
-    dic = ['printBlock', 'ifBlock', 'conditionalBlock', 'operationBlock', 'whileBlock', 'elseBlock', 'createVarBlock', 'makeVarBlock']
-    context = {'id':dic, 'step':1}
-    return render(request, 'blocks.html', context)
+    dic = [ 'eachBlock', 'listBlock', 'counterBlock','printBlock' ,'conditionalBlock','multiConditionBlock','classBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock','makeListBlock', 'makeHashBlock', 'elseBlock','whileBlock', 'makeVarBlock', 'conditionalBlock']
+    context = {'id':dic,
+                'my_template': 'TutorialsBlocks/tutorials.html', 'step':1}
+    return render(request, 'blocks.html', context)   

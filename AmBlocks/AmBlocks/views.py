@@ -9,11 +9,25 @@ from threading import Condition
 
 import websockets
 import asyncio
+import io
+from contextlib import redirect_stdout
 
 prompt = None
 response = None
 cond_send = Condition()
 cond_recv = Condition()
+
+in_memory_shared_storage = {} ## used only in debug mode to store the state of each var
+
+
+def store_in_memo(code):
+    if '=' in code:
+        dec = code.split('=')
+        name = dec[0].strip()
+        to = dec[1].strip()
+        in_memory_shared_storage[name] = to
+
+
 def test_code(request):
     running = True
     async def server(socket):
@@ -36,26 +50,30 @@ def test_code(request):
         asyncio.get_event_loop().run_forever()
         asyncio.get_event_loop().close()
 
-    t = threading.Thread(target=start_server)
-    t.start()
 
     body = request.body
     decoded_str = urllib.parse.unquote(body.decode('utf-8'))
 
-    # Split the string on the '&' character to separate the parameters
     param_strings = decoded_str.split('&')
     # Create a dictionary to store the parameter names and values
     params = {}
 
     # Split each parameter string on the '=' character to extract the name and value
-    user_code = 'print("Hello World!")'
+    user_code = param_strings[0].split('=', 1)[1]
+
     tname = param_strings[1].split('=', 1)[1]
 
-    # Extract the values of the text and tname parameters
+    print(user_code)  # Output: user code
+    print(tname)  # Output: user code
 
+    ################################
+    store_in_memo(user_code)
+    ################################
+    
     valid_code=''
     try:
         valid_code = Tutorial.objects.get(tname=tname).valid_code
+        print('valid', valid_code)
     except:
         pass
     
@@ -77,19 +95,20 @@ def test_code(request):
         return False
     
     # Run the compiled code and capture their output
-    import io
-    from contextlib import redirect_stdout
+
     
-    with io.StringIO() as valid_output:
+    with io.StringIO() as valid_output, redirect_stdout(valid_output):
         exec(compiled_valid)
         valid_result = valid_output.getvalue() 
-    with io.StringIO() as user_output: # open a stream for the temp io.String..buffer and redirect the out their
-        exec(compiled_user)
+
+    with io.StringIO() as user_output, redirect_stdout(user_output): # open a stream for the temp io.String..buffer and redirect the out their
+        exec(compiled_user, in_memory_shared_storage)
 
         user_result = user_output.getvalue()
         running = False
-    print('ser',user_result)
-    print('secx',valid_result)
+
+    print(user_result)
+    print(valid_result)
     code = 'f'
     if user_result==valid_result:
         code = 't'

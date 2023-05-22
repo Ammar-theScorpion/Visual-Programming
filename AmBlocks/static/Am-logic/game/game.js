@@ -1,4 +1,3 @@
-var step = 'no translation';
 ///////////// *Draw Lines and the main character* //////////////
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -114,8 +113,9 @@ drawCanvas();
 
 ///////////// *Draw Lines and the main character* //////////////
 
-function tuggle(){
-    const table = document.getElementsByClassName('table');
+function tuggle(element){
+    
+    const table = element.nextElementSibling;
     if ($(table).attr('visibility') === 'visible') {
         $(table).attr('visibility', 'hidden');
     } else {
@@ -124,11 +124,11 @@ function tuggle(){
 
 }
 
-function setColor(event){
+function setColor(element, event){
+    const color = $(element).closest('.draggable').find('.coloring');
     lineColor = event.target.style.backgroundColor;
-    $('.coloring').attr('fill', lineColor);
+    color.attr('fill', lineColor);
 
 }
 
-///////////// *Draw Lines and the main character* //////////////
-
+///////////// *Draw Lines and the main character* ////////////// 

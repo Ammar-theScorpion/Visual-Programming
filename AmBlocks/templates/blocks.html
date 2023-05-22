@@ -1,5 +1,5 @@
-{% extends 'TutorialsBlocks/tutorials.html' %}
-
+{% extends my_template %}
+ 
 {% load static %}
 
 <!DOCTYPE html>
@@ -13,8 +13,8 @@
    <link rel="stylesheet" href="{% static 'Am-style/front/home.css' %}" />
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-   <script src="https://cdn.socket.io/4.4.0/socket.io.min.js"></script>
    <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
+   <script src="https://cdn.socket.io/4.4.0/socket.io.min.js"></script>
    </head>
    {% endblock mainscript %}
 
@@ -26,51 +26,40 @@
 
       {% block block %}
 
-      <button class="button-30" role="button">print</button>
-      <button class="button-30 create-function" role="button">create function</button>
-      <button class="button-30" role="button">for each</button>
-      <button class="button-30 create-list" role="button">create list</button>
-      <button class="button-30 create-var" role="button">create var</button>
-      <button class="button-30 create-class" role="button">create class</button>
+      {% if my_template != 'GameBlocks/game_board.html' %} <!-- not for game app -->
+         <button class="button-30" role="button">print</button>
+         <button class="button-30" role="button">for each</button>
+         <button class="button-30 create-list" role="button">create list</button>
+         <button class="button-30 create-class" role="button">create class</button>
+         <button class="button-30 create-function" role="button">create function</button>
+         <button class="button-30 create-var" role="button">create var</button>
+         <button class="button-30 create-set" role="button">set</button>
+         <button class="button-30 create-hash" role="button">hash</button>
+
+      {% else %}<!-- for game app only -->
+         <button class="button-30" role="button">move</button>
+         <button class="button-30" role="button">turn</button>
+         <button class="button-30" role="button">set color</button>
+      {% endif %} <!-- common blocks for all apps -->
       <button class="button-30" role="button">if</button>
       <button class="button-30" role="button">assigmnemt</button>
       <button class="button-30" role="button">operation</button>
       <button class="button-30" role="button">else</button>
       <button class="button-30" role="button">while</button>
       <button class="button-30" role="button">counter</button>
-      <button class="button-30 create-set" role="button">set</button>
-      <button class="button-30 create-hash" role="button">hash</button>
       <button class="button-30" role="button">math</button>
+      <button class="button-30" role="button">condition</button>
 
-      <div  class="DropDownDiv" 
-      style="visibility: hidden; left: 200px; top: 100px; position: relative; transition: transform 0.25s ease 0s, opacity 0.25s ease 0s; background-color: #5CB1D6;  direction: ltr; display: block; opacity: 1;" data-category="data">
-         <div class="blocklyDropDownContent" style="max-height: 300px;overflow: auto;">
-            <div class="goog-menu goog-menu-vertical blocklyDropdownMenu"  role="menu" aria-haspopup="true" tabindex="0" style="cursor: default; font: normal 13px Helvetica Neue, Helvetica, sans-serif;outline: none;user-select: none;">
-               
-            </div>
-         </div>
-         <div class="blocklyDropDownArrow arrowTop" style="border-top: 1px solid;
-         border-left: 1px solid;
-         border-top-left-radius: 4px;
-         border-color: inherit;
-         position: absolute;
-         left: 0;
-         top: 0;
-         width: 16px;
-         height: 16px;
-         z-index: -1;
-         background-color: inherit;
-         transform: translate(157.5px, -9px) rotate(45deg);"></div></div>
 
       <svg class="home Am-workspace" xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       xmlns:html="http://www.w3.org/1999/xhtml"
-      version="1.1" width="100%" height="100%">
+      version="1.1" width="100%" height="400">
       
       <!--
          op on sets
       --> 
-      <g id="set" class="ops" data-category="data-lists" visibility="hidden" transform="translate(8, 350)">
+      <g id="set" class="ops" data-category="data-lists" visibility="hidden" transform="translate(8, 200)">
          <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 224.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
 
          <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(60, 20) ">set operations</text>
@@ -86,39 +75,51 @@
       <!--
          op on sets
       --> 
-      
+      <g id="list" class="ops"  visibility="hidden" data-category="data-lists" transform="translate(8, 250)">
+         <path stroke="#392D52" fill="#745BA5" fill-opacity="1" d="m 0,0 m 20,0 H 224.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
+
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(60, 20) ">list operations</text>
+         <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
+         <g data-argument-type="variable" class="blocklyEditableText" transform="translate(160.59074020385742, 4) " style="cursor: default;">
+            <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#392D52" fill="#745BA5" class="blocklyBlockBackground" fill-opacity="1"></rect>
+            <text class="Am-text operation" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">add</text>
+         <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
+
+         </image>
+      </g>
+   </g>
+    
 
            <!--
          operations sets
       --> 
-      <g data-id="data_itemoflist" id="find" visibility="hidden" class="draggable" data-category="data-lists">
+      <g id="find" visibility="hidden" class="draggable ops" data-category="data-lists">
          <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 174.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
          <g data-id="A-6^%srWWP187amr{{r[" data-argument-type="text number" data-shapes="argument round" transform="translate(50.240739822387695,4)">
             <path class="blocklyPath blocklyBlockBackground  circleOps" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-            <g class="Am-edit" transform="translate(8, 0) " style="cursor: text;">
+            <g class="op Am-edit" transform="translate(8, 0) " style="cursor: text;">
              <text class="Am-text" x="12" y="18" fill="#E64D00" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g>
          </g>
          <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(12, 20) ">find</text>
-         <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
+         <path style="visibility: hidden" d="" fill="#E64D00"></path>
          <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(98.2407398223877, 20) ">in</text>
-         <g data-argument-type="variable" class="blocklyEditableText" transform="translate(119.59074020385742, 4) " style="cursor: default;">
+         <g data-argument-type="variable" id="vars" transform="translate(119.59074020385742, 4) " style="cursor: default;">
             <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1"></rect>
-            <text class="Am-text blocklyDropdownText" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+            <text class="Am-text dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
          <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
 
          </image>
       </g>
    </g>
 
-         <g data-id="data_itemoflist" id="pop" visibility="hidden" class="draggable" data-category="data-lists">
-            <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" 
-           
-         d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 160.96111297607422 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
+         <g data-id="data_itemoflist" id="pop" visibility="hidden" class="draggable ops" data-category="data-lists">
+            <path class="circleOps" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 180.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
+
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(12, 20) ">pop</text>
             <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
             <g data-argument-type="variable" class="blocklyEditableText" transform="translate(60.59074020385742, 6) " style="cursor: default;">
                <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A"  fill-opacity="1"></rect>
-               <text class="dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+               <text class="dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
             <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
 
             </image>
@@ -126,21 +127,21 @@
       </g>
   
 
-   <g data-id="data_itemoflist" id="length" visibility="hidden" class="draggable" data-category="data-lists">
-      <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 180.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
+   <g data-id="data_itemoflist" id="length" visibility="hidden" class="draggable ops" data-category="data-lists">
+      <path class="circleOps" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 180.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
    
       <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(40, 20) ">length of</text>
       <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
       <g data-argument-type="variable" class="blocklyEditableText" transform="translate(130.59074020385742, 4) " style="cursor: default;">
          <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1"></rect>
-         <text class="Am-text blocklyDropdownText" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+         <text class="Am-text dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
       <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
 
       </image>
    </g>
 </g>
 
-   <g data-id="data_itemoflist" id="clear" visibility="hidden" class="draggable" data-category="data-lists">
+   <g data-id="data_itemoflist" id="clear" visibility="hidden" class="draggable ops" data-category="data-lists">
       <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1"
       d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 155.96111297607422 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
 
@@ -148,20 +149,20 @@
       <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
       <g data-argument-type="variable" class="blocklyEditableText" transform="translate(60.59074020385742, 6) " style="cursor: default;">
          <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A"  fill-opacity="1"></rect>
-         <text class="dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+         <text class="dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
       <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
 
       </image>
    </g>
    </g>
-   <g data-id="data_itemoflist" id="isempty" visibility="hidden" class="draggable" data-category="data-lists">
+   <g data-id="data_itemoflist" id="isempty" visibility="hidden" class="draggable ops" data-category="data-lists">
       <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 160.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
    
       <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(30, 20) ">isempty</text>
       <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
       <g data-argument-type="variable" class="blocklyEditableText" transform="translate(90.59074020385742, 4) " style="cursor: default;">
          <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A"  fill-opacity="1"></rect>
-         <text class="dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+         <text class="dataStructureName" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
       <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
    
       </image>
@@ -188,11 +189,11 @@
          </image>
       </g>
    </g>
-   <g data-id="data_itemoflist" id="at" visibility="hidden" class="draggable" data-category="data-lists">
+   <g data-id="data_itemoflist" id="at" visibility="hidden" class="draggable ops" data-category="data-lists">
       <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,0 m 20,0 H 174.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
       <g data-id="A-6^%srWWP187amr{{r[" data-argument-type="text number" data-shapes="argument round" transform="translate(50.240739822387695,4)">
          <path class="blocklyPath blocklyBlockBackground  circleOps" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-         <g class="Am-edit" transform="translate(8, 0) " style="cursor: text;">
+         <g class="op Am-edit" transform="translate(8, 0) " style="cursor: text;">
           <text class="Am-text" x="12" y="18" fill="#E64D00" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g>
       </g>
       <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(12, 20) ">at</text>
@@ -200,7 +201,7 @@
       <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(98.2407398223877, 20) ">in</text>
       <g data-argument-type="variable" class="blocklyEditableText" transform="translate(119.59074020385742, 4) " style="cursor: default;">
          <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A"  fill-opacity="1"></rect>
-         <text  class="dataStructureName"x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+         <text  class="dataStructureName"x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
       <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
 
       </image>
@@ -217,8 +218,8 @@
          list ops
 
       -->
-      <g class="draggable" visibility="hidden" id="initialize" >
-         <path stroke="#392D52" fill="#745BA5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 150.5907402038574 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
+      <g class="draggable ops" visibility="hidden" id="initialize" >
+         <path stroke="#392D52" fill="#745BA5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 162.5907402038574 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
 
          <text  y="12.5" transform="translate(26,12)">List</text>
          <text class="listname" y="12.5" transform="translate(65,12)"></text>
@@ -232,10 +233,9 @@
                      <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 130.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
                      </path>
                      <text class="Am-text" y="25" dy="0" x="15.564815521240234">item:</text>
-                     <g class="Am-edit" transform="translate(95,12)" style="display: block;">
-                        <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                        <text class="Am-text" fill="#1e8f14" x="5" y="17">a</text>
-                     </g>
+                     <path stroke="#389438"transform="translate(95, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                     <g class="Am-edit" transform="translate(98, 8)" style="cursor: text;">
+                        <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">a</text></g>
                   </g>
                </g>
                <g class="inputs-wrapper-container" transform="translate(180, 30)">
@@ -257,65 +257,89 @@
             </g>
             <g data-argument-type="variable" class="blocklyEditableText" transform="translate(80.59074020385742, 4) " style="cursor: default;">
                <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#E64D00" fill="#FF661A"  fill-opacity="1"></rect>
-               <text  class="dataStructureName"x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">jhb</text>
+               <text  class="dataStructureName"x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
             <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
       
             </image>
          </g>
       </g>
 
-      <g data-id="data_deleteoflist" visibility="hidden" class="draggable" id="delete" data-shapes="stack" data-category="data-lists" >
-         <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 199.8685188293457 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
-         <g data-id="dM|h_V04ZYgGc?@5;`Vo" data-argument-type="text number" data-shapes="argument round" transform="translate(59.61111068725586,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-            <g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">1</text></g></g>
+      <g data-id="data_deleteoflist" visibility="hidden" class="draggable ops" id="delete" data-shapes="stack" data-category="data-lists" >
+         <path class="" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 199.8685188293457 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
+         <g data-argument-type="text number" data-shapes="argument round" transform="translate(59.61111068725586,8)">
+            <path class="circleOps" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+            <g class="op Am-edit" transform="translate(8, 0) " style="cursor: text;">
+               <text class="Am-text" x="12" fill="#000" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">1</text></g></g>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.80555534362793" transform="translate(8, 24) ">delete</text>
             <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(107.61111068725586, 24) ">of</text>
             <g data-argument-type="variable" class="blocklyEditableText" transform="translate(128.9611110687256, 8) " style="cursor: default;">
                <rect rx="4" ry="4" x="0" y="0" width="66.90740776062012" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1"></rect>
-               <text class="Am-text blocklyDropdownText" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">xsa</text>
+               <text class="Am-text dataStructureName" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
          <image height="12px" width="12px"  xlink:href="{% static 'Am-images/drowarrow.svg' %}"transform="translate(42.90740776062012,11)"></image></g>
       </g>
 
-      <g data-id="data_replaceitemoflist"  visibility="hidden"  class="draggable" id="replace"  data-shapes="stack" data-category="data-lists">
+      <g data-id="data_replaceitemoflist"  visibility="hidden"  class="draggable ops" id="replace"  data-shapes="stack" data-category="data-lists">
          <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 344.5907402038574 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
          <g data-id="T+QFY$jq++BiWKE8aS$," data-argument-type="text number" data-shapes="argument round" transform="translate(103.16666412353516,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
             <g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;">
                <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">1</text></g></g>
                <g data-id="N9z()i:8Fq/%?LoZvEK*" data-argument-type="text" data-shapes="argument round" transform="translate(283.88703536987305,8)">
                   <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 40.703704833984375 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-                  <g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="Am-text" x="20.351852416992188" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">thing</text></g></g>
+                  <g class="op Am-edit" transform="translate(8, 0) " style="cursor: text;"><text class="Am-text" x="20.351852416992188" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text></g></g>
                   <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.58333206176758" transform="translate(8, 24) ">replace&nbsp;item</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path><text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(151.16666412353516, 24) ">of</text>
                   <g data-argument-type="variable" class="blocklyEditableText" transform="translate(172.51666450500488, 8) " style="cursor: default;">
                      <rect rx="4" ry="4" x="0" y="0" width="66.90740776062012" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1"></rect>
                      <text class="Am-text blocklyDropdownText" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">xsa</text>
          <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(42.90740776062012,11)"></image></g>
-         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.231481552124023" transform="translate(247.424072265625, 24) ">with</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path></g>
+         <text class="Am-text moveit" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.231481552124023" transform="translate(247.424072265625, 24) ">with</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path></g>
 
 
-         <g data-id="data_insertatlist" visibility="hidden"  class="draggable" id="insert" data-shapes="stack" data-category="data-lists" >
+         <g data-id="data_insertatlist" visibility="hidden"  class="draggable ops" id="insert" data-shapes="stack" data-category="data-lists" >
             <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 281.44259548187256 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
-            <g data-id="AMOtj/}sMsJ*AxK_!rt1" data-argument-type="text number" data-shapes="argument round" transform="translate(141.18518733978271,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">1</text></g></g><g data-id="4)3]~2zso=OAyxp$rY,)" data-argument-type="text" data-shapes="argument round" transform="translate(55.12963104248047,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 40.703704833984375 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="Am-text" x="20.351852416992188" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">thing</text></g></g>
-            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">insert</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path><text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.6759257316589355" transform="translate(119.83333587646484, 24) ">at</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path><text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(189.18518733978271, 24) ">of</text>
-            <g data-argument-type="variable" class="blocklyEditableText" transform="translate(210.53518772125244, 8) " style="cursor: default;"><rect rx="4" ry="4" x="0" y="0" width="66.90740776062012" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1"></rect>
-               <text class="Am-text blocklyDropdownText" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">xsa</text><image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(42.90740776062012,11)"></image></g></g>
+            <g data-id="AMOtj/}sMsJ*AxK_!rt1" data-argument-type="text number" data-shapes="argument round" transform="translate(141.18518733978271,8)">
+               <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+               <g class="op Am-edit" transform="translate(8, 0) " style="cursor: text;">
+                  <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">1</text></g>
+               </g>
+               <!--
+               -->
 
-               <g data-id="data_addtolist" visibility="hidden" class="draggable" data-shapes="stack" id="append" data-category="data-lists">
+                  <path class="circleOps" transform="translate(55, 7)" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 40.703704833984375 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="op Am-edit" transform="translate(60, 7) " style="cursor: text;">
+                     <text class="Am-text" x="20.351852416992188" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text></g>
+                     <!--
+               -->
+            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">insert</text>
+            <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
+            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.6759257316589355" transform="translate(119.83333587646484, 24) ">at</text>
+            <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
+            <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(189.18518733978271, 24) ">of</text>
+            <g data-argument-type="variable" class="blocklyEditableText" transform="translate(210.53518772125244, 8) " style="cursor: default;"><rect rx="4" ry="4" x="0" y="0" width="66.90740776062012" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1"></rect>
+               <text class="Am-text dataStructureName" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">xsa</text><image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(42.90740776062012,11)"></image></g></g>
+
+               <g data-id="data_addtolist" visibility="hidden" class="draggable ops" data-shapes="stack" id="append" data-category="data-lists">
                   <path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FF661A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 204.96111297607422 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path>
-                  <g data-id="hgu+k8!:X(Ezc)b`!7ja" data-argument-type="text" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 40.703704833984375 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-                     <g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="Am-text" x="20.351852416992188" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">thing</text></g></g>
+               <!--
+               -->
+
+               <path class="circleOps" transform="translate(48, 8)" stroke="#E64D00" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 40.703704833984375 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+               <g class="op Am-edit" transform="translate(52, 8) " style="cursor: text;">
+                  <text class="Am-text" x="20.351852416992188" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text></g>
+                  <!--
+            -->
                      <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.351851463317871" transform="translate(8, 24) ">add</text>
                      <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path><text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(112.70370483398438, 24) ">to</text>
                      <g data-argument-type="variable" class="blocklyEditableText" transform="translate(134.0537052154541, 8) " style="cursor: default;"><rect rx="4" ry="4" x="0" y="0" width="66.90740776062012" height="32" stroke="#E64D00" fill="#FF661A" class="blocklyBlockBackground" fill-opacity="1">
 
-                     </rect><text class="Am-text blocklyDropdownText" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">xsa</text>
+                     </rect><text class="Am-text dataStructureName" x="23.45370388031006" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">xsa</text>
                      <image height="12px" width="12px"  xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(42.90740776062012,11)">
 
                      </image>
                </g>
             </g>
 
-      <g data-id="MEhs+,0n)|5Fh#cF+0^s" class="draggable" visibility="hidden" id="math" data-shapes="reporter round" data-category="operators">
+      <g data-id="MEhs+,0n)|5Fh#cF+0^s" class="draggable"  visibility="hidden" id="math" data-shapes="reporter round" data-category="operators">
          <path class="blocklyPath blocklyBlockBackground" stroke="#389438" fill="#59C059" fill-opacity="1" d="m 0,0 m 20,0 H 133.14999961853027 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
          <g data-argument-type="dropdown" class="blocklyEditableText" transform="translate(12, 4) " style="cursor: default;">
             <rect rx="4" ry="4" x="0" y="0" width="67.79999923706055" height="32" stroke="#389438" fill="#59C059" class="blocklyBlockBackground" fill-opacity="1"></rect>
@@ -326,10 +350,10 @@
          </g>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.675000190734863" transform="translate(87.79999923706055, 20) ">of</text>
             <path class="blocklyPath" style="visibility: hidden" d="M 16,0 h 16 a 16 16 0 0 1 0 32 h -16 a 16 16 0 0 1 0 -32 z" fill="#389438" transform="translate(109.14999961853027,4)" data-argument-type="round"></path>
-            <g data-id="l=c5-.nC/cKDQcLoFEP6" data-argument-type="text number" data-shapes="argument round" transform="translate(109.14999961853033,4)">
-               <path class="blocklyPath blocklyBlockBackground  circleOps" stroke="#389438" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-              <g class="Am-edit" transform="translate(8, 0) " style="cursor: text;">
-               <text class="Am-text" x="12" y="18" fill="#1e8f14" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g>
+            <path stroke="#389438"transform="translate(105, 4)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+            <g class="Am-edit" transform="translate(109, 4)" style="cursor: text;">
+               <rect rx="4" ry="4" fill="#fff" x="3" y="2" height="23" width="25"></rect>
+               <text class="Am-text on" x="12" y="18"  fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
             </g>
       </g>
       <g class="draggable return" style="position:fixed;" visibility="hidden" id="return" transform="translate(8,200)">
@@ -347,7 +371,7 @@
          list ops
 
       -->
-      <g class="Am-edit global" transform="translate(120,12)" style="display: block;" visibility="hidden">
+      <g class="Am-edit global" visibility="hidden" transform="translate(120,12)" style="display: block;">
          <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="23" ></rect>
          <text class="Am-text name" fill="#1e8f14" x="5" y="17">1</text>
       </g>
@@ -359,14 +383,7 @@
          </g>
          
       </g>
-      <g class="al" visibility="hidden" transform="translate(10,60)" >
-         <g class="a create-list" style="cursor: pointer;" >
-            <rect stroke="#392D52" fill="#745BA5" fill-opacity="1" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
-            <text class="input-mimic" x="60" y="16" text-anchor="middle"  fill="#fff">Create list</text>
-            
-         </g>
-         
-      </g>
+     
       <g class="al" visibility="hidden" transform="translate(10,5)" > 
          <g class="a create-var" transform="translate(0,35)" style="cursor: pointer;">
             <rect stroke="#389438" fill="#59C059" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
@@ -374,6 +391,89 @@
             
          </g>
       </g>
+      <g class="al" visibility="hidden" transform="translate(10,5)" > 
+         <g class="a create-list" transform="translate(0,35)" style="cursor: pointer;">
+            <rect stroke="#389438" fill="#59C059" width="120" height="22" rx="4" ry="4" x="1" y="1"></rect>
+            <text class="input-mimic" x="60" y="16" text-anchor="middle"  fill="#fff">Create list</text>
+            
+         </g>
+      </g>
+      {% if 'moveBlock' in id %}
+
+      <g class="draggable move" visibility="hidden" style="position:fixed;" id="move">
+         <path stroke="none" fill="#5ba58c"fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 215.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) " fill="#fff">move</text>
+         <g class="Am-edit" transform="translate(60,12)" style="display: block;">
+             <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="70" ></rect>
+             <text class="Am-text" fill="#1e8f14" x="5" y="17">forward</text>
+             
+            </g>
+            <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
+
+            </image>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(130, 24) " fill="#fff">by</text>
+         <g class="Am-edit" transform="translate(170,12)" style="display: block;">
+             <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="40" ></rect>
+             <text class="Am-text" fill="#1e8f14" x="5" y="17">100</text>
+         </g>
+     </g>
+     {% endif %}   
+
+     {% if 'turnBlock' in id %}
+
+     <g class="draggable turn" visibility="hidden" style="position:fixed;" id="turn" transform="translate(0, 60)">
+         <path stroke="none" fill="#5ba58c" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 215.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) " fill="#fff">turn</text>
+         <g class="Am-edit" transform="translate(60,12)" style="display: block;">
+             <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="50" ></rect>
+             <text class="Am-text" fill="#1e8f14" x="5" y="17">right</text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(110, 24) " fill="#fff">by</text>
+         <g class="Am-edit" transform="translate(150,12)" style="display: block;">
+             <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="40" ></rect>
+             <text class="Am-text" fill="#1e8f14" x="5" y="17">100</text>
+         </g>
+     </g>
+     {% endif %}   
+
+     {% if 'colorBlock' in id %}
+
+     <g class="draggable color" visibility="hidden" style="position:fixed;" id="color" transform="translate(10, 120)">
+         <path stroke="none" fill="#5ba58c" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 140.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(20, 24) " fill="#fff">set color to</text>
+         <g onclick="tuggle(this)" transform="translate(94.85679626464844, 15)" style="cursor: pointer;">
+             <rect class="coloring" rx="4" ry="4" x="0" y="0" height="16" width="26" fill-opacity: 1; fill="#fff"></rect>
+         </g>
+         <g class="table" transform="translate(80, 40)" visibility="hidden">
+            <foreignObject x="0" y="0" width="90" height="90">
+                <div xmlns="http://www.w3.org/1999/xhtml" style="border: 3px solid; border-color:  #000; max-height: 300px; position: absolute;">
+                    <table onclick="setColor(this,event)" style="border-collapse: collapse; width: 50px; height: 50px;" >
+                        <tr role="row">
+                            <td title="#ff0000" style="background-color: rgb(255, 0, 0);">
+                    </td>
+                 <td title="#ffcc33"  style="background-color: rgb(255, 204, 51);"></td>
+                 <td title="#ffff00" style="background-color: rgb(255, 255, 0);"></td>
+                 </tr>
+                 <tr role="row">
+                    <td title="#009900" style="background-color: rgb(0, 153, 0);"></td>
+                     <td title="#3333ff" style="background-color: rgb(51, 51, 255);"></td>
+                     <td title="#cc33cc" style="background-color: rgb(204, 51, 204);"></td></tr>
+                     <tr role="row">
+                        <td title="#ffffff"  style="background-color: rgb(255, 255, 255);"></td>
+                         <td title="#999999" style="background-color: rgb(153, 153, 153);"></td>
+                         <td title="#000000" style="background-color: rgb(0, 0, 0);">
+                        </td></tr>
+                    </table>
+                </div>
+             </foreignObject>
+             
+        </g>
+      </g>
+      {% endif %}   
+
       {% if 'classBlock' in id %}
 
          <g class="draggable onleft" visibility="hidden" id="class">
@@ -422,7 +522,7 @@
       {% endif %}   
 
       {% if 'functionBlock' in id %}
-         <g class="draggable function-container if-like" visibility="hidden" id="function">
+         <g class="draggable function-container iflike" visibility="hidden" id="function">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 145 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 145 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="#995ba5" ></path>
 
@@ -471,42 +571,21 @@
                <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="23" ></rect>
                <text class="Am-text name" fill="#1e8f14" x="5" y="17"></text>
             </g>
-            <text class="Am-text" y="2"  dy="0" x="4" transform="translate(80,24)" > with: </text>
+            <text class="Am-text moveit" y="2"  dy="0" x="4" transform="translate(80,24)" > with: </text>
       
             
 
 
          </g>
-         <g class="draggable call" style="position:fixed;" id="caller"  visibility="hidden">
-            <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 100.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
-            </path>
+         <g class="draggable call circleOps" style="position:fixed;" id="caller"  visibility="hidden">
+            <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,0 m 20,0 H 85.81481170654297 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">call </text>
             <text class="Am-text name" y="2"  x="50.564815521240234" transform="translate(0, 24) "></text>
-
          </g>
 
       {% endif %}   
       
-      {% if 'listBlock' in id %}
-
-      <g id="list" class="ops" data-category="data-lists" transform="translate(8, 250)">
-         <path stroke="#392D52" fill="#745BA5" fill-opacity="1" d="m 0,0 m 20,0 H 224.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
-
-         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="15.120369911193848" transform="translate(60, 20) ">list operations</text>
-         <path class="blocklyPath" style="visibility: hidden" d="" fill="#E64D00"></path>
-         <g data-argument-type="variable" class="blocklyEditableText" transform="translate(160.59074020385742, 4) " style="cursor: default;">
-            <rect rx="4" ry="4" x="0" y="0" width="63.35185241699219" height="32" stroke="#392D52" fill="#745BA5" class="blocklyBlockBackground" fill-opacity="1"></rect>
-            <text class="Am-text operation" x="21.675926208496094" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">add</text>
-         <image height="12px" width="12px" xlink:href="{% static 'Am-images/drowarrow.svg' %}" transform="translate(39.35185241699219,11)">
-
-         </image>
-      </g>
-   </g>
-    
-       
-
-      {% endif %}
-
+ 
       {% if 'eachBlock' in id %}
       <g class="draggable if-container thick " id="each" visibility="hidden" transform="translate(8,200)">
          <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 160 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 70 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 160 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
@@ -529,15 +608,15 @@
       {% if 'printBlock' in id %}
     
     
-         <g class="draggable print"  transform="translate(8,300)"  style="position:fixed;" visibility="hidden" id="print">
+         <g class="iflike draggable print"  transform="translate(8,300)"  style="position:fixed;" visibility="hidden" id="print">
             <path stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
             </path>
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(8, 24) ">print</text>
-            <g transform="translate(70, 8)">
-               <path stroke="#389438" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
-               <g class="Am-edit" transform="translate(8, 0)" style="cursor: text;">
-                  <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">&nbsp;</text></g>
-             </g>
+               <path stroke="#389438"transform="translate(70, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+               <g class="Am-edit" transform="translate(78, 8)" style="cursor: text;">
+               <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+
+                  <text class="Am-text"  fill="#000" x="12" y="18" dy="0"></text></g>
             <image  class="string" xlink:href="{% static 'Am-images/fether.svg' %}" transform="translate(120,12)" width="20" height="20" />
          </g>
 
@@ -547,7 +626,7 @@
 
 
       {% if 'ifBlock' in id %}
-         <g class="draggable if-container if-like"   visibility="hidden" id="if">
+         <g class="draggable if-container iflike"   visibility="hidden" id="if">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
 
@@ -556,21 +635,7 @@
             <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(8,24)">if </text>
             <path class="drobable" d="M 16,0  h 16 l 16,16 l -16,16 h -16 l -16,-16 l 16,-16 z" fill="#CF8b17" transform="translate(50,8)"></path>
             <text class="Am-text move" y="2" text-anchor="middle" dominant-baseline="middle"  dy="0" x="4" transform="translate(124,24)" > then</text>
-            <svg  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            xmlns:html="http://www.w3.org/1999/xhtml"
-            version="1.1" y="45" x="20" visibility="hidden" >
-            <rect stroke="#392D52" fill="#745ba53e" height="100" width="160" class="MutatorBackground"></rect>
 
-            </svg>
-            <g class="drop_content create" style="cursor: pointer;" transform="translate(0,35)">
-               <rect rx="4" ry="4" height="16" width="16"></rect>
-               <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
-               </path>
-               <circle  r="2.7" cx="8" cy="8"></circle>
-            </g>
-           
-            
          </g>
       {% endif %}
 
@@ -606,15 +671,17 @@
 
          <g class="draggable operation-logic" visibility="hidden"  id="condition" >
             <path d="m 0,0 m 20,0 H 140.35000038146973 l 20 20 l -20 20 H 20 l -20 -20 l 20 -20 z" stroke="#389438" fill="#59C059"></path>
-               <g class="Am-edit" transform="translate(30,7)" style="display: block;">
-                  <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
-                  <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
-               </g>
-            <g class="move-input" transform="translate(0,0)">
+            <path stroke="#389438"transform="translate(22, 4)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+            <g class="Am-edit" transform="translate(25, 5)" style="cursor: text;">
+              <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+
+               <text class="Am-text main" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
+            </g>
+            <g class="moveit move-input" transform="translate(0,0)">
       
-            <g class="am-drop select"  transform="translate(65, 10)" style="cursor: text;">
+            <g class="moveit am-drop select"  transform="translate(67, 10)" style="cursor: text;">
                <rect  rx="4" ry="4" x="0" y="0" height="18" width="31"></rect>
-               <text class="Am-text" x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> <</text>
+               <text class="Am-text op" x="10" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> <</text>
                <text x="23" y="9" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> ▾ </text>
               <!-- <foreignObject x="-80" y="50" width="0" height="250" visibility="hidden">
                   <div xmlns="http://www.w3.org/1999/xhtml">
@@ -630,10 +697,12 @@
                      </div>
                </foreignObject>-->
             </g>
-               <g class="Am-edit" transform="translate(108,7)" style="display: block;">
-                  <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
-                  <text class="Am-text" fill="#1e8f14" x="5" y="17">0</text>
-               </g>
+            <path stroke="#389438"transform="translate(105, 4)" class="moveit circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+            <g class="moveit Am-edit" transform="translate(108, 5)" style="cursor: text;">
+              <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+
+               <text class="Am-text main" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
+            </g>
           
          </g>
          </g>
@@ -664,15 +733,16 @@
          {% if 'operationBlock' in id %}
 
          <g class="draggable operation" visibility="hidden" style="position:fixed;" id="operation" >
-            <path stroke="#389438" fill="#59C059" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 145.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
-            </path>
-            <g class="Am-edit" transform="translate(15,11)" style="display: block;">
-               <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
-               <text class="Am-text" fill="#1e8f14" x="5" y="17"></text>
+            <path  stroke="#389438" fill="#59C059" fill-opacity="1" d="m 0,0 m 20,0 H 135.9425926208496 a 20 20 0 0 1 0 40 H 20 a 20 20 0 0 1 0 -40 z"></path>
+   
+            <path stroke="#389438"transform="translate(13, 4)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+            <g class="Am-edit" transform="translate(16, 4.5)" style="cursor: text;">
+               <rect rx="4" ry="4" fill="#fff" x="3" y="2" height="23" width="25"></rect>
+               <text class="Am-text on"  fill="#000" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
             </g>
-            <g class="am-drop select"  transform="translate(55, 13)" style="cursor: text;">
+            <g class="am-drop select"  transform="translate(60, 11)" style="cursor: text;">
                <rect  rx="4" ry="4" x="-2" y="0" height="18" width="33"></rect>
-               <text class="Am-text" x="15" y="10" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> += </text>
+               <text class="Am-text op" x="15" y="10" dominant-baseline="middle" stroke="none"text-anchor="middle" dy="0" fill="#ffffff"> += </text>
                <foreignObject x="-80" y="50" width="200" height="250" visibility="hidden">
                   <div xmlns="http://www.w3.org/1999/xhtml">
                      <div class="operation-head">
@@ -687,11 +757,10 @@
                      </div>
                </foreignObject>
             </g>
-            <g class="Am-edit" transform="translate(95,11)" style="display: block;">
-               <rect rx="4" ry="4" fill='#fff' x="0" y="0" height="23" width="25" ></rect>
-               <text class="Am-text" fill="#1e8f14" x="5" y="17"></text>
-            </g>
-       
+            <path stroke="#389438"transform="translate(97, 4)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+            <g class="Am-edit" transform="translate(100, 4.5)" style="cursor: text;">
+               <rect rx="4" ry="4" fill="#fff" x="3" y="2" height="23" width="25"></rect>
+            <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle"></text></g>
             
          </g>
 
@@ -707,24 +776,12 @@
          {% endif %}
 
       {% if 'elseBlock' in id  %}
-         <g  class="draggable else-container" visibility="hidden" id="else">
+         <g  class="draggable else-container iflike" visibility="hidden" id="else">
             <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 156 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
             fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
-            <g class="drop_content create" style="cursor: pointer;" transform="translate(0,35)">
-               <rect rx="4" ry="4" height="16" width="16"></rect>
-               <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
-               </path>
-               <circle  r="2.7" cx="8" cy="8"></circle>
-            </g>
+      
             <text y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="5" transform="translate(16,24)">else</text>
 
-            <svg  style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            xmlns:html="http://www.w3.org/1999/xhtml"
-            version="1.1" y="45" x="20" visibility="hidden" >
-            <rect stroke="#392D52" fill="#745ba53e" height="100" width="160" class="MutatorBackground"></rect>
-
-            </svg>
       </g>
       {% endif %}
       {% if 'counterBlock' in id  %}
@@ -745,26 +802,30 @@
                <g class="inputs">
 
                   <rect rx="4" ry="4" y="5" x="5" fill="#ddd" width="160" height="200"></rect>
-                  <g class="change drop_list" visibility="hidden" id="inputs" style="cursor: pointer;" transform="translate(10,10)" >
-                     <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 210.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                  <g class="change drop_list"  visibility="hidden"  id="inputs" style="cursor: pointer;" transform="translate(16,50)" >
+                     <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 240.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
                      </path>
                      <g class="Am-edit" transform="translate(10,12)" style="display: block;">
                         <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                        <text class="main Am-text varname" fill="#1e8f14" x="5" y="17">a</text>
+                        <text class="Am-text varname" fill="#1e8f14" x="5" y="17">a</text>
                      </g>
                      <text class="Am-text" y="27" dy="0" x="40">from </text>
-                     <g class="Am-edit" transform="translate(75,12)" style="display: block;">
-                        <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                        <text class="main Am-text" fill="#1e8f14" x="5" y="17">10</text>
+                     <path stroke="#389438"transform="translate(75, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                     <g class="Am-edit" transform="translate(78, 9)" style="cursor: text;">
+                       <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+
+                        <text class="Am-text main" x="12" y="18"  fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
                      </g>
-                     <text class="Am-text" y="27" dy="0" x="108">to </text>
-                     <g class="Am-edit" transform="translate(123,12)" style="display: block;">
-                        <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                        <text class="main Am-text" fill="#1e8f14" x="5" y="17">20</text>
+                     <text class="Am-text" y="27" dy="0" x="118">to </text>
+                     <path stroke="#389438"transform="translate(135, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                     <g class="Am-edit" transform="translate(138, 9)" style="cursor: text;">
+                       <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+
+                        <text class="Am-text main" x="12" y="18"  fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle"></text>
                      </g>
 
-                     <text class="Am-text" y="27" dy="0" x="158">by </text>
-                     <g class="Am-edit" transform="translate(175,12)" style="display: block;">
+                     <text class="Am-text" y="27" dy="0" x="178">by </text>
+                     <g class="Am-edit" transform="translate(198,12)" style="display: block;">
                         <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
                         <text class="main Am-text by" fill="#1e8f14" x="5" y="17">2</text>
                      </g>
@@ -774,11 +835,12 @@
                      <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 130.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
                      </path>
                      <text class="Am-text" y="25" dy="0" x="15.564815521240234">counter:</text>
-                     <g class="Am-edit" transform="translate(95,12)" style="display: block;">
-                        <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                        <text class="Am-text" fill="#1e8f14" x="5" y="17">a</text>
-                     </g>
-                  </g>
+                     <path stroke="#389438"transform="translate(85, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                      <g class="Am-edit" transform="translate(87, 9)" style="cursor: text;">
+                        <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+
+                         <text class="Am-text" x="12" y="18"   fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle"></text></g>
+                          </g>
   
                </g>
                <g class="inputs-wrapper-container" transform="translate(180, 30)">
@@ -786,35 +848,40 @@
                   xmlns:xlink="http://www.w3.org/1999/xlink"
                   xmlns:html="http://www.w3.org/1999/xhtml"
                   version="1.1" width="450px" height="400px" >
-                     <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 100 a 4 4 0 0 1 4 4 v 50 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 100 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
+                     <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 160 a 4 4 0 0 1 4 4 v 50 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 100 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
                      fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
                      <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(50,15)">settings </text>
                      <g class="change drop_list s" id="inputs" style="cursor: pointer;" transform="translate(16,50)" >
-                        <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 210.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                        <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 240.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
                         </path>
                         <g class="Am-edit" transform="translate(10,12)" style="display: block;">
                            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
                            <text class="Am-text varname" fill="#1e8f14" x="5" y="17">a</text>
                         </g>
                         <text class="Am-text" y="27" dy="0" x="40">from </text>
-                        <g class="Am-edit" transform="translate(75,12)" style="display: block;">
-                           <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                           <text class="main Am-text" fill="#1e8f14" x="5" y="17">10</text>
+                        <path stroke="#389438"transform="translate(75, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                        <g class="Am-edit" transform="translate(78, 9)" style="cursor: text;">
+                          <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+  
+                           <text class="Am-text main" x="12" y="18"  fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle">0</text>
                         </g>
-                        <text class="Am-text" y="27" dy="0" x="108">to </text>
-                        <g class="Am-edit" transform="translate(123,12)" style="display: block;">
-                           <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
-                           <text class="main Am-text" fill="#1e8f14" x="5" y="17">20</text>
+                        <text class="Am-text" y="27" dy="0" x="118">to </text>
+                        <path stroke="#389438"transform="translate(135, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                        <g class="Am-edit" transform="translate(138, 9)" style="cursor: text;">
+                          <rect rx="4" ry="4" fill="#fff" x="2" y="2" height="23" width="25"></rect>
+  
+                           <text class="Am-text main" x="12" y="18" fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle">10</text>
                         </g>
    
-                        <text class="Am-text" y="27" dy="0" x="158">by </text>
-                        <g class="Am-edit" transform="translate(175,12)" style="display: block;">
+                        <text class="Am-text" y="27" dy="0" x="178">by </text>
+                        <g class="Am-edit" transform="translate(198,12)" style="display: block;">
                            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
                            <text class="main Am-text by" fill="#1e8f14" x="5" y="17">2</text>
                         </g>
                      </g>
                   </svg>
                </g>
+          
             </g>
          </g>
       {% endif %}
@@ -838,10 +905,170 @@
       </g>
 
       {% endif %}
+      {% if 'makeListBlock' in id  %}   
+      <g class="draggable make-list"  transform="translate(8,300)" visibility="hidden" style="position:fixed;" id="create_list">
+         <path stroke="#2E8EB8" fill="#5CB1D6" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(12, 24) ">set</text>
+         <g class="Am-edit" transform="translate(55,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
+            <text class="Am-text name" fill="#1e8f14" x="5" y="17"></text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="85.564815521240234" transform="translate(12, 24) ">to</text>
+         <g class="parameters" transform="translate(0,100)">
+            <rect rx="4" ry="4"  fill="#995ba5" width="355" height="210"></rect>
+            <rect rx="4" ry="4" y="5" x="5"  stroke="" width="345" height="200"></rect>
+            <g class="inputs">
+               <rect rx="4" ry="4" y="5" x="5" fill="#ddd" width="160" height="200"></rect>
+               <g class="drop_list" style="cursor: pointer;" id="inputs" transform="translate(10,10)">
+                  <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 130.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                  </path>
+                  <text class="Am-text" y="25" dy="0" x="15.564815521240234">item:</text>
+                  <path stroke="#389438"transform="translate(80, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="Am-edit" transform="translate(85, 7)" style="cursor: text;">
+                     <text class="Am-text" x="12" y="18" fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle">a</text></g>
+               </g>
+            </g>
+            <g class="inputs-wrapper-container" transform="translate(180, 30)">
+            <svg style="z-index: 99999; position: relative;" class="Am-workspace" xmlns="http://www.w3.org/2000/svg"
+               xmlns:xlink="http://www.w3.org/1999/xlink"
+               xmlns:html="http://www.w3.org/1999/xhtml"
+               version="1.1" width="150px" height="400px" >
+                  <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 100 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 100 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
+                  fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
+                  <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(50,15)">item </text>
+               </svg>
+            </g>
+         </g>
+         <g class="drop_params" style="cursor: pointer;" transform="translate(3,8)">
+            <rect rx="4" ry="4" height="16" width="16"></rect>
+            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
+            </path>
+            <circle  r="2.7" cx="8" cy="8"></circle>
+         </g>
+      </g>
 
+      {% endif %}
+
+      {% if 'makeListBlock' in id  %}   
+      <g class="draggable make-set"  transform="translate(8,300)" visibility="hidden" style="position:fixed;" id="create_set">
+         <path stroke="#2E8EB8" fill="#5CB1D6" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(12, 24) ">set</text>
+         <g class="Am-edit" transform="translate(55,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
+            <text class="Am-text name" fill="#1e8f14" x="5" y="17"></text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="85.564815521240234" transform="translate(12, 24) ">to</text>
+         <g class="parameters" transform="translate(0,100)">
+            <rect rx="4" ry="4"  fill="#995ba5" width="355" height="210"></rect>
+            <rect rx="4" ry="4" y="5" x="5"  stroke="" width="345" height="200"></rect>
+            <g class="inputs">
+               <rect rx="4" ry="4" y="5" x="5" fill="#ddd" width="160" height="200"></rect>
+               <g class="drop_list" style="cursor: pointer;" id="inputs" transform="translate(10,10)">
+                  <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 130.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                  </path>
+                  <text class="Am-text" y="25" dy="0" x="15.564815521240234">item:</text>
+                  <path stroke="#389438"transform="translate(80, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="Am-edit" transform="translate(85, 6)" style="cursor: text;">
+                     <text class="Am-text" x="12" y="18"  fill="#000" dominant-baseline="middle" dy="0" text-anchor="middle">a</text></g>
+               </g>
+            </g>
+            <g class="inputs-wrapper-container" transform="translate(180, 30)">
+            <svg style="z-index: 99999; position: relative;" class="Am-workspace" xmlns="http://www.w3.org/2000/svg"
+               xmlns:xlink="http://www.w3.org/1999/xlink"
+               xmlns:html="http://www.w3.org/1999/xhtml"
+               version="1.1" width="150px" height="400px" >
+                  <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 100 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 100 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
+                  fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
+                  <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(50,15)">item </text>
+            </svg>
+            </g>
+         </g>
+         <g class="drop_params" style="cursor: pointer;" transform="translate(3,8)">
+            <rect rx="4" ry="4" height="16" width="16"></rect>
+            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
+            </path>
+            <circle  r="2.7" cx="8" cy="8"></circle>
+         </g>
+      </g>
+
+      {% endif %}
+      
+      {% if 'makeHashBlock' in id  %}   
+      <g class="draggable make-hash"  transform="translate(8,300)" visibility="hidden" style="position:fixed;" id="create_hash">
+         <path stroke="#2E8EB8" fill="#5CB1D6" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+         </path>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="19.564815521240234" transform="translate(12, 24) ">set</text>
+         <g class="Am-edit" transform="translate(55,12)" style="display: block;">
+            <rect rx="4" ry="4" x="0" fill='#fff' y="0" height="23" width="25" ></rect>
+            <text class="Am-text name" fill="#1e8f14" x="5" y="17"></text>
+         </g>
+         <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="85.564815521240234" transform="translate(12, 24) ">to</text>
+         <g class="parameters" transform="translate(0,100)">
+            <rect rx="4" ry="4"  fill="#995ba5" width="355" height="210"></rect>
+            <rect rx="4" ry="4" y="5" x="5"  stroke="" width="345" height="200"></rect>
+            <g class="inputs">
+               <rect rx="4" ry="4" y="5" x="5" fill="#ddd" width="160" height="200"></rect>
+               <g class="drop_list" style="cursor: pointer;" id="inputs" transform="translate(10,10)">
+                  <path stroke="none" fill="#995ba5" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 170.38888931274414 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z">
+                  </path>
+                  <text class="Am-text" y="25" dy="0" x="15.564815521240234">key:</text>
+                  <path stroke="#389438"transform="translate(50, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="Am-edit" transform="translate(52, 8)" style="cursor: text;">
+                     <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">a</text></g>
+                  <text class="Am-text" y="25" dy="0" x="80.564815521240234">value:</text>
+                  <path stroke="#389438"transform="translate(130, 8)" class="circleOps" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path>
+                  <g class="Am-edit" transform="translate(132, 8)" style="cursor: text;">
+                     <text class="Am-text" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">a</text></g>
+               </g>
+            </g>
+            <g class="inputs-wrapper-container" transform="translate(130, 70)">
+            <svg style="z-index: 99999; position: relative;" class="Am-workspace" xmlns="http://www.w3.org/2000/svg"
+               xmlns:xlink="http://www.w3.org/1999/xlink"
+               xmlns:html="http://www.w3.org/1999/xhtml"
+               version="1.1" width="200px" height="400px" >
+                  <path  d="m 0 4 A 4 4 0 0 1 4 0 H 12 -2 H 100 a 4 4 0 0 1 4 4 v 40 a 4 4 0 0 1 -4 4 H 64 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 h -8 a 4 4 0 0 0 -4 4 v 16 a 4 4 0 0 0 4 4 h 8 c 2 0 3 1 4 2 l 4 4 c 1 1 2 2 4 2 h 12 c 2 0 3 -1 4 -2 l 4 -4 c 1 -1 2 -2 4 -2 H 100 a 4 4 0 0 1 4 4 v 24 a 4 4 0 0 1 -4 4 H 48 c -2 0 -3 1 -4 2 l -4 4 c -1 1 -2 2 -4 2 h -12 c -2 0 -3 -1 -4 -2 l -4 -4 c -1 -1 -2 -2 -4 -2 H 4 a 4 4 0 0 1 -4 -4 Z" 
+                  fill="rgb(255, 171, 25)" stroke="rgb(207, 139, 23)" stroke-width="2"/>
+                  <text class="Am-text" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="4" transform="translate(50,15)">item </text>
+               </svg>
+            </g>
+         </g>
+         <g class="drop_params" style="cursor: pointer;" transform="translate(3,8)">
+            <rect rx="4" ry="4" height="16" width="16"></rect>
+            <path stroke="#392D52" fill="#745BA5" fill-opacity="1"  d="m4.203,7.296 0,1.368 -0.92,0.677 -0.11,0.41 0.9,1.559 0.41,0.11 1.043,-0.457 1.187,0.683 0.127,1.134 0.3,0.3 1.8,0 0.3,-0.299 0.127,-1.138 1.185,-0.682 1.046,0.458 0.409,-0.11 0.9,-1.559 -0.11,-0.41 -0.92,-0.677 0,-1.366 0.92,-0.677 0.11,-0.41 -0.9,-1.559 -0.409,-0.109 -1.046,0.458 -1.185,-0.682 -0.127,-1.138 -0.3,-0.299 -1.8,0 -0.3,0.3 -0.126,1.135 -1.187,0.682 -1.043,-0.457 -0.41,0.11 -0.899,1.559 0.108,0.409z">
+            </path>
+            <circle  r="2.7" cx="8" cy="8"></circle>
+         </g>
+      </g>
+
+      {% endif %}
+
+
+    
 	  </svg>
    </svg>
   
+
+   <div  class="DropDownDiv" 
+   style="visibility: hidden; left: 200px; top: 100px; position: relative; transition: transform 0.25s ease 0s, opacity 0.25s ease 0s; background-color: #5CB1D6;  direction: ltr; display: block; opacity: 1;" data-category="data">
+      <div class="blocklyDropDownContent" style="max-height: 300px;overflow: auto;">
+         <div class="goog-menu goog-menu-vertical blocklyDropdownMenu"  role="menu" aria-haspopup="true" tabindex="0" style="cursor: default; font: normal 13px Helvetica Neue, Helvetica, sans-serif;outline: none;user-select: none;">
+            
+         </div>
+      </div>
+      <div class="blocklyDropDownArrow arrowTop" style="border-top: 1px solid;
+      border-left: 1px solid;
+      border-top-left-radius: 4px;
+      border-color: inherit;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      z-index: -1;
+      background-color: inherit;
+      transform: translate(157.5px, -9px) rotate(45deg);"></div></div>
 
       {% endblock block %}
         

@@ -18,9 +18,11 @@ def problem(request, pname):
     
     problem = Problem.objects.get(pname=pname)
     context = {'problem':problem}
-    dic = [ 'eachBlock', 'listBlock', 'counterBlock','printBlock' ,'conditionalBlock','multiConditionBlock', 'functionBlock','classBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock', 'elseBlock','whileBlock', 'makeVarBlock']
-    context = {'id':dic}
+    dic = [ 'eachBlock', 'listBlock', 'counterBlock','printBlock' ,'conditionalBlock','multiConditionBlock', 'functionBlock','classBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock','makeListBlock', 'makeHashBlock', 'elseBlock','whileBlock', 'makeVarBlock', 'conditionalBlock']
+    context = {'id':dic,
+                'my_template': 'TutorialsBlocks/tutorials.html'}
     return render(request, 'blocks.html', context)
+ 
         #raise Http404('problem does not exist')
     
     
