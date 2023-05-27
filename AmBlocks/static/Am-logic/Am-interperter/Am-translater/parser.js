@@ -1,5 +1,6 @@
 import * as Type from './ast.js' 
 import { tokenize, TokenType } from "./lexical.js";
+
 import { Symbol, SymbolClass, SymbolFunction } from './symbol.js';
 export class Parser{
 
@@ -56,11 +57,25 @@ export class Parser{
         
         return this.translate_expression(expression.left)+expression.left.value+expression.operater.value+expression.right.value;
     }
-    getMathType(mth){
+    getListOpType(lst, env){
+        switch(lst.ops){
+            case "length":
+                return 'int';
+            case 'pop':
+                let lstname = lst.listName.value;
+                return env.lookUp(lstname)[0];
+
+            
+        }
+    }
+    getMathType(mth, env){
         /* check mathexpression first * */
         if(mth.kind === 'mathStatement'){
             return this.getMathType(mth.on);
-        }return this.getVarType(mth.value);
+        }if(mth.kind === 'opListStatement'){
+            return this.getListOpType(mth, env);
+        }
+        return this.getVarType(mth.value, env);
     }
     getVarType(value, env=null){
        
@@ -124,6 +139,8 @@ export class Parser{
         let op = '';
         let right_op = 'NULL';
         this.move();
+        let varvalue;
+        let vartype;
         let right;
         // check for prompt
         if(this.getCurrentToken().value == 'prompt'){
@@ -134,10 +151,11 @@ export class Parser{
             right='input('+prompt+')'.replace("\n", '')
 
         }else{
-                right = this.parse_additive_expr(env);
+          
+                right = this.parse_statement(env);
             if(right['kind']){
              
-                if(right.value!=null){
+                if(right.value!=null){ /// parse normal assi
                     const lookup = env.lookUp(left)
                     let value = '';
 
@@ -187,18 +205,27 @@ export class Parser{
                     }
                     lookup[0] = value;
                     env.isset(true);
+                    right.value = op + right_op
+                    varvalue = right.value;
+                    vartype = this.getVarType(varvalue)
+
+                }else{
+                    // get varvalue from math if math
+                    vartype = this.getMathType(right, env);
+                    varvalue = right;
+                    lookup[0] = vartype;
+
                 }
 
             }
         }
-        right.value = op + right_op
         
         left = {
             kind:'assignmentStatement',
             left,
             right
         };
-        return left;
+        return [left, varvalue, vartype];
     }
 
     produceAST(srcCode, env, lang){
@@ -254,6 +281,8 @@ export class Parser{
             case TokenType.op:
                 return (this.pasre_operation_statement(env))
                 
+            case TokenType.Strings:
+                return this.pasre_string_statement(env)
             case TokenType.Math:
                 return this.pasre_math_statement(env)
             default:
@@ -273,7 +302,21 @@ export class Parser{
                 body.body.push(statement);
             }else
                 body['body'] = [statement];
-        }
+        }this.move()/////\n
+        return body;
+    }
+    pasre_string_statement(env){
+        this.move();
+        const op = this.move().value;
+        const onstring = this.move().value;
+        const on = this.parse_statement(env);
+        
+        let body={
+            kind:'stringStatement',
+            op:op,
+            on:on,
+            onstring:onstring
+        };
         return body;
     }
     pasre_math_statement(env){
@@ -307,7 +350,11 @@ export class Parser{
     pasre_opList_statement(env){
         let body={};
         this.move();
-        const listName = this.move().value;
+        let listName = this.parse_additive_expr(env);
+        if(listName.kind!='BinaryExpression' && listName.kind!='private' && listName.kind!='public'){
+            const error =  this.generateBodyError(env, listName, true);
+            if(error!=true)return error
+        }
         body={
             kind:'opListStatement',
             listName,
@@ -325,10 +372,10 @@ export class Parser{
                 val = this.getVarType(x.value, env);
             }else{
 
-                val = this.getMathType(x);
-                type.push(val);
-                opvalue.push(x);
+                val = this.getMathType(x, env);
             }
+            type.push(val);
+            opvalue.push(x);
         }
 
         /// get list/set type
@@ -376,8 +423,15 @@ export class Parser{
             while (this.inBody() && this.validToken()) { 
                 let x = this.parse_statement(env);
                 if(x['error'])return x.error;
-                type.push(this.getVarType(x.value, env));
-                opvalue.push(x.value);
+                let val;
+                if(x.value){
+                    val = this.getVarType(x.value, env);
+                }else{
+    
+                    val = this.getMathType(x, env);
+                }
+                type.push(val);
+                opvalue.push(x);
             }
             
             /// get list/set type
@@ -455,10 +509,11 @@ export class Parser{
         let varvalue = 'null';
         if(this.getCurrentToken().type==TokenType.Equals){ 
             
-            let left = this.handle_assigment(varname, env);
-            if(left['error']) return left.error;
-            varvalue = left.right.value;
-            vartype = this.getVarType(varvalue)
+            let resutl = this.handle_assigment(varname, env);
+            let left = resutl[0];
+            if(left.right['error']) return left.right;
+            varvalue = resutl[1];
+            vartype = resutl[2];
         }
  
         //check if the var is the same as the function name
@@ -746,7 +801,7 @@ export class Parser{
         if(this.getCurrentToken().value == 'then')
             condition = 'false'
         else
-            condition = this.parse_expr(env);
+            condition = this.parse_statement(env);
         body={
             kind:'ifStatement',
             condition,
@@ -780,7 +835,10 @@ export class Parser{
             const name = this.move().value;
             const from = this.move().value;
             const to = this.move().value;
-            const by = this.move().value;
+            let by = this.move().value;
+            if(by==='-'){
+                by+=this.move().value;
+            }
 
             indexes[name] = [from, to, by];
         }

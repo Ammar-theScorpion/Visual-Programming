@@ -128,7 +128,6 @@ function setColor(element, event){
     const color = $(element).closest('.draggable').find('.coloring');
     lineColor = event.target.style.backgroundColor;
     color.attr('fill', lineColor);
-
 }
 
 ///////////// *Draw Lines and the main character* ////////////// 

@@ -37,64 +37,27 @@ export class ConverterPy{
 
     generateBody(node, level, type, cond=true){
       const condition = node.condition;
-      let conditionValue = 'False';
+
+      let conditionValue = '';
+      if(cond)
+        conditionValue ='False'
       if (condition !== undefined && conditionValue.toLowerCase() != condition) {
         conditionValue = this.getExpressionString(condition);
       }
-      const body = !node.body?undefined: [...node.body];
-      let bodyValue = '\t'+'pass';
-
+      const body = !node.body ? undefined : [...node.body];
+      let bodyValue = '\tpass';
+      
       if (body) {
         bodyValue = '';
         while (body.length) {
-          bodyValue += '\t'+this.generateCode(body.shift(), level + 1);
+          bodyValue += '\n\t' + this.generateCode(body.shift(), level + 1);
         }
       }
-      const indentation = level>=0?'\t'.repeat(level):"";
-      return `${indentation}${type} ${conditionValue}:\n${'\t'.repeat(level+1)}${bodyValue}`;
-    }
+      const indentation = level >= 0 ? '\t'.repeat(level) : "";
+      return `${indentation}${type} ${conditionValue}:\n${'\t'.repeat(level + 1)}${bodyValue}`;
+      
+    }      
 
-    analysOperations(ope){
-      const [methodName, argsStr] = ope.split(":");
-      const args = argsStr ? argsStr.split(",") : [];
-    
-      // Map the method name to the corresponding Python code
-      switch (methodName) {
-        case "up":
-          return `${args[0]}.upper()`;
-        case "low":
-          return `${args[0]}.lower()`;
-        case "cat":
-          return `${args[0]} + ${args[1]}`;
-        case "cnt":
-          return `${args[0]}.count('${args[1]}')`;
-        case "spt":
-          return `${args[0]}.split('${args[1]}')`;
-        case "idx":
-          return `${args[0]}.index('${args[1]}')`;
-        // Handle the special case of [:::] separator
-        case "replace":
-          if (args[1] === "[:::]") {
-            return `${args[0]}.replace('${args[1]}', ':')`;
-          } else {
-            return `${args[0]}.replace('${args[1]}', '${args[2]}')`;
-          }
-        case "slc":
-          if (args.length === 1) {
-            return `${args[0]}[:]`;
-          } 
-          else if (args.length === 2) {
-            return `${args[0]}[${args[1]}:]`;
-          } else if (args.length === 3) {
-            return `${args[0]}[${args[1]}:${args[2]}]`;
-          } else if (args.length === 4) {
-            return `${args[0]}[${args[1]}:${args[2]}:${args[3]}]`;
-          } else {
-            throw new Error(`Invalid number of arguments for slice operation`);
-          }
-      }return methodName == 'NULL'?'None':methodName;
-
-    }
 
     generateCode(node, level) {
         switch (node.kind) {
@@ -126,11 +89,65 @@ export class ConverterPy{
               return this.generateMathStatement(node, level);
           case 'opListStatement':
               return this.generateOpListStatement(node, level);
+          case 'stringStatement':
+                return this.generateStringStatement(node, level);
               case 'multiBinary':
                 return this.getExpressionString(node, level);
           default:
             return typeof(node.error)=='string'?node.error:(node.value !== undefined? node.value : node);
          }
+      }
+        generateStringStatement(node){
+          let op = node.op;
+          let on ;
+          let onstring = node.onstring;
+          if(node.on.value ==null)
+            on = this.generateCode(node.onstring);
+          else
+            on = this.generateCode(node.on);
+          // Map the method name to the corresponding C++ code
+          switch(op){
+          case "up":
+            op=`${on}.upper()`;
+          case "low":
+            return `${on}.lower()`;
+            case "Len": 
+            op= `len(${on})`;break;
+          case "cat":
+            return `${onstring} + ${on}`;
+          case "cnt":
+            return `${onstring}.count(${on})`;
+          case "spt":
+            return `${onstring}.split(${on})`;
+          case "idx":
+            return `${onstring}[${on}]`;
+          // Handle the special case of [:::] separator
+          case "repl":
+            if (isNaN(on) ) {
+              return `${onstring}.replace(${onstring}[:])`;
+            } 
+            let argss = on.toString().split('.')
+            if (argss.length===1) {
+              return `${onstring}.replace('${argss[0]}', '')`;
+            } else {
+              return `${onstring}.replace('${argss[0]}', '${argss[1]}')`;
+            }
+          case "sub":
+            if (isNaN(on) ) {
+              return `${onstring}[:]`;
+            } 
+            let args = on.toString().split('.')
+             if (args.length === 1) {
+              return `${onstring}[${args[0]}:]`;
+            } else if (args.length === 2) {
+              return `${onstring}[${args[0]}:${args[1]}]`;
+            } else if (args.length === 3) {
+              return `${args[0]}[${args[1]}:${args[2]}:${args[3]}]`;
+            } else {
+              throw new Error(`Invalid number of arguments for slice operation`);
+            }
+        }
+        return 'None';
       }
       generateMathStatement(node, level){
         let op = node.op;
@@ -165,7 +182,7 @@ export class ConverterPy{
         return '(' + expressionStr.trim() + ')';
       }
       generateOpListStatement(node, level){
-        const listName = node.listName;
+        const listName = node.listName.value;
         const body = !node.body?undefined: [...node.body];
         let bodyValue ='';
         for (let index = 0; index < body.length; index++) {
@@ -175,24 +192,61 @@ export class ConverterPy{
         const operation = node.ops;
         switch (operation) {
           case 'initialize':
-            return `${listName} = [${body}]`;
+              if (dtype === 'set') {
+                  return `${listName} = new Set(${body});`;
+              } else {
+                  return `${listName} = [${body}];`;
+              }
           case 'append':
-            return `${listName}.append(${bodyValue})`;
+              if (dtype === 'set') {
+                  return `${listName}.add(${bodyValue});`;
+              } else {
+                  return `${listName}.push(${bodyValue});`;
+              }
           case 'insert':
-            return ` ${listName}.[${body[1]}] = ${body[0]}`;
+              if (dtype === 'set') {
+                  return `${listName}.add(${body[0]});`;
+              } else {
+                  return `${listName}.splice(${body[1]}, 0, ${body[0]});`;
+              }
           case 'pop':
-            return `${listName}.pop()`;
+              if (dtype === 'set') {
+                  return `${listName}.delete(${bodyValue});`;
+              } else {
+                  return `${listName}.pop();`;
+              }
           case 'clear':
-            return `${listName}.clear()`;
+              if (dtype === 'set') {
+                  return `${listName}.clear();`;
+              } else {
+                  return `${listName} = [];`;
+              }
           case 'delete':
-            return `${listName}.remove(${bodyValue})`;
+              if (dtype === 'set') {
+                  return `${listName}.delete(${bodyValue});`;
+              } else {
+                  return `${listName}.splice(${bodyValue}, 1);`;
+              }
           case 'isempty':
-            return `len(${listName})==0`;
+              if (dtype === 'set') {
+                  return `${listName}.size === 0;`;
+              } else {
+                  return `${listName}.length === 0;`;
+              }
           case 'length':
-            return `len(${listName})`;
+              if (dtype === 'set') {
+                  return `${listName}.size;`;
+              } else {
+                  return `${listName}.length;`;
+              }
           case 'find':
-            return `${bodyValue} in ${listName}`;
+              if (dtype === 'set') {
+                  return `${listName}.has(${bodyValue});`;
+              } else {
+                  return `${listName}.includes(${bodyValue});`;
+              }
         }
+      
       }
       generateListStatement(node, level){
         let env = node.env;

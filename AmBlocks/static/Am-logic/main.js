@@ -24,7 +24,7 @@ $(document).ready(function() {
         });
       
         // Mouse wheel event handler
-        svgElement.on('mousewheel', function(event) {
+       /* svgElement.on('mousewheel', function(event) {
           event.preventDefault();
       
           if (event.originalEvent.wheelDelta > 0) {
@@ -41,10 +41,10 @@ $(document).ready(function() {
           isDragging = true;
           lastX = event.clientX;
           lastY = event.clientY;
-        });
+        });*/
       
         // Mouse move event handler
-        $(document).mousemove(function(event) {
+       /* $(document).mousemove(function(event) {
           if (isDragging) {
             var deltaX = event.clientX - lastX;
             var deltaY = event.clientY - lastY;
@@ -62,7 +62,7 @@ $(document).ready(function() {
         // Mouse up event handler
         $(document).mouseup(function() {
           isDragging = false;
-        });
+        });*/
       
         // Function to apply zoom to the SVG workspace
         function zoomWorkspace() {
@@ -78,16 +78,19 @@ $(document).ready(function() {
 
 
     function findDistance(on_mouse, on_ground, on_mouseh, on_groundh, direction=0){
-        let mouse=0, ground=0;
-        if(direction==-1){
-            mouse=on_mouseh;
-        }else if(direction==1){
-            ground=on_groundh;
-        }
-        let ftop = on_mouse.offset().top + mouse
-        let stop = on_ground.offset().top + ground
-        return Math.sqrt(Math.pow(on_mouse.offset().left - on_ground.offset().left, 2) +
-            Math.pow(ftop - stop, 2));
+        try{
+
+            let mouse=0, ground=0;
+            if(direction==-1){
+                mouse=on_mouseh;
+            }else if(direction==1){
+                ground=on_groundh;
+            }
+            let ftop = on_mouse.offset().top + mouse
+            let stop = on_ground.offset().top + ground
+            return Math.sqrt(Math.pow(on_mouse.offset().left - on_ground.offset().left, 2) +
+                    Math.pow(ftop - stop, 2));
+        }catch(e){return 1000;}
     }
     function findHeight(regex, d){
         let height = 0
@@ -120,26 +123,33 @@ $(document).ready(function() {
             parent = parent.parent()
         }return $(pathss);
     }
-    function alterVerticalLength(droppable, d, height, direction, at, q=true){
+    function alterVerticalLength(droppable, d, height, direction, at, q=true, where){
         if(droppable.prop("tagName")!=='svg' && height >16){ 
             let paths =$();
             if(q)
                 paths= getAllParentPath(droppable);
-            paths = paths.add(droppable.find('path:first')); // return the added element
+            let dp = droppable.find('path:first');
+            paths = paths.add(dp); // return the added element
+            let traslate =  where
+
             paths.each(function() {
-                let dd = $(this).attr("d");
-                const re = /v ([0-9.]+)/g
-                let match = re.exec(dd);
-                match = re.exec(dd);
-                let matchedString = match[0];
-                let newString = `v ${height-5+ (at=='m' ? 0 :( parseFloat(matchedString.split(' ')[1])))}`;
-                at='m';
-                if(direction==-1){
-                    newString = `v ${ 16}`;
+                const traslate2 = $(this).parent().position().top;  
+                    if(traslate-traslate2<100 || $(this).parent().prop("tagName")==='svg'){
+                        let dd = $(this).attr("d");
+                        const re = /v ([0-9.]+)/g
+                        let match = re.exec(dd);
+                        match = re.exec(dd);
+                        let matchedString = match[0];
+                        let newString = `v ${height-5+ (at=='m' ? 0 :( parseFloat(matchedString.split(' ')[1])))}`;
+                        at='m';
+                        if(direction==-1){
+                            newString = `v ${ 16}`;
+                        }
+                        dd = dd.replace(matchedString, newString);
+                        $(this).attr("d", dd)
+                        height+=80;
+                        traslate = traslate2;
                 }
-                dd = dd.replace(matchedString, newString);
-                $(this).attr("d", dd)
-                height+=80;
             });
         }
     }
@@ -191,35 +201,27 @@ $(document).ready(function() {
     }
 
   
-    let workspaceOffset = $(".codesspace.Am-workspace").offset();
+    let workspaceOffset = $(".codesspace .Am-workspace").offset();
     const G_C_L        = 20;   // oval size in any circle width
     const H_REGEX      = /H ([0-9.]+)/;
     const V_REGEX      = /v ([0-9.]+)/g;
     const IF_LK_REGEX  = /-2 H [0-9.][0-9.]+/g;
     const TRANS_REGEX  = /translate\(([^)]+)\)/;
-    const VARAIBLES = ['a', 'b', 'c', 'd', 'f', 'g'];
+    let VARAIBLES = [1,2,3,4,5,6,7,8,9,10];
+    const VARAIBLES_ = ['a', 'b', 'd', 'e', 'f', 'g', 'h'];
     const sidebarWidth = $('.left-section').width()+38;
-	var $trashCan = $('.trash-can');
     const STRING_OP = [
-        'length',
+        'Length',
         'toUpperCase',
         'toLowerCase',
         'Concatenate',
         'count',
         'split',
         'index',
-        'slice',
+        'substr',
+        'Replace',
     ]
-    const STRING_OPMAP = {
-        'length':'len:',
-        'toUpperCase':'up:',
-        'toLowerCase':'low:',
-        'Concatenate':'cat:(',
-        'count':'cnt:(',
-        'split':'spt:(',
-        'index':'idx:(',
-        'slice':'slc:(',
-    }
+
 
     const MATH_OP = [
         'abs',
@@ -248,6 +250,27 @@ $(document).ready(function() {
         'length',
         'replace',
     ]
+    const STRING_OPMAP = {
+        'Length':'Len',
+        'length':'len',
+        'toUpperCase':'up',
+        'toLowerCase':'low',
+        'Concatenate':'cat',
+        'count':'cnt',//:(
+        'split':'spt',//:(
+        'index':'idx',//:(
+        'substr':'sub',//:(
+        'initialize':'init',//:(
+        'insert':'int',//:(
+        'clear':'cel',//:(
+        'isempty':'iem',//:(
+        'append':'apd',//:(
+        'delete':'del',//:(
+        'pop':'pop',//:(
+        'find':'fin',//:(s
+        'Replace':'repl',//:(
+        'replace':'rep',//:(
+    }
     const SET_OP = [
         'initialize',
         'insert',
@@ -300,7 +323,48 @@ $(document).ready(function() {
             }
         }
       });
+      function setVar(){
+        let all_list_vars = $('.make-list')
+        let vars = [];
+        for (let index = 1; index < all_list_vars.length; index++) {
+            const element = $(all_list_vars[index]).find('.name').text();
+            vars.push(element);
+        }   
+         all_list_vars = $('.make-set')
 
+        for (let index = 1; index < all_list_vars.length; index++) {
+            const element = $(all_list_vars[index]).find('.name').text();
+            vars.push(element);
+        }   
+        $('.dataStructureName').text(vars[all_list_vars.length-1])
+        return vars;
+      }
+      function generate_menu(op){
+        $('.goog-option-selected').remove()
+        for (let index = 0; index < op.length; index++) {
+            var div = $('<div/>', {
+               'class': 'goog-menuitem goog-option goog-option-selected',
+               'role': 'menuitemcheckbox',
+               'aria-checked': 'true',
+               'id': ':c',
+             });
+             
+             var divContent = $('<div/>', {
+               'class': 'goog-menuitem-content',
+             });
+             
+             var divCheckbox = $('<div/>', {
+               'class': 'goog-menuitem-checkbox',
+             });
+             
+             divCheckbox.appendTo(divContent);
+             divContent.appendTo(div);
+             
+           const element = op[index];
+             div.append('<p>'+element+'</p>');
+           $('.goog-menu').append(div);
+       }
+      }
       function setDropDown(block, on='string'){
         let parent = block.closest('.draggable');
         if(parent.length===0)
@@ -325,68 +389,51 @@ $(document).ready(function() {
             case'turn':
                 op = TURN_OP; break;
             default:
-                // get list vars
-                const all_list_vars = $('#create_list');
-                let vars = [];
-                for (let index = 0; index < all_list_vars.length; index++) {
-                    const element = $(all_list_vars[index]).find('.name').text();
-                    vars.push(element);
-                }   
-                $('.dataStructureName').text(vars[0])
-                op = vars; break;
+                // get list vars    
+                op = setVar();
+                break;
                
         }
-        $('.goog-option-selected').remove()
-        for (let index = 0; index < op.length; index++) {
-             var div = $('<div/>', {
-                'class': 'goog-menuitem goog-option goog-option-selected',
-                'role': 'menuitemcheckbox',
-                'aria-checked': 'true',
-                'id': ':c',
-                'style': 'user-select: none;'
-              });
-              
-              var divContent = $('<div/>', {
-                'class': 'goog-menuitem-content',
-                'style': 'user-select: none;'
-              });
-              
-              var divCheckbox = $('<div/>', {
-                'class': 'goog-menuitem-checkbox',
-                'style': 'user-select: none;'
-              });
-              
-              divCheckbox.appendTo(divContent);
-              divContent.appendTo(div);
-              
-            const element = op[index];
-            const all_list_vars = $('#create_list');
-            $('.dataStructureName').text($(all_list_vars[index]).find('.name').text());
-            div.append('<p>'+element+'</p>');
-            $('.goog-menu').append(div);
-        }
+        generate_menu(op);
         return find_fill;
       }
       $(document).on('click', '.goog-menuitem', function(event) {
-        const operation = $(this).find('p').text();
+        //check if parent is of type string
+        let operation = $(this).find('p').text();
         let on = $(onImage).prev('.operation').first();
-        let orign = on.find('.Am-text:first').text()
-        on.text(operation);
-        on.click()
-        $('#flex').keydown()
-        let opBlock = $(`#${on.text()}`); 
-        if(opBlock.length!==0){
-            let parent = on.closest('.draggable');
-            if(parent.length===0)
-                parent = on.closest('.ops');
-            parent = parent.find('path');
+        const parent = on.parent().parent();
+        if(parent.attr('id')!=='math'){
+            operation = STRING_OPMAP[operation];
+            if(operation == 'cat'|| operation == 'spt' || operation=='sub' || operation=='len' || operation=='idx'|| operation=='cnt' || operation=='repl'){
+                let re = on.parent().parent();
+                clones.blocks = clones.getBlocks().not(re);
+                re.remove();
+            }
+        }
+        on.text(operation)
+        if(on.length===0){
+            on = $(onImage).prev('.dataStructureName').first();
 
-            let find_fill = parent.attr('fill');
-            let find_stroke = parent.attr('stroke');
-            opBlock.find('path').attr('fill',  find_fill).attr('stroke', find_stroke)
-            opBlock.find('rect:first').attr('fill',  find_fill).attr('stroke', find_stroke)
-            console.log(opBlock.find('path'))
-            opBlock.click()
+
+        }else{
+
+            let orign = on.find('.Am-text:first').text()
+            on.click()
+            $('#flex').keydown()
+            let opBlock = $(`#${on.text()}`); 
+            if(opBlock.length!==0){
+                let parent = on.closest('.draggable');
+                if(parent.length===0)
+                    parent = on.closest('.ops');
+                parent = parent.find('path');
+                
+                let find_fill = parent.attr('fill');
+                let find_stroke = parent.attr('stroke');
+                opBlock.find('path:first').attr('fill',  find_fill).attr('stroke', find_stroke)
+                opBlock.find('rect:first').attr('fill',  find_fill).attr('stroke', find_stroke)
+                setVar()
+                opBlock.click()
+            }
         }
         $('.DropDownDiv').css('visibility', 'hidden')
 
@@ -399,6 +446,9 @@ $(document).ready(function() {
         foreignObject.draggable({ disabled: true });
         if(ask){
             name = window.prompt(`${thing_name} Name` )
+            if(name===""){
+                name = 'do something';
+            }
         }
         
         foreignObject.find('.name').text(name)
@@ -454,11 +504,10 @@ $(document).ready(function() {
 
         /////////////////////////////////////////////////////////
                 ////////// declare operations  //////////
-                let op = $(this).attr('class').split('-')[2];
+                let op = $(this).attr('class').split('-')[1];
                 if ($(`#${op}`).attr('visibility') !== 'visible') {
                     $(`#${op}`).attr('visibility', 'visible');
                     $(`#${op}`).click();
-                    console.log($(`#${op}`));
                 }
                 
                 
@@ -482,32 +531,33 @@ $(document).ready(function() {
         clone.children('path:first').attr("d", d);
         clone.click();
         // get operations if not there
-        console.log($(`#${op}`))
         $(`#${op}`).attr('visibility','visible')
         // get operations if not there
 
         translateAndSet();
     });
     $('.create-function').click(function(){
-        const name = create_function_class('function');
+        let name = create_function_class('function');
+
         var call = $('#caller');
+    
         call.find('.name').text(name)
+        console.log(call.attr('class'))
 
         let d = call.children('path:first').attr("d");
-        let match = ''
-        while(match=H_REGEX.exec(d)){
+        let match = H_REGEX.exec(d)
             let matchedString = match[0];
             //let newString = `-2 H ${parseFloat(matchedString.split(' ')[2])+(draggableLength)*direction}`;
-            let newString = `H ${name.length*12+10}`;
+            let newString = `H ${name.length*12+30}`;
             d = d.replace(matchedString, newString);
-        }
         call.children('path:first').attr("d", d)
-        call.click();
+        call.attr('transform','translate(1, 350)')
+        call.click()
     });
     $('.create-class').click(function(){
         create_function_class('class');
-
     });
+
     $('.make-var').keydown(function(event){
         if(event.keyCode === 13){
             $('.make-var').attr('visibility', 'hidden')
@@ -524,7 +574,13 @@ $(document).ready(function() {
         let block = $(this).text().split(' ');
         if(block.length>1)
             block = block[1];
-        if(block!=='list' && block!=='function')
+        if(block == 'create_list')
+            $('.create-list').click()
+        else if(block == 'create_set')
+            $('.create-set').click()
+        else if(block == 'make_var')
+            $('.create-var').click()
+        else if(block!=='list' && block!=='function')
             $(`.draggable#${block}`).click();
     });
     
@@ -539,7 +595,6 @@ $(document).ready(function() {
 
             clone.attr('transform', 'translate('+16+','+ 48*children.length+')');
             const varaible = clone.find('.Am-edit .Am-text').text(); 
-            obj.find('.Am-edit .Am-text').text(VARAIBLES[VARAIBLES.indexOf(varaible)+1]);
         }else{
             appendto = obj.parent();
             obj.remove();
@@ -571,9 +626,9 @@ $(document).ready(function() {
         } else {
             
             const traslate =  $(this).offset()
-            foreignObject.css('transform', 'translate('+(parseFloat(traslate.left)-workspaceOffset.left)+'px,'+ (parseFloat(traslate.top)-750)+ 'px)');
+            foreignObject.css('transform', 'translate('+(parseFloat(traslate.left)-workspaceOffset.left-10)+'px,'+ (parseFloat(traslate.top)-20)+ 'px)');
             foreignObject.css('box-shadow', '6px 4px 4px rgba(0, 0, 0, 0.3)');
-            foreignObject.css({'visibility': 'visible', 'background-color':fill});
+            foreignObject.css({'visibility': 'visible', 'background-color':fill });
         }
 
     });
@@ -589,8 +644,11 @@ $(document).ready(function() {
         }
         edit = $(this);
     });
+//
+
     $('.draggable').click(function(event){
-        
+         
+
         var clone = $(this).clone();
         if (!clone.parent().is(".Am-workspace.main")){
             let appendto = $(".Am-workspace.main");
@@ -636,8 +694,13 @@ $(document).ready(function() {
                 }
             });
 
-      
+            //////////////////  circleOps  //////////////////////////
+            
+       
+        /////////////////  circleOps  ///////////////
+            
             clone.find('.-inputs').on('click', function(event) {
+                
                 var clone = $(this).clone(true);
                 let appendto = $(this).parent().next().children('svg');
                 if(appendto.length===1){
@@ -647,7 +710,7 @@ $(document).ready(function() {
 
                     clone.attr('transform', 'translate('+16+','+ 48*children.length+')');
                     const varaible = clone.find('.Am-edit .Am-text').text(); 
-                    $(this).find('.Am-edit .Am-text').text(VARAIBLES[VARAIBLES.indexOf(varaible)+1]);
+                    $(this).find('.Am-edit .Am-text').text(VARAIBLES_[VARAIBLES_.indexOf(varaible)+1]);
                 }else{
                     appendto = $(this).parent();
                     $(this).remove();
@@ -668,7 +731,7 @@ $(document).ready(function() {
                 let path = current_function.find('path:first').attr('d');
                 let match;
                 while(match = IF_LK_REGEX.exec(path)){
-                    let newLength = 'H '+ (parseFloat(match[0].split(' ')[2])+16);
+                    let newLength = '-2 H '+ (parseFloat(match[0].split(' ')[2])+16);
                     path = path.replace(match, newLength);
                 }
                 current_function.find('path:first').attr("d", path);    
@@ -691,8 +754,7 @@ $(document).ready(function() {
                 callFunction.children('.name:first').nextAll().remove().empty();
 
                 let parameter_names = var_names.split(', ');
-                match = IF_LK_REGEX.exec(path)
-                let start_x = current_function.find('.name').text().length*13;
+                let start_x = current_function.find('.name').text().length*19+50;
                 for (let index = 0; index < parameter_names.length; index++) {
                     const element = parameter_names[index];
 
@@ -717,7 +779,7 @@ $(document).ready(function() {
                         pathElement.setAttribute("class", "circleOps");
                     let clonetext = $('.Am-edit.global:first').clone();
                     clonetext.attr('visibility','visible')
-                    clonetext.attr('transform', 'translate('+(start_x)+',6)')
+                    clonetext.attr('transform', 'translate('+(start_x+2)+',8)')
                     start_x+=50;
                     callFunction.append(pathElement);
                     callFunction.append(clonetext);
@@ -783,8 +845,12 @@ $(document).ready(function() {
                     d = d.replace(match[0], newLength);
                     d = d.replace(match[0], newLength);
                     parent.find('path:first').attr('d',d);
+                    let text = parent.children('.list_create').find('.Am-text');
+                    for (let index = 0; index < text.length; index++) {
+                        const element = $(text[index]).text();
+                        VARAIBLES[index] = element;
+                    }
                     parent.children('.list_create').remove().empty();
-
                     for (let index = 0; index < children.length; index++) {
 
                         // create the main group element
@@ -827,7 +893,8 @@ $(document).ready(function() {
                         nestedGroup.appendChild(rect);
 
                         // create the text element
-                        let var_name = $(children[index]).find('.Am-edit .Am-text').text();
+
+                        let var_name = VARAIBLES[(index)%VARAIBLES.length];
 
                         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                         text.setAttribute("class", "Am-text");
@@ -838,7 +905,7 @@ $(document).ready(function() {
                         nestedGroup.appendChild(text);
 
                         $(group).attr('transform', 'translate('+(parseFloat((parent_length)))+', '+((index)*40)+')');
-
+                        
                         parent.append(group);
                         
                     }
@@ -887,7 +954,7 @@ $(document).ready(function() {
                 var currentText = $(this).text();
                 text.text(currentText)
             });
-        
+ 
             ////////////////////// operations /////////////////////////
 
 
@@ -913,7 +980,6 @@ $(document).ready(function() {
         })
 
 
-
         clones.getBlocks().draggable({
             start: function(event, ui) {
                 
@@ -925,19 +991,13 @@ $(document).ready(function() {
                 isDragging = false;
 
                 translateAndSet();
-                const draggable = $(this);
+                let draggable = $(this);
                 let appendto = $('.Am-workspace');
                 if(appendto.attr('visibility') !== 'visible')
                     appendto = $(".Am-workspace.main");
                 ///////////////////////// MOVEMENT //////////////////////
 
-                /*const draggab = $("#Am-workspace");
-                const workspaceOffset = draggab.offset();
-                const scale = parseFloat(draggab.attr("transform").match(/scale\((\d+\.\d+)\)/)[1]);
-                const left = (ui.offset.left - workspaceOffset.left) / scale;
-                const top = (ui.offset.top - workspaceOffset.top) / scale;
-                draggab.attr("transform", `translate(${left},${top}) scale(${scale})`);
-                draggable.attr('transform', 'translate(' + left + ',' + top + ')');*/
+        
                 workspaceOffset =  $('.codesspace .Am-workspace').offset();
                 const left = (ui.offset.left - workspaceOffset.left - translateX) / zoomLevel;
                 const top = (ui.offset.top - workspaceOffset.top - translateY) / zoomLevel;
@@ -945,11 +1005,8 @@ $(document).ready(function() {
                 draggable.attr('transform', 'translate(' + left + ',' + top + ')');
                 draggable.addClass('shadow')
                 ///////////////////////// MOVEMENT //////////////////////
-
-                //////////////////  circleOps  //////////////////////////
-                $('.circleOps').each(function() {
-                    console.log($(this));
-                    if(!$(this).closest(draggable).length){
+                clones.getBlocks().filter('.draggable').find('.circleOps').each(function(){
+                    if(!$(this).closest(draggable).length && draggable.hasClass('circleOps')){
                         const droppable = $(this);
                         var distance = findDistance(draggable, droppable); 
                         if (distance <= 50) { 
@@ -959,16 +1016,66 @@ $(document).ready(function() {
                         }
                         else{
                             /// remove the block by appending again to the global scope
+                            if(draggable.parent().is(droppable.parent())){
+                                let leftOffset = droppable.offset().left;
+
+                                let droppableX =  parseInt((droppable.attr('transform').match(TRANS_REGEX)[1].split(","))[0])+parseFloat(leftOffset);  
+        
+                                let oparent = getAllParentPath(draggable);
+                                let dlength =  parseFloat(draggable.find('path').attr("d").match(H_REGEX)[1]);
+
+                                oparent.each(function(){
+                                    ////****** *alter HLength **** */
+                                    let desired_path = $(this).attr("d");
+                                    
+                                    //////////// check parent type first ///////////////
+                                    let type = H_REGEX;
+                                    let st = 'H ';
+                                    let olength;
+                                    if($(this).parent().hasClass('iflike')){
+                                        type = IF_LK_REGEX;
+                                        st = '-2 H ';
+                                    }
+                                    let match = desired_path.match(type);
+                                    
+                                    if(type == IF_LK_REGEX)
+                                        olength =  parseFloat(match[0].split(' ')[2]);
+                                    else
+                                        olength =  parseFloat(match[1]);
+                                    let newLength = parseInt(olength) - parseInt(dlength)+G_C_L ;
+                                    
+                                    // sub into orignal one
+                                    desired_path = desired_path.replace(match[0], st+newLength);
+                                    
+                                    $(this).attr("d", desired_path);
+                                    ////****** *alter HLength **** */
+        
+                                    /////**** for each block push (moveit) forward ***** */
+                                    let moveIt = $(this).parent().find('> .moveit');
+        
+                                    moveIt.each(function(){
+                                        let t = $(this).attr('transform').match(TRANS_REGEX)[1].split(",");  
+                                        let leftOffset = parseFloat($(this).parent().offset().left);
+                                        let x = parseFloat(t[0]);  
+                                        let y = t[1];  
+                                        if(droppableX < x+ leftOffset){
+                                            let g = x-parseInt(dlength) + G_C_L;
+                                            $(this).attr('transform', `translate(${g}, ${y})`);
+                                        }
+        
+                                    });
+                                    /////**** for each block push (moveit) forward ***** */
+                                });
                                 $('.Am-workspace.main').append(draggable)
+        
+                            }
                             /// remove the block by appending again to the global scope
                             droppable.css({"stroke": "none", "stroke-width": "none"});
-
-
+        
                         }
                         if(droppable.attr('id')=='closed' && droppable.css('stroke')=='none'){
                             droppable.removeAttr('id');
                             clones.addBlock(draggable);
-                            console.log(1111)
                             let d = draggable.find('path').attr("d");
                             let dlength =  parseFloat(d.match(H_REGEX)[1]);
                             /*if(droppable.parent().attr('id') == 'multiConditionBlock')
@@ -978,36 +1085,9 @@ $(document).ready(function() {
                         }
                     }
                 });
-                /////////////////  circleOps  /////////////////
-                $('.drobable').each(function() {
-                    if(draggable.attr('class').indexOf('operation-logic')!==-1 && !$(this).closest(draggable).length){
-                        const droppable = $(this);
-                        var distance = findDistance(draggable, droppable); 
-                        if (distance <= 50) { 
-                            if(!droppable.attr('id'))
-                                droppable.attr('id', 'close');
-                            droppable.css({"stroke": "white", "stroke-width": "2" });``
-                        }
-                        else{
-                            droppable.css({"stroke": "none", "stroke-width": "none"});
-                        }
-                        if(droppable.attr('id')=='closed' && droppable.css('stroke')=='none'){
-                            droppable.removeAttr('id');
-                            clones.addBlock(draggable);
 
-                            let d = draggable.find('path').attr("d");
-                            let dlength =  parseFloat(d.match(H_REGEX)[1]);
-                            /*if(droppable.parent().attr('id') == 'multiConditionBlock')
-                                alterParentsLength(droppable, dlength, H_REGEX, -1);
-                            else
-                                alterParentsLength(droppable, (dlength+18), IF_LK_REGEX, 1);*/
-                        }
-                    }
-                });
-          
-                $('.draggable').each(function() {
-                    translateAndSet();
-                    if(draggable.attr('id')!='function' && draggable.attr('id')!='condition' && $(this).attr('id')!='condition'){
+                clones.getBlocks().filter('.draggable').each(function() {
+                    if( !draggable.hasClass('circleOps') && draggable.attr('id')!='function' && draggable.attr('id')!='condition' && $(this).attr('id')!='condition'){
                         if(!$(this).closest(draggable).length){
                             const onground_path   = $(this).children('path:first').attr('d');
                             const onground_height = parseFloat(findHeight(V_REGEX, onground_path))+($(this).attr('class').indexOf('container')==-1 ? 8 :25);
@@ -1026,7 +1106,7 @@ $(document).ready(function() {
                                 index = 2;
                             for (; index < direction.length; index++) {
                                 const element = direction[index];
-                                let distance = findCustomeDistance(draggable, $(this), onmouse_height, onground_height ,element); 
+                                let distance = findCustomeDistance(draggable, $(this), onmouse_height+all_height, onground_height ,element); 
                                 if (distance <= onmouse_height && $('#newpath').length==0) { 
                                     ch = $(this);
                                     chdrag = draggable;
@@ -1040,7 +1120,7 @@ $(document).ready(function() {
                                     
                                     if(element==-1){
                                         $(this).append(newPath);
-                                        let transform = 'translate( 0'+','+(-(onmouse_height)) +')';
+                                        let transform = 'translate( 0'+','+(-(onmouse_height+all_height)) +')';
                                         newPath.setAttribute('transform',  transform);
                                     } 
                                     else if(element==1){
@@ -1059,20 +1139,25 @@ $(document).ready(function() {
                                                 $(this).addClass('affected');
                                             }
                                         });
+                                        const gppos =  $(this).position().top;  
+                                        const ppos =  $(this).parent().position().top;  
+                                        if(gppos-ppos<100){
+                                            alterVerticalLength($(this).parent(), onground_path, onground_height+onmouse_height+all_height, 1, 'm',true, gppos)
+                                        }
                                     } 
-                                    else if(element==2 && $(this).attr('class').indexOf('container')!==-1){
+                                     if(element==2 && $(this).attr('class').indexOf('container')!==-1){
                                         $(this).append(newPath);
                                         let x = 16;
                                         if($(this).attr('class').indexOf('thick')!==-1)
                                             x = 22;
                                         newPath.setAttribute('transform', 'translate('+x+','+ 50+')');
-                                        alterVerticalLength($(this), onground_path, onmouse_height+all_height, 1, 'm')
-                                        
                                         const traslate =  $(newPath).position().top;  
-                                        $('.chain').each(function(){
+                                        alterVerticalLength($(this), onground_path, onmouse_height+all_height, 1, 'm',true, traslate)
+                                        
+                                        $(this).children('.draggable').each(function(){
                                             const traslate2 = $(this).position().top;  
-                                            if(traslate==traslate2){
-                                                transform = 'translate( 0'+','+(onground_height+onmouse_height) +')';
+                                            if(traslate<traslate2){
+                                                let transform = 'translate( 0'+','+(onground_height+onmouse_height+all_height-20) +')';
                                                 $(this).attr('transform',  transform);
                                                 $(this).addClass('affected');
                                             }
@@ -1081,9 +1166,9 @@ $(document).ready(function() {
                                 }
                                 else if(distance>onmouse_height && $('#newpath').length && draggable.is(chdrag) && $(this).is(ch) && element == chdirection ){
                                     const traslate =  $('#newpath').position().top;  
-                                    $('.chain').each(function(){
+                                    $(this).children('.draggable').each(function(){
                                         const traslate2 = $(this).position().top;  
-                                        if(traslate<traslate2){
+                                        if(traslate==traslate2){
                                             let transform = 'translate( 0'+','+(onground_height) +')';
                                             $(this).attr('transform',  transform);
                                             $(this).addClass('affected');
@@ -1099,82 +1184,8 @@ $(document).ready(function() {
                             }
                          
                         }
-                       /* 
-                        if(!$(this).closest(draggable).length){
-                            const path = draggable.children('path:first');
-                            let stringPath = path.attr('d');
-                            stringPath+=' '+draggable.find('.draggable').find('path:first').attr('d');
-                            const paths = $(this).children('path:first');
-                            const height = parseFloat(findHeight(V_REGEX, paths.attr('d')))+ ($(this).attr('class').indexOf('container')==-1 ? 8 :25);
-                            const selfHeight = parseFloat(findHeight(V_REGEX, stringPath)) + (draggable.attr('class').indexOf('container')==-1 ? 8 :25);
-                            let direction=[1, -1, 2];
-                            let index = 0;
-                            if($(this).attr('id')=='function')
-                                index = 2;
-                            for (; index < direction.length; index++) {
-                                const element = direction[index];
-                                let distance = findCustomeDistance(draggable, $(this), V_REGEX, paths, element); 
-                                if (distance <= 120 && $('#newpath').length==0) { 
-                                    ch = $(this);
-                                    chdrag = draggable;
-                                    chdirection = element
-                                    var newPath = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
-                                    newPath.setAttribute('d', path.attr('d'));
-                                    newPath.setAttribute('id', 'newpath');
-                                    newPath.setAttribute('fill', '#868686');
-                                    newPath.setAttribute('visibility', 'visible');
-                                    if(element==2){
-                                        $(this).append(newPath);
-                                        clones.setBlocks(clones.getBlocks().not(draggable));
-        
-                                        newPath.setAttribute('transform', 'translate('+17+','+ 50+')');
-                                        alterVerticalLength($(this), path.attr('d'), selfHeight, 1, 'm')
-                                    }else{
-                                        //const traslate =  ($(this).attr('transform').match(TRANS_REGEX)[1].split(","));  
-                                        //let transform = 'translate('+traslate[0]+','+((element==-1 ? selfHeight: parseFloat(traslate[1])+height+25 )*element)+')';
-                                       
-                                        if(!visited){ 
-                                            alterVerticalLength($(this).parent(), path.attr('d'), selfHeight, 1, 'l')
-                                            visited = true;
-                                        }
-                                    }
-                                    if(element==-1){
-                                        $(this).prepend(newPath);
-                                        let transform = 'translate( 0'+','+(-height) +')';
-                                        newPath.setAttribute('transform',  transform);
-                                        
-                                    }
-                                    if(element==1){ 
-                                        $(this).append(newPath);
-                                        let transform = 'translate( 0'+','+(height) +')';
-                                        newPath.setAttribute('transform',  transform);
-                                    }
-                                }
-                            }
-                            if(ch){
-                                let distance = 0;
-                                let parents = [];
-                                parents.push(ch.parent())
-                                parents.push(ch);
-                                for (let index = 0; index < parents.length; index++) {
-                                    const element = parents[index];
-                                    if($(element).prop("tagName")=='svg')
-                                        continue;
-                                    distance = findCustomeDistance(chdrag, element, V_REGEX, paths, chdirection);
-                                    
-                                    if(distance > 190 ){
-                                    
-                                        if(chdirection == 2)
-                                            alterVerticalLength(element, path.attr('d'), selfHeight, -1, 'm')
-                                        chdirection = 0
-                                        $('#newpath').remove();
-                                        ch = null;
-                                    }
-                                } 
-                            }
-                        }
-                    }*/
-
+                        translateAndSet();
+           
                 }
             });
     
@@ -1201,16 +1212,12 @@ $(document).ready(function() {
                     if($('#newpath').length){
                         const traslate = draggable.position().top;  
                         let appendon = draggable;
-                        $(this).find('.chain').each(function(){
-                            const traslate2 = $(this).position().top;  
-                            if(traslate<traslate2){
-                                appendon.append($(this))
-                                let transform = 'translate( 0'+','+(on_mouseHeight) +')';
-                                $(this).attr('transform',  transform);
-                                appendon = $(this)
-                            }
-                        });
+                        if(chdirection==1){
+                            draggable.addClass('selected');
+                        }
+                      
                         if(chdirection==-1){
+                                droppable.addClass('selected');
                                 draggable.append(ch);
                                 const traslate =  ($('#newpath').attr('transform').match(TRANS_REGEX)[1].split(","));  
                                 ch.attr('transform', 'translate(0,'+parseFloat(traslate[1])*-1+')');
@@ -1224,37 +1231,26 @@ $(document).ready(function() {
                         draggable.addClass('chain')
                         $('#newpath').remove();
                     }
-                $('.drobable').each(function() {
-                    let droppable = $(this);
-                    if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
-       
-                        let dlength =  parseFloat(d.match(H_REGEX)[1]);
-
-            
-                        if(droppable.parent().attr('id') == 'multiConditionBlock'){
-                         
-                            alterParentsLength(droppable, dlength, H_REGEX, 1);
-                        }
-                        else
-                            alterParentsLength(droppable, (dlength), IF_LK_REGEX, 1);
-                        droppable.parent().append(draggable)
-
-                        const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
-                        draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
-                        droppable.attr("id", 'closed');
-                        clones.setBlocks(clones.getBlocks().not(draggable));
-    
-                    }
-                   
-                });
+              
 
                 $('.circleOps').each(function() {  //////// drop a block into () 
                     let droppable = $(this); /// 
                     
                     if(droppable.attr('id')=='close' && droppable.css('stroke')==='rgb(255, 255, 255)'){
-                        let droppableX =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","))[0];  
                         // calculate new length
                         let dlength =  parseFloat(d.match(H_REGEX)[1]);
+                        let leftOffset = droppable.offset().left;
+
+                        let droppableX =  parseInt((droppable.attr('transform').match(TRANS_REGEX)[1].split(","))[0])+parseFloat(leftOffset);  
+
+                        let parant = droppable.parent();
+                        
+                        droppable.parent().append(draggable)
+                        const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
+                        draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
+                        droppable.attr("id", 'closed');
+                        clones.setBlocks(clones.getBlocks().not(draggable));
+
 
                         let oparent = getAllParentPath(droppable);
                         oparent.each(function(){
@@ -1284,13 +1280,14 @@ $(document).ready(function() {
                             ////****** *alter HLength **** */
 
                             /////**** for each block push (moveit) forward ***** */
-                            let moveIt = $(this).parent().find('.moveit');
+                            let moveIt = $(this).parent().find('> .moveit');
 
                             moveIt.each(function(){
                                 let t = $(this).attr('transform').match(TRANS_REGEX)[1].split(",");  
+                                let leftOffset = parseFloat($(this).parent().offset().left);
                                 let x = parseFloat(t[0]);  
                                 let y = t[1];  
-                                if(droppableX < x){
+                                if(droppableX < x+ leftOffset){
                                     let g = x+parseInt(dlength) - G_C_L;
                                     $(this).attr('transform', `translate(${g}, ${y})`);
                                 }
@@ -1300,11 +1297,6 @@ $(document).ready(function() {
                         });
 
 
-                        droppable.parent().append(draggable)
-                        const traslate =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","));  
-                        draggable.attr('transform', 'translate('+ traslate[0]+','+(parseFloat(traslate[1])-4)+')');
-                        droppable.attr("id", 'closed');
-                        clones.setBlocks(clones.getBlocks().not(draggable));
                     }
                 });
             }
@@ -1366,7 +1358,6 @@ $(document).ready(function() {
                     d= d.replace(match[0], 'H '+((8*direction)+length));
 
                     edit.prev().attr("d", d);
-
                 }
 
                 let droppable =  edit;
@@ -1416,8 +1407,27 @@ $(document).ready(function() {
                     /////**** for each block push (moveit) forward ***** */
                 });
         }
+
+      
  
     });
+    function generate_error_msg(on, errmsg){
+        //let at =  (on.attr('transform').match(TRANS_REGEX)[1].split(",")); 
+        const clone_msg = $('.DropDownDiv')
+        if (clone_msg.css('visibility') === 'visible') {
+            clone_msg.css('visibility', 'hidden');
+        } else {
+            
+            const traslate =  on.offset();
+            clone_msg.css('transform', 'translate('+(parseFloat(traslate.left)-workspaceOffset.left+50)+'px,'+ (parseFloat(traslate.top)-40)+ 'px)');
+            clone_msg.css('box-shadow', '6px 4px 4px rgba(0, 0, 0, 0.3)');
+            clone_msg.css({'visibility': 'visible'});
+            let op=[errmsg]
+            generate_menu(op);
+        }
+
+
+    }
     $('#flex').on('keyup', function(event) {
         let text = $(this).text();
         if (text !== undefined) { 
@@ -1437,6 +1447,35 @@ $(document).ready(function() {
             edit.find('.Am-text').text(text);
             translateAndSet();
         }
+        /////////////////////////////////////////////////////////
+                /////////////change for para////////////
+                if(edit.hasClass('for')){
+
+                    let prev_text = edit.closest('.parameters').parent().find('.ecounter').text().split('to')[1];
+                    edit.closest('.parameters').parent().find('.ecounter').text( $(this).text() +' to ' + prev_text);
+                }else if(edit.hasClass('to')){
+                        let prev_text = edit.closest('.parameters').parent().find('.ecounter').text().split('to')[0];
+                        edit.closest('.parameters').parent().find('.ecounter').text( prev_text +' to ' + $(this).text() );
+                }
+                /////////////change for para////////////
+                /////////////check condition////////////
+                let edit_parent = edit.parent();
+                let from = parseInt(edit_parent.find('.Am-edit.from').find('.Am-text').text());
+                let to =   parseInt(edit_parent.find('.Am-edit.to')  .find('.Am-text').text());
+                let by =   parseInt(edit_parent.find('.Am-edit.by')  .find('.Am-text').text());
+
+                if(to>from){
+                    if(by<0) 
+                       generate_error_msg(edit.closest('.parameters').parent(), 'infinte loop: Consider changing the condition or incremental');
+                }else{
+                    if(by>0)
+                        generate_error_msg(edit.closest('.parameters').parent(), 'infinte loop: Consider changing the condition or incremental');
+                }
+                    
+                        //disply error
+                /////////////check condition////////////
+        /////////////////////////////////////////////////////////
+
     });
     // set up the main function
     
@@ -1492,21 +1531,21 @@ $(document).ready(function() {
     var code = '{{prev_code|safe}}';
     let stepped = false
 	  window.translateAndSet =function(){
-		  if(step!='no translation'){
+		  if(window.step!='no translation'){
 			let C_Code_List = ['',''];
 			let code = '';
             if(window.lang_id == 1)
                 lang = 'Python'
             else
                 lang = 'C++'
-			if(step==1 && stepped){
+			if(window.step==1 && stepped){
 				C_Code_List = clones.translateSteps(lang, currentElement);
 				if(currentElement+1<clones.blocks.length)
 					currentElement++;
 				else
 					currentElement=0;
 			}
-			else if(step!=1){
+			else if(window.step!=1){
 				C_Code_List = clones.translate(lang);
 			}
 
@@ -1536,9 +1575,7 @@ $(document).ready(function() {
        $('form button').click(function(event){
         document.getElementById('user_code_input').value = language; // fill djano's form
         
-        console.log(document.getElementById('user_code').innerHTML)
         let tname = document.querySelector('.header').textContent;
-        console.log(tname)
           if(event.target.innerHTML.indexOf('step')!==-1){
              stepped = true;
              window.translateAndSet()
@@ -1602,30 +1639,13 @@ $(document).ready(function() {
           document.getElementById("user_code").innerHTML = "";
           document.getElementById("user_code").appendChild(codeNode);
        }
-       function toggleSidebar() {
-       var sidebar = document.getElementById("sidebar1");
-       var arrow = document.querySelector(".arrow");
-       if (sidebar.style.left == "0px") {
-          sidebar.style.left = "-400px";
-          arrow.style.transform = "rotate(0deg)";
-          arrow.style.left="0"
- 
-       } else {
-          sidebar.style.left = "0";
-          arrow.style.transform = "rotate(180deg)";
-          arrow.style.left="400px"
-       }
-       }
-       function processMessage(s){
-            console.log(s);
 
-       }
 
 //*************** check the calling script for not setting the initial func in case 'game' ***************** */
 
    
     console.log(window.calling_script)
-    if(window.calling_script!=undefined){
+    /*if(window.calling_script!=undefined){
 
         const name = create_function_class('function', false);
         var call = $('#caller');
@@ -1642,7 +1662,7 @@ $(document).ready(function() {
         call.children('path:first').attr("d", d)
         call.attr('transform','translate(1, 350)')
         call.click();//set up main function
-    }
+    }*/
     //$(".call.draggable").off("mousedown mousemove mouseup").removeClass("draggable");
 
 //*************** check the calling script for not setting the initial func in case 'game' ***************** */

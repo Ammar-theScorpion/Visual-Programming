@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 # Create your views here.
 
 def renderTutorials(request, tname):
+  
+
     form = UserCodeForm()
     tutorial = Tutorial.objects.get(tname=tname)
     user = User.objects.get(username=request.user.username)
@@ -43,6 +45,8 @@ def renderTutorials(request, tname):
         'form': form,
         'prev_code': user_code
     }
+
+        
     return render(request, 'blocks.html', context)
 
 

@@ -12,8 +12,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
-    <link rel="stylesheet" href="{% static 'Am-style/game.css' %}">
-    <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
+<link rel="stylesheet" href="{% static 'Am-style/game.css' %}">
+<script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
+<script>
+  window.step = '{{step|safe}}'
+  console.log(window.step)
+</script>
 
 {% endblock links %}
 
