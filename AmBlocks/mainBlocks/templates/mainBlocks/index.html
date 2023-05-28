@@ -1,0 +1,136 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block links %}
+
+
+<link rel="stylesheet" href="{% static 'Am-style/front/datatable.css' %}" />
+<link rel="stylesheet" href="{% static 'Am-style/front/card.css' %}">
+
+<script src="{% static 'Am-logic/front/datatable.js' %}"></script>
+
+{% endblock links %}
+  {% block content %}
+
+  <div class="container">
+    
+    <main class="page-content">
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Tutorial</h2>
+          <p class="copy">Learn to use all of programming blocks </p>
+          <button class="btn"><a href="http://127.0.0.1:8000/tutorial/print-hello-world!/">Start Now </a></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Problem Solver</h2>
+          <p class="copy">Start solving coding problems with blocks </p>
+          <button class="btn">Start Now</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Blocks Player</h2>
+          <p class="copy">Learn programming with a simple game </p>
+          <button class="btn"><a href="http://127.0.0.1:8000/game/">Start Now </a></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Block Steps</h2>
+          <p class="copy">Debug your code with step-by-step compilation</p>
+          <button class="btn"><a href="http://127.0.0.1:8000/stepbystep/">Start Now </a></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>
+  
+  
+  
+      <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>   <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>   <div class="card">
+        <div class="content">
+          <h2 class="title">Explore The Galaxy</h2>
+          <p class="copy">Seriously, straight up</p>
+          <button class="btn">Book Now</button>
+        </div>
+      </div>
+  
+  
+  
+    </main>
+  <br>
+    <hr>
+  <br>
+    <button class="button-30" role="button">Link 1</button>
+    <button class="button-30" role="button">Link 2</button>
+    <button class="button-30" role="button">Link 3</button>
+    <button class="button-30" role="button">Link 4</button>
+    <button class="button-30" role="button">Link 5</button>
+    <button class="button-30" role="button">Link 6</button>
+    <button class="button-30" role="button">Link 7</button>
+    <button class="button-30" role="button">Link 8</button>
+    <button class="button-30" role="button">Link 90</button>
+    <button class="button-30" role="button">Link 10</button>
+    <button class="button-30" role="button">Link 11</button>
+    <button class="button-30" role="button">Link 12</button>
+    <button class="button-30" role="button">Link 13</button>
+    <button class="button-30" role="button">Link 14</button>
+    <button class="button-30" role="button">Link 15</button>
+  
+  <br>
+  
+    <hr>
+  <br>
+  <div>
+  
+      <table id="myTable" class="display">
+          <thead>
+              <tr>
+                  <th>Column 1</th>
+                  <th>Column 2</th>
+                  <th>Column 3</th>
+                  <th>Column 4</th>
+                  <th>Column 5</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td><a href="http://127.0.0.1:8000/problems/isPalindrome">isPalindrome</td>
+                  <td>Row 1 Data 2</td>
+                  <td>Row 1 Data 3</td>
+                  <td>Row 1 Data 4</td>
+                  <td>Row 1 Data 5</td>
+              </tr>
+              <tr>
+                  <td>Row 2 Data 1</td>
+                  <td>Row 2 Data 2</td>
+                  <td>Row 2 Data 3</td>
+                  <td>Row 2 Data 4</td>
+                  <td>Row 2 Data 5</td>
+  
+              </tr>
+          </tbody>
+      </table>
+  
+  
+  </div>
+  
+  </div> 
+    {% endblock %}

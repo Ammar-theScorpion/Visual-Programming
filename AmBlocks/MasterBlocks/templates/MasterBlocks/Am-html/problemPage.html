@@ -1,0 +1,117 @@
+{% extends 'main.html' %}
+{% load static %}
+
+  {% block links %}
+  <link rel="stylesheet" href="{% static 'Am-style/problem.css' %}" />
+
+  {% endblock links %}
+    {% block content %}
+ 
+
+    <div class="contain">
+    <div class="scroll">
+      <h2 class="questions">1.Qusetion</h2>
+      <p> 
+        {{ problem.body }}
+      </p>
+      <br>
+      <br>
+      <br>
+
+      <p>Example 1:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [2,7,11,15], target = 9</p>
+        <p><span>Output:</span> [0,1]</p>
+        <p><span>Explanation:</span> Because nums[0] + nums[1] == 9, we return [0, 1].</p>
+      </div>
+
+
+      <p>Example 2:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [3,2,4], target = 6</p>
+        <p><span>Output:</span> [1,2]</p>
+      </div>
+      <p>Example 3:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [3,3], target = 6</p>
+        <p><span>Output:</span> [0,1]</p>
+      </div>
+
+      <p>Example 3:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [3,3], target = 6</p>
+        <p><span>Output:</span> [0,1]</p>
+      </div>
+      <p>Example 3:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [3,3], target = 6</p>
+        <p><span>Output:</span> [0,1]</p>
+      </div>
+      <p>Example 3:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [3,3], target = 6</p>
+        <p><span>Output:</span> [0,1]</p>
+      </div>
+
+      <p>Example 3:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [3,3], target = 6</p>
+        <p><span>Output:</span> [0,1]</p>
+      </div>
+
+      <p>Example 4:</p>
+      <div class="example">
+        <p><span>Input:</span> nums = [8,6], target = 10</p>
+        <p><span>Output:</span> [4,2]</p>
+      </div>
+      <!--<p> Given an array of integers <span class="keyword">nums</span> and an integer <span class="keyword">target</span>, 
+        return indices of the two numbers  such that they add up to <span class="keyword">target</span>.</p>
+
+      <p>You may assume that each input would have <span>exactly one solution</span>,
+         and you may not use the same element twice.</p>
+
+      <p>You can return the answer in any order.</p>
+      
+     
+    -->
+      
+    </div>
+
+   <div class="answer">
+
+    <div class="title">
+        <h2>Build Block Code</h2>
+    </div>
+
+    <div class="temp">
+      
+    <div id="mydiv">
+        <div id="mydivheader">Java</div>  
+      </div>
+      
+      <div id="mydiv2">
+        <div id="mydivheader2">C++</div>
+      </div>
+      
+      <div id="mydiv3">
+        <div id="mydivheader3">JavaScribt</div>
+      </div>
+      
+      <div id="mydiv4">
+        <div id="mydivheader4">ReactJs</div>
+      </div>
+      
+      <div id="mydiv5">
+        <div id="mydivheader5">NodeJs</div>
+      </div>
+      
+      <div id="mydiv6">
+        <div id="mydivheader6">Php</div>
+      </div>
+    </div>
+
+   </div>
+</div>
+<script src="main.js"></script>
+
+{% endblock content %}
