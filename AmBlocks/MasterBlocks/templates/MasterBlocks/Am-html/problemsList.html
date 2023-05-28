@@ -1,6 +1,0 @@
-{% extends 'main.html' %}
-    {% block content %}
-        {% for problem in problems %}
-            <li><a href="{% url 'problem' problem.pname %}"> {{problem.pname}} </a></li>
-        {% endfor %}
-    {% endblock content %}
