@@ -61,6 +61,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOWED_ORIGIN_REGEXES = [
     'http://localhost:8080',
 ]
+
 ROOT_URLCONF = 'AmBlocks.urls'
 
 TEMPLATES = [

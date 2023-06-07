@@ -1,11 +1,12 @@
 // covert the string from the parser to different PG
 import { Parser } from "../Am-translater/parser.js";
 import { ConverterPy } from "./convertPy.js";
-import { checkIfElseOrder } from "../Am-translater/syntex.js";
+import { checkBreakContinue, checkIfElseOrder, checkReturnFunction } from "../Am-translater/syntex.js";
 
 const INCLUDE={
   'cout':'#include<iostream>',
   'string':'#include<string>',
+  'to_string':'#include<string>',
   'vector':'#include<vector>',
   'transform':'#include<algorithm>',
   'replace':'#include<algorithm>',
@@ -13,6 +14,8 @@ const INCLUDE={
   'set':'#include<set>',
   'toupper':'#include<cctype>',
   'tolower':'#include<cctype>',
+  'variant':'#include<variant>',
+  
 }
 export class Converter{
     constructor(){
@@ -21,6 +24,26 @@ export class Converter{
         this.parser = new Parser();
         this.m = false;
     }
+
+    createStruct(alltypes) {
+      if(!alltypes.length)
+        return 'void*'
+      let set = new Set();
+    
+      for (let i = 0; i < alltypes.length; i++)
+        set.add(alltypes[i]);
+    
+      if (set.size > 1) {
+        let types = [];
+        set.forEach(element => {
+          types.push(element);
+        });
+        return `std::variant<${types.join(',')}>`;
+      } else {
+        return [...set][0];
+      }
+    }
+
     moveNode(array){
         const prev = array.shift();
         return prev;
@@ -38,12 +61,18 @@ export class Converter{
         if(!checkIfElseOrder(this.ast)){
           code.push('unvalid else: must followd with if-block:');
         }
+        if(!checkBreakContinue(this.ast)){
+          code.push('unvalid break: must be inside a loop container:');
+        }
+        if(!checkReturnFunction(this.ast)){
+          code.push('unvalid return: must be inside a function container:');
+        }
         this.py.ast = this.ast.slice();
         if(lang==='Python')
-          return this.py.covertString();
+          return this.py.covertString(code);
 
         while(this.canMove(this.ast[0])){
-            code.push(this.generateCode(this.moveNode(this.ast), -1)+'\n');
+            code.push(this.generateCode(this.moveNode(this.ast), 0)+'\n');
         }
         let code_str = code.join('');
         let include_str='';
@@ -60,7 +89,7 @@ export class Converter{
       switch(node){
         case 'apt':
             return 'push_back'
-        case 'length':
+        case 'len':
             return 'size'
         case 'pop':
             return 'pop_back'
@@ -92,7 +121,7 @@ export class Converter{
           case 'printStatement':
             return this.generatePrintStatement(node, level);
           case 'BinaryExpression':
-            return this.generateBinaryExpression(node, level);
+            return this.getExpressionString(node, level);
           case 'MBinaryExpression':
             return this.generateMBinaryExpression(node, level);
           case 'declarationStatements':
@@ -119,12 +148,23 @@ export class Converter{
               return this.generateStringStatement(node, level);
           case 'multiBinary':
               return this.getExpressionString(node, level);
+          case 'BreakStatement':
+              return this.getBreakString(node, level);
+
+
           default:
               return typeof(node.error)=='string'?node.error:(node.value !== undefined? node.value : node);
        }
       }
+
+
+
+
+      getBreakString(node, level){
+        return `${node.dirc}`;
+      }
       generateStringStatement(node){
-        let op = node.op;
+        let op = node.ops;
         let on ;
         let onstring = node.onstring;
          if(node.on.value ==null)
@@ -134,6 +174,8 @@ export class Converter{
         // Map the method name to the corresponding C++ code
         switch(op){
 
+        case "str":
+            op=`std::to_string(${on})`;break;
         case "up":
             op=`std::toupper(${on})`;break;
         case"low":
@@ -212,11 +254,21 @@ export class Converter{
             op = 'exp'; break;
           case '10^':
             op = 'pow'; break;
+          case 'flr':
+              op = 'floor'; break;
+          
         }
-        return `${op}(${this.generateCode(node.on)})`
+        return `std::${op}(${this.generateCode(node.on)})`
       }
       generateReturnStatement(node, level){
-        return `return ${node.statement};`
+        let allreturn = node.returnV;
+        if(allreturn.length===0) 
+        return 'return';
+        else if(allreturn.length===1)
+        return 'return '+this.generateCode(allreturn[0])+';\n';
+        else
+        return `return [${allreturn.join(', ')} ;\n`;
+        
       }
       generateOpListStatement(node, level){
         const listName = node.listName.value;
@@ -234,6 +286,7 @@ export class Converter{
           case 'init':
             return `${listName} = {${body}};`;
           case 'apd':
+
               return `${listName}.push_back(${bodyValue});`;
           case 'int':
               if (dtype == 'set') {
@@ -246,10 +299,13 @@ export class Converter{
           case 'cel':
               return `${listName}.clear();`;
           case 'del':
+            if (dtype == 'set') 
+              return `${listName}.erase(${bodyValue});`;
+
               return `${listName}.erase(${listName}.begin() + ${bodyValue});`;
-          case 'isempty':
+          case 'iem':
               return `${listName}.empty();`;
-          case 'length':
+          case 'len':
               return `${listName}.size();`;
           case 'fin':
             return `${dtype === 'set' ? (listName + '.find(' + bodyValue + ')') : ('std::find(' + listName + '.begin(), ' + listName + '.end(), ' + bodyValue + ')')};`;
@@ -265,6 +321,9 @@ export class Converter{
       let equalto = [];
       if(look != null || look!=undefined){
          type = look[0];
+          /// get list/set type
+        type= this.createStruct(type)
+
          if(look[1]){
           for (let index = 0; index < look[1].length; index++) {
             const element = look[1][index];
@@ -281,14 +340,28 @@ export class Converter{
       const body = node.body;
       let bodyValue = '';
       if (body) {
+        if(node.kind=='printStatement'){
+          bodyValue = 'std::cout<< '+node.varname+'<<std::endl;';
+        }
+        else
         while (body.length) {
           bodyValue += this.generateCode(body.shift(), level + 1);
         }
       }
-      return `for (${node.iterateable_type} ${node.varname} : ${node.varname_over}){\n ${bodyValue} \n}`;
+      let type = this.createStruct(node.iterateable_type);
+      if(type.indexOf('variant')!==-1)
+        type = 'const auto';
+      return `for (${type} ${node.varname} : ${node.varname_over}){\n ${bodyValue} \n}`;
     }
     generateCallStatement(node, level){
-      return `${node.function_name}(${node.argsv})\n`;
+      let body = node.argsv;
+      let bodyValue='';
+      if (body) {
+        while (body.length) {
+          bodyValue += this.generateCode(body.shift(), level + 1);
+        }
+      }
+      return `${node.function_name}(${bodyValue})`;
     }
     generateClassStatement(node, level){
       const body = node.body;
@@ -302,12 +375,19 @@ export class Converter{
 
     }
     generateFunctionStatement(node, level){
-      const body = node.body;
-      let bodyValue = '';
+      const body = node.body  
+      let bodyValue = [];
+    
       if (body) {
+        bodyValue = [];
         while (body.length) {
-          bodyValue += '\n    ' + this.generateCode(body.shift(), level + 1);
+          bodyValue .push(this.generateCode(body.shift(), level + 1));
         }
+        bodyValue.push('    ')
+      }
+      for (let index = 0; index < bodyValue.length-1; index++) {
+        bodyValue[index] = ('    '.repeat(level+1))+bodyValue[index];
+        
       }
       let args = '';
       const paramenters = node.params;
@@ -319,20 +399,20 @@ export class Converter{
         }
       args+= params.join(', ');
 
-      return `${node.type} ${node.name} (${args}) {\n${'\t'.repeat(level + 1)}${bodyValue}}\n`;
+      
+      return `${node.type} ${node.name} (${args}) {\n${bodyValue.join('\n')}}`;
 
     }
     generateassignmentStatement(node, level){
         let right = node.right;
         if(typeof right === 'string' && right.indexOf('input')!==-1){
           right = `std::cout << "${right.substr(7, right.length-2-7)}";\n`
-          right += `std::cin >> ${node.left.value}`
+          right += `std::cin >> ${node.left}`
         }else{
           right = this.generateCode(node.right);
-          right = this.generateCode(node.right.value);
         }
 
-        return node.left.value + ' = '+ right +';\n';
+        return node.left + ' = '+ right +';\n';
       }
     generateDeclarationStatements(node, level){
       let type = node.varBody[0]
@@ -358,8 +438,8 @@ export class Converter{
     }
     getExpressionString(expression) {
       let expressionStr = '';
+      const self = this
       traverseExpression(expression);
-    
       function traverseExpression(node) {
         if (node.kind === 'BinaryExpression') {
           expressionStr += '(';
@@ -368,7 +448,7 @@ export class Converter{
           traverseExpression(node.right);
           expressionStr += ') ';
         } else {
-          expressionStr += node.value + ' ';
+          expressionStr += self.generateCode(node) + ' ';
         }
       }
     
@@ -380,7 +460,19 @@ export class Converter{
         let print = 'std::cout <<';
         let printThings = [];
         for (let index = 0; index < printValue.length; index++) {
-          const element = printValue[index];
+          let element = printValue[index];
+            if(printNode.printType == 'list'){
+                let body={
+                  kind:'printStatement',
+                  body:'std::cout<<',
+                  varname:'i',
+                  iterateable_type:'const auto',
+                  varname_over:element.value,
+        
+                };
+                element = this.generateEachStatement(body, 0)
+                return element;
+          }
           printThings.push(this.generateCode(element));
           
         } 
@@ -394,14 +486,20 @@ export class Converter{
         conditionValue = this.generateCode(condition);
       }
       const body = ifNode.body;
-      let bodyValue = '';
+      let bodyValue = [];
+
       if (body) {
+        bodyValue = [];
         while (body.length) {
-          bodyValue += '\n    ' + this.generateCode(body.shift(), level + 1);
+          bodyValue .push(this.generateCode(body.shift(), level + 1)+'\n');
         }
       }
-      const indentation = level >= 0 ? '\t'.repeat(level) : "";
-      return `${indentation}if (${conditionValue}) {\n${'\t'.repeat(level + 1)}${bodyValue}}\n`;
+      for (let index = 0; index < bodyValue.length; index++) {
+        bodyValue[index] = ('    '.repeat(level+1))+bodyValue[index];
+        
+      }
+
+      return `if (${conditionValue}) {\n${bodyValue.join('\n')}}`;
       }
       
     generateForStatement(body, level){
@@ -412,8 +510,8 @@ export class Converter{
       
         for (let key in indexes) {
           const index = indexes[key];
-          from.push(`int ${key} = ${index[0]}`);
-          to.push(`${key} < ${index[1]}`);
+          from.push(`int ${key} = ${this.generateCode(index[0])}`);
+          to.push(`${key} < ${this.generateCode(index[1])}`);
           by.push(`${key} += ${index[2]}`);
       }
       let allIndexes = [from.join(', '), to.join(', '), by.join(', ')]
@@ -430,20 +528,27 @@ export class Converter{
     }
     
     generateReapetStatement(ifNode, level){
+
       const condition = ifNode.condition;
       let conditionValue = 'false';
       if (conditionValue != condition) {
-        conditionValue = this.getExpressionString(condition);
+        conditionValue = this.generateCode(condition);
       }
       const body = ifNode.body;
-      let bodyValue = '';
+      let bodyValue = [];
+
       if (body) {
+        bodyValue = [];
         while (body.length) {
-          bodyValue += '\t'+this.generateCode(body.shift(), level + 1);
+          bodyValue .push(this.generateCode(body.shift(), level + 1)+'\n');
         }
       }
-      const indentation = level>=0?'\t'.repeat(level):"";
-      return `${indentation}while(${conditionValue}){\n${'\t'.repeat(level+1)}${bodyValue}}`;
+      for (let index = 0; index < bodyValue.length; index++) {
+        bodyValue[index] = ('    '.repeat(level+1))+bodyValue[index];
+        
+      }
+
+      return `while (${conditionValue}) {\n${bodyValue.join('\n')}}`;
     }
     
 

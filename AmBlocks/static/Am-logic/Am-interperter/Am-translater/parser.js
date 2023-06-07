@@ -1,4 +1,3 @@
-import * as Type from './ast.js' 
 import { tokenize, TokenType } from "./lexical.js";
 
 import { Symbol, SymbolClass, SymbolFunction } from './symbol.js';
@@ -62,12 +61,24 @@ export class Parser{
         return this.translate_expression(expression.left)+expression.left.value+expression.operater.value+expression.right.value;
     }
     getListOpType(lst, env){
-        switch(lst.ops){
-            case "length":
+        switch((lst.ops).toLowerCase()){
+            case "len":
                 return 'int';
             case 'pop':
                 let lstname = lst.listName.value;
                 return env.lookUp(lstname)[0];
+            case 'idx':
+                let lsname = lst.onstring;
+                let type= env.lookUp(lsname)[0];
+                if (type == 'string')
+                    type = 'char';
+                else{
+                    let on = lst.on;
+                    if(on.kind=='Identifier')
+                    return type[env.lookUp(on.value)[2]];
+                    else
+                    return type[on.value];
+                }   
 
             
         }
@@ -76,17 +87,127 @@ export class Parser{
         /* check mathexpression first * */
         if(mth.kind === 'mathStatement'){
             return this.getMathType(mth.on);
+        }
+        if(mth.kind === "Identifier"){
+            const lookup = env.lookUp(mth.value);
+            if(lookup!=null){
+                if(lookup[3] == 'list')
+                    return['std::vector<'+(lookup[0].length==0?'void*':lookup[0][0])+'> '];
+                return lookup;
+            }
+            return 'undefined'
+        }
+        if(mth.kind === "returnStatement"){
+            let allreturn ='';
+            for (let index = 0; index < mth.returnV.length; index++) {
+                const element = mth.returnV[index];
+                let r = this.getMathType(element, env);
+                if(r['error'])return r.error;
+                    switch(r[3]){
+                        case 'list':
+                            allreturn += 'std::vector<'+r[0]+'> ';break;
+                        case 'set':
+                            allreturn += 'std::set<'+r[0]+'> ';break;
+                        default:
+                            if(r.indexOf('var')!==-1)
+                                allreturn += r[0];
+                            else
+                                allreturn += r;
+                            allreturn += ' ';
+
+                    }
+            }
+            return allreturn === '' ? 'void':allreturn;
+        }
+        if(mth.kind === "stringStatement"){
+            return this.getListOpType(mth, env);
         }if(mth.kind === 'opListStatement'){
             return this.getListOpType(mth, env);
+        }if(mth.kind === "CallStatement"){
+            const function_scope = SymbolFunction.tracker[mth.function_name];
+
+            if(this.lang === 'C++' && function_scope[2] === 'void'){
+                return {error:'void function cannot be lvalue'};
+            }
+
+            return function_scope[2];
+        }if(mth.kind === 'MBinaryExpression'){
+            for (let index = 0; index < mth.body.length; index++) {
+                const element = mth.body[index];
+                return this.getMathType(element, env);
+            }
+        }
+        if(mth.kind === 'BinaryExpression'){
+            let expressionStr=[]
+            let all = this.traverseExpression(mth, expressionStr, env);
+            for (let index = 0; index < all.length; index++) {
+                if(Array.isArray(all[index]))
+                all[index] = all[index][0]
+                
+            }
+            let o = '';
+            let returnt = '';
+            if(all.includes('>') || all.includes('<'))
+                returnt = 'bool';
+            if(all.includes('&&') || all.includes('||')){
+                if(all.includes('string')){
+                    return { error: 'string not supported here' };
+                }
+                o = 'bool';
+            }
+            // for operations
+            if (all.includes('string')) {
+                
+                if (all.includes('int') || all.includes('float')) {
+                    if(this.lang ==='Python' && all.includes('int') && all.includes('+') )
+                        o= 'string';
+                    return { error: 'this binary operation is not supported' };
+                } else {
+                    let index = all.indexOf('string');
+                    let opertaor = all[index+1];
+                    if(this.lang ==='C++'){
+                        if (opertaor == ('-') ||opertaor == ('*') || opertaor == ('/')) {
+                            return 'Invalid string operation';
+                        }
+                    }
+                        o= 'string';
+                }
+            } else if (all.includes('float')) {
+                if (all.includes('int')) {
+                        o= 'float';
+                } else {
+                    return { error: 'this binary operation is not supported' };
+                }
+            } else if (all.includes('int')) {
+                    o= 'int';
+            } else {
+                return { error: 'this binary operation is not supported' };
+            }
+            
+            if(returnt === ''){
+                return o;}
+                
+            return returnt
         }
         return this.getVarType(mth.value, env);
     }
+
+     traverseExpression(node, expressionStr, env) {
+            if (node.kind === 'BinaryExpression') {
+            this.traverseExpression(node.left, expressionStr, env);
+            expressionStr.push(node.operater)
+            this.traverseExpression(node.right, expressionStr, env);
+            } else {
+            expressionStr.push(this.getMathType(node, env));
+            }
+        return expressionStr
+     }
+
     getVarType(value, env=null){
        
         // retrun datatype based on the value
 
-        if(value==='NULL')
-
+         if(value ==='true' || value ==='false')return 'bool';
         if(value==='NULL')
             return 'void*'
         if (/^-?\d+\.\d+/.test(value)) {
@@ -105,7 +226,10 @@ export class Parser{
                 return ('error missing \'');
         }
          if(env){
-            return env.lookUp(value)[0];
+            let type = env.lookUp(value);
+            if(type[3] == 'list')
+                return'std::vector<'+(type[0].length==0?'void*':type[0])+'> ';
+            return type[0];
         }
     }
 
@@ -127,7 +251,7 @@ export class Parser{
         }
 
         const function_scope = SymbolFunction.lookUp(this.current_scope);
-        if(env.lookUp(left.value)==null && function_scope==undefined){
+        if(env.lookUp(left.value)==null && (function_scope == undefined || function_scope.length==0)){
 
             let error = {error:(`${left.value} is not declared yet\n`)};
             if(error_type==1)
@@ -140,17 +264,19 @@ export class Parser{
         }return true
     }
 
-    handle_assigment(left, env){
+    handle_assigment(left, env, kind=''){
         let op = '';
         let right_op = 'NULL';
         this.move();
         let varvalue;
         let vartype;
         let right;
+
+        let datatype = 'var';
         // check for prompt
         if(this.getCurrentToken().value == 'prompt'){
             this.move();this.move();this.move();
-            let prompt = `'Enter ${left.value}'`  
+            let prompt = `'Enter ${left}'`  
             if(this.getCurrentToken().type!=TokenType.EOC && this.getCurrentToken().type !== TokenType.newLine)
                 prompt = this.move().value;
             right='input('+prompt+')'.replace("\n", '')
@@ -159,9 +285,8 @@ export class Parser{
           
                 right = this.parse_statement(env);
             if(right['kind']){
-             
+                const lookup = env.lookUp(left)
                 if(right.value!=null){ /// parse normal assi
-                    const lookup = env.lookUp(left)
                     let value = '';
 
                     if(right.kind=='Op'){
@@ -181,22 +306,26 @@ export class Parser{
                         if(right_op=='NULL')
                             right_op = right.value;
                         const function_scope = SymbolFunction.lookUp(this.current_scope);
-                        if(function_scope !== undefined){
+                        if(function_scope !== undefined && function_scope.length!==0){
                             const parameters = function_scope[0];
                             if(parameters && parameters.hasOwnProperty(right.value)){
                                 value = parameters[right.value]
                             }
-                        }else{
+                        }
                             
                             if(env.lookUp(right.value) == null)
                                 return {error:(`${right.value} is not decalred yet\n`)};
-                            value = env.lookUp(right.value)[0]
-                        }
+                            value = this.getVarType(right.value, env);
+                            if(value.indexOf('vector')!==-1){
+                                datatype = 'list'
+                                kind[0] = 'createListStatement';
+                            }
                     }
                     else{
                         value = this.getVarType(right.value);
                         if(value=='string'){
                             lookup[1] = right.value.replace(/'/g, '\"');
+                            
                             right.value = lookup[1]
                             
                         }
@@ -206,9 +335,11 @@ export class Parser{
                     }
 
                     if(lookup[0] !=='void*' &&  value != lookup[0]&& this.lang=='C++'){
-                        return {error:(`${left.value} is ${lookup[0]}. Cannot change data type in C++`)};
+                        return {error:(`${left} is ${lookup[0]}. Cannot change data type in C++`)};
                     }
                     lookup[0] = value;
+                    lookup[2] = right.value;
+                    lookup[3] = datatype;
                     env.isset(true);
                     right.value = op + right_op
                     varvalue = right.value;
@@ -217,6 +348,8 @@ export class Parser{
                 }else{
                     // get varvalue from math if math
                     vartype = this.getMathType(right, env);
+                    if(vartype['error'])
+                        return vartype;
                     varvalue = right;
                     lookup[0] = vartype;
 
@@ -285,16 +418,99 @@ export class Parser{
                 return (this.pasre_return_statement(env))
             case TokenType.op:
                 return (this.pasre_operation_statement(env))
-                
+            case TokenType.Break:
+                    return this.pasre_break_statement(env)
             case TokenType.Strings:
                 return this.pasre_string_statement(env)
             case TokenType.Math:
                 return this.pasre_math_statement(env)
+
+            ///////HANDLe GAME//////////////
+            case TokenType.turn:
+                    return this.pasre_game_turn(env)
+            case TokenType.move:
+                    return this.pasre_game_move(env)
+            case TokenType.color:
+                    return this.pasre_game_color(env)
+            case TokenType.colour:
+                    return this.pasre_game_colour(env)
+            case TokenType.pen:
+                    return this.pasre_game_pen(env)
             default:
                 return this.parse_expr(env);
         }
     }
     
+
+
+
+
+    ////////GAME BLOCKS///////
+
+    pasre_game_colour(env){
+        this.move();
+        let color = [];
+        while(this.getCurrentToken().value !=='\n')
+            color.push(this.parse_statement(env));
+        let body = {
+            kind:'colourGame',
+            color:color,
+        };
+        return body;
+    }
+
+    pasre_game_color(env){
+        this.move();
+        let color = '';
+        while(this.getCurrentToken().value !=='\n')
+            color += this.move().value;
+        let body = {
+            kind:'colorGame',
+            color:color,
+        };
+        return body;
+    }
+    pasre_game_turn(env){
+        this.move();
+        let direction = this.move().value;
+        let by = this.parse_statement(env);
+        let body = {
+            kind:'turnGame',
+            dirc:direction,
+            by:by
+        };
+        return body;
+    }
+    pasre_game_pen(env){
+        this.move();
+        let direction = this.move().value;
+        let body = {
+            kind:'penGame',
+            dirc:direction,
+        };
+        return body;
+    }
+    pasre_game_move(env){
+        this.move();
+        let direction = this.move().value;
+        let by = this.parse_statement(env);
+        let body = {
+            kind:'moveGame',
+            dirc:direction,
+            by:by
+        };
+        return body;
+    }
+
+    pasre_break_statement(env){
+        this.move();
+        let direction = this.move().value;
+        let body = {
+            kind:'BreakStatement',
+            dirc:direction,
+        };
+        return body;
+    }
     pasre_operation_statement(env){
         this.move();
         let body = {
@@ -307,18 +523,29 @@ export class Parser{
                 body.body.push(statement);
             }else
                 body['body'] = [statement];
-        }this.move()/////\n
+        }if(this.getCurrentToken().value=='\n') this.move()/////\n
+        for (let index = 0; index < body.body.length; index++) {
+            const element = body.body[index];
+            try{let e = this.getMathType(element, env);
+            if(e['error']) return e['error'];
+        }catch{}
+            
+        }
+
         return body;
     }
     pasre_string_statement(env){
         this.move();
         const op = this.move().value;
         const onstring = this.move().value;
-        const on = this.parse_statement(env);
-        
+        let on='';
+        if(this.getCurrentToken().value !== '\n'){
+            on= this.parse_statement(env);
+        }
+        this.move();
         let body={
             kind:'stringStatement',
-            op:op,
+            ops:op,
             on:on,
             onstring:onstring
         };
@@ -337,20 +564,15 @@ export class Parser{
         return body;
     }
     pasre_return_statement(env){
-        let body={};
         this.move();
-        let statement = '';
-        while(this.validToken() && this.getCurrentToken().value!='\n'){
-            statement += this.move().value;
-        }
+        let returnV = [];
+            while(this.validToken() && this.getCurrentToken().value!='\n'){
+                returnV.push(this.parse_statement(env));
+            }
         if(this.validToken() ){
             this.move();
         }
-        body={
-            kind:'returnStatement',
-            statement
-        }
-        return body;
+        return{kind: 'returnStatement', returnV};
     }
     pasre_opList_statement(env){
         let body={};
@@ -439,17 +661,9 @@ export class Parser{
                 opvalue.push(x);
             }
             
-            /// get list/set type
-            const firstElement = type[0];
-            final_type = firstElement;
-            
-            for (let i = 1; i < type.length; i++) {
-                if (type[i] !== firstElement) {
-                    final_type = 'std::auto';break;
-                }
-            }
+        
         }
-        const valid = env.declareVar([listName, [final_type, opvalue]], this.line, dtype);
+        const valid = env.declareVar([listName, [type, opvalue]], this.line, dtype);
         if(valid!=undefined)return valid;
         body={
             kind:'createListStatement',
@@ -464,15 +678,29 @@ export class Parser{
         let body={};
         this.move();
         let printValue = [];
+        let printType = [];
+        let eachbody = [];
             while(this.validToken() && this.getCurrentToken().value!='\n'){
-                printValue.push(this.parse_statement(env));
+                let type = this.parse_statement(env);
+                if(this.lang === 'C++'){
+                    if(type['kind'] == 'CallStatement')
+                        if(SymbolFunction.tracker[type.function_name][2] === 'void')
+                            return {error:'Cannot print void function'}
+                }
+                printValue.push(type);
+                if(type.kind === 'Identifier')
+                printType.push(env.lookUp(type.value)[3]);
+                else
+                printType.push(type.value);
             }
+          
         if(this.validToken() ){
             this.move();
         }
         body={
             kind:'printStatement',
             printValue,
+            printType,
         };
         return body;
     }
@@ -514,11 +742,13 @@ export class Parser{
         let varvalue = 'null';
         if(this.getCurrentToken().type==TokenType.Equals){ 
             
-            let resutl = this.handle_assigment(varname, env);
+            let resutl = this.handle_assigment(varname, env, [kind]);
+            if(resutl['error']) return resutl['error'];
             let left = resutl[0];
             if(left.right['error']) return left.right;
             varvalue = resutl[1];
             vartype = resutl[2];
+ 
         }
  
         //check if the var is the same as the function name
@@ -550,6 +780,7 @@ export class Parser{
             env
             
         }
+        
         env.declared = false;
         /*let console = document.getElementById("sidebar1");
         let p = document.createElement("p");
@@ -562,14 +793,17 @@ export class Parser{
     }
     parse_assignment(env){
         let left = this.parse_additive_expr(env);
-        if(left.kind!='BinaryExpression' && left.kind!='private' && left.kind!='public'){
+        if(left['error'])return left.error
+        if(left.kind!='BinaryExpression' &&  left.kind!='private' && left.kind!='public'){
             const error =  this.generateBodyError(env, left, true);
             if(error!=true)return error
         }
  
 
         if(this.getCurrentToken().type==TokenType.Equals){
-            left = this.handle_assigment(left);
+            let resutl = this.handle_assigment(left.value, env);
+            if(resutl['error']) return resutl['error'];
+            left = resutl[0];
         } //'multiCondition
         return left;
     }
@@ -577,7 +811,8 @@ export class Parser{
         //10+2-5
         let left = this.parse_multitive_expr(env); 
         if(!(this.getCurrentToken().value === '!')){ // stop proccessing. This belongs to another block ex(abs(0)+=1)
-            while(this.getCurrentToken().value == '+' || this.getCurrentToken().value == '>' || this.getCurrentToken().value == '<'  || this.getCurrentToken().value == '%' || this.getCurrentToken().value == '&' || this.getCurrentToken().value=='|'){
+            while(this.getCurrentToken().value == '+' || this.getCurrentToken().value == '>' || this.getCurrentToken().value == '<'  || this.getCurrentToken().value == '-'  || this.getCurrentToken().value == '%' || this.getCurrentToken().value == '&' || this.getCurrentToken().value=='|' || 
+            this.getCurrentToken().value == '+=' || this.getCurrentToken().value == '==' || this.getCurrentToken().value == '>=' || this.getCurrentToken().value == '<='  || this.getCurrentToken().value == '-='  || this.getCurrentToken().value == '%='){
                 let operater = this.move().value;
                 if(this.getCurrentToken().value=='&' || this.getCurrentToken().value=='|' || this.getCurrentToken().value=='='){
                     operater += this.move().value;
@@ -600,11 +835,16 @@ export class Parser{
     parse_multitive_expr(env){
         //10+2-5
         let left = this.parse_value_expr(env);
+        let er = this.generateBodyError(env, left);
+        if(er['error'])return er;
 
-        while(this.getCurrentToken().value == '*' || this.getCurrentToken().value == '/'){
-            const operater = this.move();
-            const right = this.parse_value_expr();
-            
+        while(this.getCurrentToken().value == '*' || this.getCurrentToken().value == '*=' ||this.getCurrentToken().value == '/'||this.getCurrentToken().value == '/=' ){
+            const operater = this.move().value;
+            const right = this.parse_statement(env);
+            let er = this.generateBodyError( env, right);
+            if(er['error'])return er;
+
+
             left = {
                 kind: "BinaryExpression",
                 left,
@@ -636,6 +876,8 @@ export class Parser{
             case TokenType.Number:
                 const val = this.move().value;
                 return {kind:'Number', value:parseFloat(val)};
+            case TokenType.Bool:
+                return {kind:'Boolean', value:this.move().value};
             case TokenType.String:
                 return {kind:'String', value:this.move().value};
             case TokenType.Up: case TokenType.Low: case TokenType.Cat:
@@ -655,30 +897,34 @@ export class Parser{
         if(paramenters===undefined)
             return {error:`call block should be under the function '${function_name}'`}
         let f =0
-        while(this.validToken() && this.getCurrentToken().value!='\n'){
+        while(this.validToken() && this.getCurrentToken().value!='\n' && this.getCurrentToken()!='inside'){
             const argu_name = this.move();
             let val = this.move().value;
             
-            val = this.parse_multitive_expr();
+            val = this.parse_statement(env);
             if(val==='!')
                 return {error:`missing one potential argument '${argu_name.value}'`}
-            paramenters[f++][argu_name.value] = this.getVarType(val.value);
-            argsv.push(val.value);
+            let s = this.getMathType(val, env);
+            if(Array.isArray(s))
+                s = s[0];
+            paramenters[f++][argu_name.value] = s;
+            argsv.push(val);
             argsk += val.kind ;
 
-        }this.move();
-        argsv = argsv.join(', ');
-        const body={
+        }
+         const body={
             kind:'CallStatement',
             function_name,
             argsv,
             argsk
         };
-
+        while(this.getCurrentToken().value=='\n')
+            this.move()
         ///////////////// 
 //        switch 
+if(this.getCurrentToken() !='inside'){
         let copy = this.tokens;
-        this.tokens = this.func_body[function_name];
+        this.tokens = [...this.func_body[function_name]];
         let fbody;
         for(let dict of this.program.body){
             if(dict.name == function_name){
@@ -687,32 +933,34 @@ export class Parser{
             }
         }
 
-        let function_env = new Symbol(env);
-        let return_type = 'void';
-        this.move();
-        while(this.inBody() && this.validToken()) { 
-            if(this.getCurrentToken().value=='\n'){
-                this.move();
-                continue;
+            let function_env = new Symbol(env);
+            let return_type = 'void';
+            this.move();
+            while(this.inBody() && this.validToken()) { 
+                if(this.getCurrentToken().value=='\n'){
+                    this.move();
+                    continue;
+                }
+                const statement = this.parse_statement(function_env);
+                if(statement.kind=='returnStatement'){
+                    return_type = this.getMathType(statement, function_env);
+                    SymbolFunction.set_return_type(function_name, return_type);
+                    fbody.type = return_type;
+                }
+                if (fbody.body) {
+                    fbody.body.push(statement);
+                    
+                }else
+                    fbody['body'] = [statement];
+                this.line ++;
             }
-            const statement = this.parse_statement(function_env);
-            if(statement.kind=='returnStatement'){
-                return_type = this.getVarType(statement.statement);
-                SymbolFunction.set_return_type(function_name, return_type);
-                  fbody.type = return_type;
-            }
-            if (fbody.body) {
-                fbody.body.push(statement);
-                
-            }else
-                fbody['body'] = [statement];
-            this.line ++;
-        }
-            if(!this.inBody())
-                this.move();
-            SymbolFunction.set_scope(return_type);
+                if(!this.inBody())
+                    this.move();
+                SymbolFunction.set_scope(return_type);
 
-        this.tokens = copy;
+            this.tokens = copy;
+        }else
+            this.move();
 
         return body;
 
@@ -723,18 +971,23 @@ export class Parser{
         const varname = this.move().value;
         let varname_over = this.parse_value_expr(env);
         const error =  this.generateBodyError(env, varname_over, 2);
-        if(error!=true)return error
+        if(error['error'])return error.error
         //check the type
         varname_over = varname_over.value
         const lookup = env.lookUp(varname_over);
-        const var_type = lookup[3];
-        if(var_type!='list' && lookup[0]!='string')
+        let var_type;
+        let type = 'string';
+        if(lookup){
+
+            var_type = lookup[3];
+            if(var_type!='list' && lookup[0]!='string')
             return {error:`Cannot iterate over ${lookup[0]}`};
-        const type = lookup[0];
+             type = lookup[0];
+        } 
         let iterateable_type;
         switch(type){
             case 'string':
-                iterateable_type = 'char';
+                iterateable_type = 'char';break;
             default:
                 iterateable_type = type;
         }
@@ -812,12 +1065,29 @@ export class Parser{
         };
         this.current_scope = name;
          //remove { 
+            let o=1, c=0;
         this.func_body[name] = [this.move()];
-        while (this.inBody() && this.validToken()) { 
+        while (this.validToken()) { 
+            let a = this.getCurrentToken().value;
+            if(a==='{')o++;
+            else if(a==='}')c++
+            let m = this.getCurrentToken().value;
+            if(m=='call'){
+                if(this.tokens[1].value == name){
+                    m=[]
+                    while(this.getCurrentToken().value !='\n'){
+                        this.func_body[name].push(this.move());
+                        
+                    }
+                    this.func_body[name].push(this.move());
+                    this.func_body[name].push('inside');
+                }
+            }
             this.func_body[name].push(this.move());
-        }
-        this.func_body[name].push(this.move());
 
+            if(a=='}' && o-c === 0)break;
+        }
+      
         return body;
     }
 
@@ -861,14 +1131,14 @@ export class Parser{
         let indexes = {};
         while(this.getCurrentToken().value !== '{'){ // recieve all indexes
             const name = this.move().value;
-            const from = this.move().value;
+            const from = this.parse_statement(for_env);
             
             //store in symbol 
                 const valid = for_env.declareVar([name, ['int', from]], this.line, 'int');
                 if(valid!=undefined)return valid;
             //store in symbol 
 
-            const to = this.move().value;
+            const to = this.parse_statement(for_env);
             let by = this.move().value;
             if(by==='-'){
                 by+=this.move().value;
@@ -893,26 +1163,30 @@ export class Parser{
         return body;
     }
     parse_repeate_statement(env){
-        let repeat_env = new Symbol(env);
+        let if_env = new Symbol(env);
         let body={};
         this.move();
         let condition;
-        if(this.getCurrentToken().value == '{')
+        if(this.getCurrentToken().value == 'then')
             condition = 'false'
         else
-            condition = this.parse_expr(env);
+            condition = this.parse_statement(env);
         body={
             kind:'whileStatement',
             condition,
         };
         this.move(); //remove { 
+        this.move(); //remove { 
         while (this.inBody() && this.validToken()) { 
             if(this.getCurrentToken().type == TokenType.newLine){this.move(); continue;}
-            const statement = this.parse_statement(repeat_env);
+            const statement = this.parse_statement(if_env);
+
             if (body.body) {
                 body.body.push(statement);
             }else
                 body['body'] = [statement];
+            this.line ++;
+
         }
         if(!this.inBody())
             this.move();
@@ -926,6 +1200,8 @@ export class Parser{
         this.move(); //remove { 
 
         while (this.inBody() && this.validToken()) { 
+            if(this.getCurrentToken().type == TokenType.newLine){this.move(); continue;}
+
             const statement = this.parse_statement(else_env);
             if (body.body) {
                 body.body.push(statement);

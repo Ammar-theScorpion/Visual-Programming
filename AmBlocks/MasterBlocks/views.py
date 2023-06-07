@@ -14,11 +14,12 @@ def renderProblems(request):
 
 def problem(request, pname):
     
-    problem = Problem.objects.get(pname=pname)
+    problem = Problem.objects.get(tname=pname)
     context = {'problem':problem}
-    dic = ['printBlock', 'eachBlock', 'listBlock', 'counterBlock','conditionBlock', 'functionBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock','create_listBlock','create_setBlock', 'makeHashBlock', 'elseBlock','whileBlock', 'make_varBlock']
+    tests = problem.testcode_set.all()
+    dic = ['printBlock', 'eachBlock', 'breakBlock', 'returnBlock','listBlock','stringBlock', 'counterBlock','conditionBlock', 'functionBlock', 'ifBlock', 'assigmnemtBlock', 'operationBlock','create_listBlock','create_setBlock', 'makeHashBlock','mathBlock', 'elseBlock','whileBlock', 'make_varBlock']
     context = {'id':dic,
-                'my_template': 'TutorialsBlocks/tutorials.html','tutorial':problem}
+                'my_template': 'TutorialsBlocks/tutorials.html','tutorial':problem, 'tests':tests}
     return render(request, 'blocks.html', context)
  
         #raise Http404('problem does not exist')

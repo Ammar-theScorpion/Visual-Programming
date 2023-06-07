@@ -33,13 +33,20 @@ export const TokenType = {
     For:34,
     Math:35,
     op:36,
+    turn:37,
+    move:38,
+    color:39,
+    pen:40,
+    Break:41,
+    colour:42,
+    Bool:43,
     EOC : 45,
   };
   const KEYWORDS = {
     if:   TokenType.If,
     else: TokenType.Else,
     then: TokenType.Then,
-    repeat: TokenType.Repeat,
+    while: TokenType.Repeat,
     int: TokenType.Int,
     float: TokenType.Float,
     string: TokenType.String,
@@ -58,6 +65,9 @@ export const TokenType = {
     strings:TokenType.Strings,
     math:TokenType.Math,
     for:TokenType.For,
+    break:TokenType.Break,
+    true:TokenType.Bool,
+    false:TokenType.Bool,
     
     return:TokenType.Return,
   };
@@ -99,10 +109,18 @@ export const TokenType = {
       }  
       else if (src[0] === '+' || src[0] === '-' || src[0] === '*' || src[0] === '/' || 
               src[0] === '>' || src[0] === '<'|| src[0] === '&' || src[0] === '|' || src[0] === '%') {
-        tokens.push(token(src.shift(), TokenType.BinaryOperator));
+                let s = src.shift();
+          if(src[0] === '=')
+              s+=src.shift()
+        tokens.push(token(s, TokenType.BinaryOperator));
       }  
       else if (src[0] === '=') {
-        tokens.push(token(src.shift(), TokenType.Equals));
+        let s = src.shift();
+        if(src[0] === '='){
+            s+=src.shift()
+            tokens.push(token(s, TokenType.BinaryOperator));
+        }else
+        tokens.push(token(s, TokenType.Equals));
       }  
       else {
         if(src[0]=="'"){

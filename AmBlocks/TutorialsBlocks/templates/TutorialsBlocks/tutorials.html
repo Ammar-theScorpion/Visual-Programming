@@ -2,6 +2,39 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+	<script>
+    window.debug = '{{ debug|safe }}';
+
+var newWindow;
+
+function windowOpener() {
+  var ex = '';
+
+    ex += '{% for test in tests %}input({{ test.test }}) result ({{ test.expected_output }})<br><br>{% endfor %}';
+  
+
+  var tutorialBody = "{{ tutorial.body }}";
+
+  // Use the 'ex' and 'tutorialBody' variables in your JavaScript code
+  console.log(ex);
+
+  newWindow =  window.open('', '', "width=700,height=500");
+  tutorialBody+="<br>Examples:<br><br>"+ex;
+  var doc = newWindow.document;
+    doc.open();
+    doc.write(tutorialBody);
+    doc.close();
+
+
+  var timer = setInterval(function() {
+    if(newWindow.closed){
+      clearInterval(timer);
+    }
+  }, 250)
+}
+
+		</script>
 	<title>Tutorial</title>
       
   {% block mainscript %}
@@ -226,6 +259,8 @@
 }
 
 	</style>
+
+
 </head>
 <body>
 	{% block varside%}
@@ -239,12 +274,12 @@
    </div>
   <div class="right-section">
 	<div class="problem-body">
-		<div class="header">{{  tutorial.tname }}</div>
+		<div class="header">{{  tutorial.tname  }}</div>
 	  <div class="problem-header">
 		<h2>Problem Description</h2>
-		
+		<button onclick="windowOpener();">Description</button>
 	  </div>
-	  <p>{{tutorial.body}}</p>
+
 	  <div class="codesspace">
 
 			<svg class="Am-workspace"xmlns="http://www.w3.org/2000/svg"
@@ -252,15 +287,10 @@
 			xmlns:html="http://www.w3.org/1999/xhtml"
 			version="1.1" width="100%" height="100%">
 			<g class="Am-workspace main">
-
-				<foreignObject x="850" y="680" width="90" height="90">
-					<div xmlns="http://www.w3.org/1999/xhtml">
-						<div class="trash-can">
-							<div class="trash-lid"></div>
-							<div class="trash-bin"></div>
-						</div>
-					</div>
-			</foreignObject>
+				<filter id="my-filter">
+					<feGaussianBlur stdDeviation="4" />
+				  </filter>
+				  
 		</g>
 		</svg>
 		
@@ -303,6 +333,7 @@
   <script>
  
     window.calling_script = '{{ my_template|safe }}';
+    window.params = '{{ tutorial.parameters|safe }}';
 
   </script>
  

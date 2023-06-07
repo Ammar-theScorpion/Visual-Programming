@@ -65,6 +65,7 @@ class Identifier extends Expr{
         this.kind = "Identifier";
         this.value = "";
     }
+
 }
 
 class BinaryExpression extends Expr{

@@ -6,8 +6,8 @@ export class BlockTranslater{
         this.blockId = {};
         this.parser = new Parser();
         this.indexAt = 0
-
     }
+    
     moveNode(array){
         const prev = array[this.indexAt];
         this.indexAt++;

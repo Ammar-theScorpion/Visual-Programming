@@ -1,3 +1,5 @@
+$('.home.Am-workspace').attr('height', 1)
+
 ///////////// *Draw Lines and the main character* //////////////
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -11,16 +13,23 @@ const circleColor = 'black';
 const triangleSize = 10;
 const triangleColor = 'white';
 let triangleAngle = 0;
-
+let wdraw = true;
 // Line properties
-let lines = [];
+
+
 let lineStartX = circleX;
 let lineStartY = circleY - circleRadius;
 let lineEndX = circleX;
 let lineEndY = circleY - circleRadius;
-const lineWidth = 5;
+const lineWidth = 1;
 let lineColor = 'white';
-
+let lines =[{
+    startX: lineStartX,
+    startY: lineStartY,
+    endX: lineEndX,
+    endY: lineEndY,
+    color: lineColor
+}];
 
 function restoreDefaults(){
     circleX = 250;
@@ -32,15 +41,31 @@ function restoreDefaults(){
     lineEndY = circleY - circleRadius;
     drawCanvas()
 }
+
+function pen(dirc){
+    if(dirc == 'up'){
+        wdraw = false;
+    }else
+        wdraw = true;
+}
 // Move circle forward
-function moveForward(byDistance) {
+function move(byDistance, direc) {
+ 
+
     const angleRadians = triangleAngle * Math.PI / 180;
     const deltaX = Math.sin(angleRadians) * byDistance;
     const deltaY = Math.cos(angleRadians) * byDistance;
 
     // Update circle position
-    circleX += deltaX;
-    circleY -= deltaY;
+    if(direc==='forward'){
+
+        circleX += deltaX;
+        circleY -= deltaY;
+    }else{
+        circleX -= deltaX;
+        circleY += deltaY;
+
+    }
 
     // Update line positions
     lineStartX = lineEndX;
@@ -48,26 +73,33 @@ function moveForward(byDistance) {
     lineEndX = circleX;
     lineEndY = circleY;
     
-    // Add line to array
-    lines.push({
-        startX: lineStartX,
-        startY: lineStartY,
-        endX: lineEndX,
-        endY: lineEndY,
-        color: lineColor
-    });
+    if(wdraw){
 
+        // Add line to array
+        lines.push({
+            startX: lineStartX,
+            startY: lineStartY,
+            endX: lineEndX,
+            endY: lineEndY,
+            color: lineColor
+        });
+        
+    }
 
     // Redraw canvas
     drawCanvas();
 }
 
 // Turn triangle left
-function turnLeft() {
-    triangleAngle -= 45;
-
-
+function turn(direc, ang) {
+    ang = parseFloat(ang);
+    if(direc === 'left')
+        triangleAngle -= ang;
+    else
+        triangleAngle += ang;
     // Redraw canvas
+    console.log(triangleAngle)
+
     drawCanvas();
 }
 
@@ -124,10 +156,35 @@ function tuggle(element){
 
 }
 
-function setColor(element, event){
+function colorClick(element, event){
     const color = $(element).closest('.draggable').find('.coloring');
-    lineColor = event.target.style.backgroundColor;
-    color.attr('fill', lineColor);
+    color.attr('fill', event.target.style.backgroundColor);
 }
 
+function color(col){
+    var color;
+    if(col===''){
+
+        var r = Math.floor(Math.random() * 256); // Random value between 0 and 255
+        var g = Math.floor(Math.random() * 256);
+        var b = Math.floor(Math.random() * 256);
+        
+        // Create the RGB color string
+        color = "rgb(" + r + ", " + g + ", " + b + ")";
+    }else
+        color = col;
+
+    lineColor = color
+}
+
+function colour(colors){
+    colors = colors.split(',');
+    var r = Math.floor(colors[0]); // Random value between 0 and 255
+    var g = Math.floor(colors[1]);
+    var b = Math.floor(colors[2]);
+    color = "rgb(" + r + ", " + g + ", " + b + ")";
+    console.log(color)
+    lineColor = color
+
+}
 ///////////// *Draw Lines and the main character* ////////////// 

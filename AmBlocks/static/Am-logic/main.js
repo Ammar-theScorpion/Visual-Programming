@@ -1,7 +1,26 @@
 import {Blocks} from "./Am-interperter/front-back.js";
 
 $(document).ready(function() {
-    
+    /// setup csrf
+    var csrftoken = $('[name="csrfmiddlewaretoken"]').val();
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+               if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                   xhr.setRequestHeader('X-CSRFToken', csrftoken);
+            }
+         }
+      });
+
+      ///////////////
+    const b = $('.button-30');
+    b.each(function(){
+        let block = $(this).text();
+        
+        $(this).addClass(block);
+    });
+    //introJs().addHints().start();
+    //introJs('.button-30').start();
     /**************ZOOM IN AND OUT ******** */
         var zoomLevel = 1; // Initial zoom level
         var svgElement = $('svg.Am-workspace'); 
@@ -11,20 +30,9 @@ $(document).ready(function() {
         var translateX = 0;
         var translateY = 0;
       
-        // Zoom In button click event handler
-        $('#zoomInButton').click(function() {
-          zoomLevel += 0.05; // Increase the zoom level
-          zoomWorkspace();
-        });
-      
-        // Zoom Out button click event handler
-        $('#zoomOutButton').click(function() {
-          zoomLevel -= 0.05; // Decrease the zoom level
-          zoomWorkspace();
-        });
       
         // Mouse wheel event handler
-       /* svgElement.on('mousewheel', function(event) {
+        svgElement.on('mousewheel', function(event) {
           event.preventDefault();
       
           if (event.originalEvent.wheelDelta > 0) {
@@ -41,10 +49,10 @@ $(document).ready(function() {
           isDragging = true;
           lastX = event.clientX;
           lastY = event.clientY;
-        });*/
+        });
       
         // Mouse move event handler
-       /* $(document).mousemove(function(event) {
+        $(document).mousemove(function(event) {
           if (isDragging) {
             var deltaX = event.clientX - lastX;
             var deltaY = event.clientY - lastY;
@@ -52,7 +60,7 @@ $(document).ready(function() {
             translateX += deltaX;
             translateY += deltaY;
       
-            workspaceGroup.attr('transform', 'translate(' + translateX + ' ' + translateY + ')');
+            workspaceGroup.attr('transform', 'scale(' + zoomLevel + ')  translate(' + translateX + ' ' + translateY + ')');
       
             lastX = event.clientX;
             lastY = event.clientY;
@@ -62,7 +70,7 @@ $(document).ready(function() {
         // Mouse up event handler
         $(document).mouseup(function() {
           isDragging = false;
-        });*/
+        });
       
         // Function to apply zoom to the SVG workspace
         function zoomWorkspace() {
@@ -86,8 +94,8 @@ $(document).ready(function() {
             }else if(direction==1){
                 ground=on_groundh;
             }
-            let ftop = on_mouse.offset().top + mouse
-            let stop = on_ground.offset().top + ground
+            let ftop = (on_mouse.offset().top + mouse)/zoomLevel
+            let stop = (on_ground.offset().top + ground)/zoomLevel
             return Math.sqrt(Math.pow(on_mouse.offset().left - on_ground.offset().left, 2) +
                     Math.pow(ftop - stop, 2));
         }catch(e){return 1000;}
@@ -136,10 +144,12 @@ $(document).ready(function() {
                 const traslate2 = $(this).parent().position().top;  
                     if(traslate-traslate2<100 || $(this).parent().prop("tagName")==='svg'){
                         let dd = $(this).attr("d");
-                        const re = /v ([0-9.]+)/g
-                        let match = re.exec(dd);
-                        match = re.exec(dd);
-                        let matchedString = match[0];
+                        const re = /v ([0-9.]+)/g;
+                        try{
+
+                            let match = re.exec(dd);
+                            match = re.exec(dd);
+                            let matchedString = match[0];
                         let newString = `v ${height-5+ (at=='m' ? 0 :( parseFloat(matchedString.split(' ')[1])))}`;
                         at='m';
                         if(direction==-1){
@@ -149,6 +159,7 @@ $(document).ready(function() {
                         $(this).attr("d", dd)
                         height+=80;
                         traslate = traslate2;
+                    }catch(e){}
                 }
             });
         }
@@ -210,7 +221,10 @@ $(document).ready(function() {
     let VARAIBLES = [1,2,3,4,5,6,7,8,9,10];
     const VARAIBLES_ = ['a', 'b', 'd', 'e', 'f', 'g', 'h'];
     const sidebarWidth = $('.left-section').width()+38;
+    var socket = null;
+    var ajax = null;
     const STRING_OP = [
+        'tostring',
         'Length',
         'toUpperCase',
         'toLowerCase',
@@ -249,10 +263,12 @@ $(document).ready(function() {
         'find',
         'length',
         'replace',
+        'index',
     ]
     const STRING_OPMAP = {
         'Length':'Len',
         'length':'len',
+        'tostring':'str',
         'toUpperCase':'up',
         'toLowerCase':'low',
         'Concatenate':'cat',
@@ -270,6 +286,8 @@ $(document).ready(function() {
         'find':'fin',//:(s
         'Replace':'repl',//:(
         'replace':'rep',//:(
+        'ceiling':'ceil',//:(
+        'floor':'flr',//:(
     }
     const SET_OP = [
         'initialize',
@@ -316,9 +334,13 @@ $(document).ready(function() {
     $(document).keydown(function(event) {
         if (event.which === 67 && event.ctrlKey) {
             if(gClicked!=null){
-                var clone = gClicked.clone();
-                clone.attr('transform', 'translate('  + 20 + ',' + 300 + ')');
-                clone.appendTo('svg');
+                var clone = gClicked.clone()
+                clone.attr('data-id', generateRandomString(10))
+
+                clone.addClass('clone');
+                translateAndSet();
+                clone.attr('transform', 'translate('  + 0 + ',' + 0 + ')');
+                clone.appendTo('.Am-workspace.main');
                 clones.addBlock(clone);
             }
         }
@@ -327,13 +349,13 @@ $(document).ready(function() {
         let all_list_vars = $('.make-list')
         let vars = [];
         for (let index = 1; index < all_list_vars.length; index++) {
-            const element = $(all_list_vars[index]).find('.name').text();
+            const element = $(all_list_vars[index]).find('.name:first').text();
             vars.push(element);
         }   
          all_list_vars = $('.make-set')
 
         for (let index = 1; index < all_list_vars.length; index++) {
-            const element = $(all_list_vars[index]).find('.name').text();
+            const element = $(all_list_vars[index]).find('.name:first').text();
             vars.push(element);
         }   
         $('.dataStructureName').text(vars[all_list_vars.length-1])
@@ -401,8 +423,10 @@ $(document).ready(function() {
         //check if parent is of type string
         let operation = $(this).find('p').text();
         let on = $(onImage).prev('.operation').first();
+        if(on.length ===0) 
+        on = $(onImage).parent().find('.dataStructureName:first');
         const parent = on.parent().parent();
-        if(parent.attr('id')!=='math'){
+        if(parent.attr('id')!=='math' && STRING_OPMAP.hasOwnProperty(operation)){
             operation = STRING_OPMAP[operation];
             if(operation == 'cat'|| operation == 'spt' || operation=='sub' || operation=='len' || operation=='idx'|| operation=='cnt' || operation=='repl'){
                 let re = on.parent().parent();
@@ -438,23 +462,26 @@ $(document).ready(function() {
         $('.DropDownDiv').css('visibility', 'hidden')
 
       })
+
       
-      function create_function_class(thing_name, ask=true){
+      function create_function_class(thing_name, fname=''){
         var foreignObject = $(`#${thing_name}`);
         let n =foreignObject.find('.name').text();
-        let name = 'do something';
+        let name = fname
         foreignObject.draggable({ disabled: true });
-        if(ask){
+        if(name===''){
             name = window.prompt(`${thing_name} Name` )
             if(name===""){
                 name = 'do something';
             }
+        }else{
+            foreignObject.find('.parameters').attr('visibility', 'hidden')
         }
         
         foreignObject.find('.name').text(name)
         foreignObject.find('.fname rect').attr('width', (name.length+1.5)*8);
         foreignObject.find('.Am-text:nth-of-type(2)').attr('transform', 'translate('+(name.length*8+65)+',24)')
-
+      
         let d = foreignObject.children('path:first').attr("d");
         let match = ''
         while(match=IF_LK_REGEX.exec(d)){
@@ -466,6 +493,11 @@ $(document).ready(function() {
         }
         foreignObject.children('path:first').attr("d", d);
         foreignObject.click();
+
+        /// append params to the function
+      
+        $('.parameters').attr('visibility', 'hidden')
+
         return name;
     }
     $('.create-var').click(function(){
@@ -566,9 +598,6 @@ $(document).ready(function() {
         }
     });
     
-    clones.getBlocks().click(function() {
-        gClicked = $(this)
-    });
  
     $('.button-30').click(function(){
         let block = $(this).text().split(' ');
@@ -648,6 +677,25 @@ $(document).ready(function() {
     });
 //
 
+function generateRandomString(length) {
+    var chars = [];
+    for (var i = 33; i <= 126; i++) {
+        if(i==34 || i==39 || i==38)continue;
+      chars.push(String.fromCharCode(i));
+    }
+  
+    var randomString = "";
+    while (randomString.length < length) {
+      var randomChar = chars[Math.floor(Math.random() * chars.length)];
+      if (!randomString.includes(randomChar)) {
+        randomString += randomChar;
+      }
+    }
+  
+    return randomString;
+  }
+  
+  
     $('.draggable').click(function(event){
          
 
@@ -657,15 +705,24 @@ $(document).ready(function() {
             if(appendto.attr('visibility') !== 'visible')
                 appendto = $(".Am-workspace.main");
             clone.attr('visibility', 'visible');
+
+            // Generate a string data-id of length 10
+            clone.attr('data-id', generateRandomString(10))
+
             clone.addClass('clone');
             clone.appendTo(appendto);
             clones.addBlock(clone);
             translateAndSet();
-
+            clones.getBlocks().click(function() {
+                gClicked = $(this)
+            });
+         
             //// * FUNCTION * /////
             clone.find('.prompt').click(function(){
-                const assignement = $(this).parent();
-                const pos =  parseFloat(($(this).next().attr('transform').match(TRANS_REGEX)[1].split(","))[0]);  
+                let at = $(this).parent().parent().parent().parent();
+                const assignement = at.parent();
+                console.log($(this).parent().parent().parent())
+                const pos =  parseFloat((at.next().attr('transform').match(TRANS_REGEX)[1].split(","))[0]);  
                 let path = assignement.find('path:first').attr('d');
                 let match = /-2 H [0-9.][0-9.]+/g.exec(path)
                 let newLength;
@@ -675,11 +732,12 @@ $(document).ready(function() {
                     text.attr('class', 'Am-text pr');
                     text.text('prompt uesr with ');
                     text.attr('transform', 'translate('+(95)+',25)')
-                    $(this).next().attr('transform', 'translate('+(pos+115)+',11)')
-                    $(this).after(text);
+                    at.next().attr('transform', 'translate('+(pos+115)+',8)')
+                    at.next().next().attr('transform', 'translate('+(pos+115)+',11)')
+                    at.after(text);
                     
                 }else{
-                    $(this).next().attr('transform', 'translate('+(pos-115)+',11)')
+                    at.next().attr('transform', 'translate('+(pos-115)+',11)')
                     $('.pr').remove();
                     newLength = '-2 H '+ (parseFloat(match[0].split(' ')[2]) - 115);
                 }
@@ -702,7 +760,7 @@ $(document).ready(function() {
         /////////////////  circleOps  ///////////////
             
             clone.find('.-inputs').on('click', function(event) {
-                
+                console.log($(this))
                 var clone = $(this).clone(true);
                 let appendto = $(this).parent().next().children('svg');
                 if(appendto.length===1){
@@ -756,7 +814,7 @@ $(document).ready(function() {
                 callFunction.children('.name:first').nextAll().remove().empty();
 
                 let parameter_names = var_names.split(', ');
-                let start_x = current_function.find('.name').text().length*19+50;
+                let start_x = current_function.find('.name').text().length*12+50;
                 for (let index = 0; index < parameter_names.length; index++) {
                     const element = parameter_names[index];
 
@@ -948,13 +1006,18 @@ $(document).ready(function() {
             });
             clone.find('.operation-var p').click(function(){
                 var text = $(this).parent().parent().parent().parent().find('text:first');
+                if(text !== 'prompt'){
+                
                 var currentText = $(this).text();
                 text.text(currentText)
+                }
             });
             clone.find('.operation-list p').click(function(){
                 var text = $(this).parent().parent().parent().parent().find('text:first');
                 var currentText = $(this).text();
-                text.text(currentText)
+                if(currentText !== 'prompt'){
+                    text.text(currentText)
+                }
             });
  
             ////////////////////// operations /////////////////////////
@@ -999,10 +1062,11 @@ $(document).ready(function() {
                     appendto = $(".Am-workspace.main");
                 ///////////////////////// MOVEMENT //////////////////////
 
-        
+                draggable.appendTo($(appendto));
                 workspaceOffset =  $('.codesspace .Am-workspace').offset();
-                const left = (ui.offset.left - workspaceOffset.left - translateX) / zoomLevel;
-                const top = (ui.offset.top - workspaceOffset.top - translateY) / zoomLevel;
+                const left = (ui.offset.left - workspaceOffset.left) / zoomLevel - translateX;
+                const top = (ui.offset.top - workspaceOffset.top) / zoomLevel - translateY;
+                
                 
                 draggable.attr('transform', 'translate(' + left + ',' + top + ')');
                 draggable.addClass('shadow')
@@ -1088,18 +1152,18 @@ $(document).ready(function() {
                     }
                 });
 
-                clones.getBlocks().filter('.draggable').each(function() {
-                    if( !draggable.hasClass('circleOps') && draggable.attr('id')!='function' && draggable.attr('id')!='condition' && $(this).attr('id')!='condition'){
+                clones.getBlocks().each(function() {
+                    if(!draggable.hasClass('circleOps') && draggable.attr('id')!='function' && draggable.attr('id')!='condition' && $(this).attr('id')!='condition'){
                         if(!$(this).closest(draggable).length){
                             const onground_path   = $(this).children('path:first').attr('d');
-                            const onground_height = parseFloat(findHeight(V_REGEX, onground_path))+($(this).attr('class').indexOf('container')==-1 ? 8 :25);
+                            const onground_height = (parseFloat(findHeight(V_REGEX, onground_path))+($(this).attr('class').indexOf('container')==-1 ? 8 :25));
                             const onmouse_path    = draggable.find('path:first').attr('d');
-                            const onmouse_height  = parseFloat(findHeight(V_REGEX, onmouse_path))+(draggable.attr('class').indexOf('container')==-1 ? 8 :25);
+                            const onmouse_height  = (parseFloat(findHeight(V_REGEX, onmouse_path))+(draggable.attr('class').indexOf('container')==-1 ? 8 :25));
                             const on_mouse_children = draggable.find('.draggable')
                             let all_height = 0;
                             on_mouse_children.each(function(){
                                 const d = $(this).find('path:first').attr('d');
-                                all_height+=parseFloat(findHeight(V_REGEX, d))+(draggable.attr('class').indexOf('container')==-1 ? 8 :25);
+                                all_height+=(parseFloat(findHeight(V_REGEX, d))+(draggable.attr('class').indexOf('container')==-1 ? 8 :25));
                             });
                             on_mouseHeight = onmouse_height;
                             let direction=[1, -1, 2];
@@ -1108,7 +1172,7 @@ $(document).ready(function() {
                                 index = 2;
                             for (; index < direction.length; index++) {
                                 const element = direction[index];
-                                let distance = findCustomeDistance(draggable, $(this), onmouse_height+all_height, onground_height ,element); 
+                                let distance = findCustomeDistance(draggable, $(this), (onmouse_height+all_height), onground_height ,element); 
                                 if (distance <= onmouse_height && $('#newpath').length==0) { 
                                     ch = $(this);
                                     chdrag = draggable;
@@ -1146,6 +1210,13 @@ $(document).ready(function() {
                                         if(gppos-ppos<100){
                                             alterVerticalLength($(this).parent(), onground_path, onground_height+onmouse_height+all_height, 1, 'm',true, gppos)
                                         }
+                                        let allretrun = $('.v');
+                                        if(allretrun.length){
+
+                                            let transform = 'translate( 65'+','+(onground_height+onmouse_height+all_height-55) +')';
+                                            $(allretrun).attr('transform',  transform);
+                                            
+                                        }
                                     } 
                                      if(element==2 && $(this).attr('class').indexOf('container')!==-1){
                                         $(this).append(newPath);
@@ -1164,6 +1235,14 @@ $(document).ready(function() {
                                                 $(this).addClass('affected');
                                             }
                                         });
+                                        let allretrun = $('.v');
+                                        if(allretrun.length){
+
+                                            let transform = 'translate( 65'+','+(onground_height+onmouse_height+all_height-55) +')';
+                                            $(allretrun).attr('transform',  transform);
+                                            
+                                        }
+
                                     }
                                 }
                                 else if(distance>onmouse_height && $('#newpath').length && draggable.is(chdrag) && $(this).is(ch) && element == chdirection ){
@@ -1228,6 +1307,7 @@ $(document).ready(function() {
                             ch.append(draggable);
                             draggable.attr('transform', $('#newpath').attr('transform'));
                         }if(chdirection==2){
+                            droppable.removeClass('selected');
                             draggable.addClass('in')
                         }
                         draggable.addClass('chain')
@@ -1366,18 +1446,18 @@ $(document).ready(function() {
                 let droppableX =  (droppable.attr('transform').match(TRANS_REGEX)[1].split(","))[0];  
                 // calculate new length
 
-                let oparent = getAllParentPath(droppable);
-                oparent.each(function(){
+                const path = droppable.parent().children('path:first');
+
                     ////****** *alter HLength **** */
-                    let desired_path = $(this).attr("d");
+                    let desired_path = path.attr("d");
                     
                     //////////// check parent type first ///////////////
                     let type = H_REGEX;
                     let st = 'H ';
                     let dlength = inputWidth;
-                    let olength =  parseFloat($(this).attr("d").match(H_REGEX)[1]);
+                    let olength =  parseFloat(path.attr("d").match(H_REGEX)[1]);
 
-                    if($(this).parent().hasClass('iflike')){
+                    if(path.parent().hasClass('iflike')){
                         type = IF_LK_REGEX;
                         st = '-2 H ';
                     }
@@ -1390,11 +1470,11 @@ $(document).ready(function() {
                     // sub into orignal one
                     desired_path = desired_path.replace(match[0], st+newLength);
                     
-                    $(this).attr("d", desired_path);
+                    path.attr("d", desired_path);
                     ////****** *alter HLength **** */
 
                     /////**** for each block push (moveit) forward ***** */
-                    let moveIt = $(this).parent().find('.moveit');
+                    let moveIt = path.parent().find('.moveit');
 
                     moveIt.each(function(){
                         let t = $(this).attr('transform').match(TRANS_REGEX)[1].split(",");  
@@ -1407,7 +1487,6 @@ $(document).ready(function() {
 
                     });
                     /////**** for each block push (moveit) forward ***** */
-                });
         }
 
       
@@ -1438,13 +1517,15 @@ $(document).ready(function() {
                 let callFunction = $('svg').find('.call').filter(function(){
                     return $(this).find('.name').text() == edit.closest('.draggable').find('.name').text();
 
-                }) 
-                callFunction.find('.name').text(text);
-                let path = callFunction.find('path:first').attr('d');
-                let match =  /H [0-9.]+/g.exec(path)
-                let newLength = 'H '+ (parseFloat(match[0].split(' ')[1]) + 8);
-                path = path.replace(match, newLength);
-                callFunction.find('path:first').attr("d", path);
+                })
+                if(callFunction.length!==0){
+                    callFunction.find('.name').text(text);
+                    let path = callFunction.find('path:first').attr('d');
+                    let match =  /H [0-9.]+/g.exec(path)
+                    let newLength = 'H '+ (parseFloat(match[0].split(' ')[1]) + 8);
+                    path = path.replace(match, newLength);
+                    callFunction.find('path:first').attr("d", path);
+                }
             }
             edit.find('.Am-text').text(text);
             translateAndSet();
@@ -1488,38 +1569,11 @@ $(document).ready(function() {
         const runButton = document.querySelector('#runButton');
         if(runButton.textContent == 'Reset'){
             runButton.textContent = 'Run Program'
-            clones.clean();
             lines = [];
             restoreDefaults()
         }else{
             runButton.textContent = 'Reset';
-            const blocks = clones.getBlocks();
-            for (let index = 0; index < blocks.length; index++) {
-                const element = blocks[index].querySelectorAll('.Am-text');
-                switch(element[0].textContent){
-                    case 'move':
-                        setTimeout(function() {
-                            moveForward(element[element.length - 1].textContent);
-                            $(blocks[index]).attr('filter','url(#my-filter)')
-                            setTimeout(function() {
-                                $(blocks[index]).attr('filter','none')
-                            }, (1000));
-
-                        }, (index + 1) * 1000); // add delay of 1 second after each call
-                        break
-                    case 'turn':
-                        setTimeout(function() {
-                            turnLeft(element[element.length - 1].textContent);
-                        }, (index + 1) * 200); // add delay of 1 second after each call
-                        break
-                    case 'set':
-                        setTimeout(function() {
-                            setColor(element[element.length - 1].textContent);
-                        }, (index + 1) * 200); // add delay of 1 second after each call
-                        break
-                }
-
-            }
+            sendPython(language)
         }
     }
 ////////// *Get and Translate Blocks* //////////
@@ -1533,23 +1587,18 @@ $(document).ready(function() {
     var code = '{{prev_code|safe}}';
     let stepped = false
 	  window.translateAndSet =function(){
-		  if(window.step!='no translation'){
+        if(window.step=='game'){
+            language = clones.translate('Python')[0];
+            
+        }else{
 			let C_Code_List = ['',''];
 			let code = '';
             if(window.lang_id == 1)
                 lang = 'Python'
             else
                 lang = 'C++'
-			if(window.step==1 && stepped){
-				C_Code_List = clones.translateSteps(lang, currentElement);
-				if(currentElement+1<clones.blocks.length)
-					currentElement++;
-				else
-					currentElement=0;
-			}
-			else if(window.step!=1){
-				C_Code_List = clones.translate(lang);
-			}
+			 
+            C_Code_List = clones.translate(lang);
 
             code = C_Code_List[0];
 			if(code!=='``'){
@@ -1557,9 +1606,9 @@ $(document).ready(function() {
 				language_type();
 			}
 			const error = C_Code_List[1];
-			document.getElementById('error').innerHTML = error;
-		}
-    }
+			//document.getElementById('error').innerHTML = error;
+        }
+     }
     
     const blocks = $('.draggable');
  
@@ -1574,6 +1623,107 @@ $(document).ready(function() {
             }
        });  
     }
+
+    function initSocket(){
+        if(socket !== null) return;
+        socket = new WebSocket('ws://127.0.0.1:8080');
+        socket.addEventListener('open', function (event) {
+          console.log('Socket connected!');
+        });
+    
+        socket.addEventListener('message', function (event) {
+            let msg = event.data.split(' ');
+            console.log('Message received: ' + msg);
+            var filterElement = $('#my-filter');   
+                $('.draggable').find('path:first').removeAttr('filter');
+                let dataId = msg[msg.length - 2].replace("'", '');  // Get the desired value for data-id
+                let e = $('.draggable[data-id="' + dataId + '"]');
+                
+                e.find('path:first').attr('filter', 'url(#' + filterElement.attr('id') + ')');
+                
+              if(msg[0] ===  'turn'){
+                  setTimeout(function() {
+                      turn(msg[1], msg[2]);
+                      socket.send('reviced'); 
+                  }, 0); // add delay of 1 second after each call
+
+
+              }
+              else if(msg[0] ===  'move'){
+                setTimeout(function() {
+                    move( msg[2], msg[1]);
+                    socket.send('reviced'); 
+                }, 0); // add delay of 1 second after each call
+            }
+            else if(msg[0] ===  'pen'){
+                setTimeout(function() {
+                    pen(msg[1]);
+                    socket.send('reviced'); 
+                }, 0); // add delay of 1 second after each call
+            }
+            else if(msg[0] ===  'color'){
+                setTimeout(function() {
+                    color( msg[1]);
+                    socket.send('reviced'); 
+                }, 0); // add delay of 1 second after each call
+            }
+            else if(msg[0] ===  'colour'){
+                setTimeout(function() {
+                    colour( msg[1]);
+                    socket.send('reviced'); 
+                }, 0); // add delay of 1 second after each call
+            }
+            else if(msg[0] == 'step'){
+                if(msg[msg.length-1]!='')
+                    document.querySelector('#error').innerHTML += msg[msg.length-1]+' ';
+                
+                 
+            }
+              else
+                  socket.send(window.prompt(event.data)) 
+        });
+    
+        socket.addEventListener('close', function (event) {
+            console.log('Socket closed!');
+        });
+    }
+    function sendPython(text, tname='z', state){
+        //text = 'def reverseString(x: str):\n\treturn x[::-1]';
+        console.log(text);
+        if(ajax !== null){
+            return;
+        }
+        tname = 'reverseString';
+        text = 'def reverseString(x: str):\n\treturn x[::-1]'
+        ajax = $.ajax({
+            url: 'http://127.0.0.1:8000/test_code/',
+                method:'POST',
+                contentType: 'text/plain', // to prevent Django from treating the ajax as a form form the Query
+                data: {
+                    text,
+                    'tname': tname,
+                    'state':state
+                },
+                success: function(response){
+                    try{
+                        let inner =  document.querySelector('#error').innerHTML;
+                        if (inner=="undefined")
+                        document.querySelector('#error').innerHTML = response;
+                        else
+                        document.querySelector('#error').innerHTML+=response;
+                        if(response[response.length-1] == 't'){
+                            $('form button').html('Submit');
+                            
+                        }return true;
+                    }catch(e){}
+                },
+                complete: function(){
+                    ajax = null;
+                }
+            
+            });
+            initSocket();
+    }
        $('form button').click(function(event){
         document.getElementById('user_code_input').value = language; // fill djano's form
         
@@ -1583,52 +1733,90 @@ $(document).ready(function() {
              window.translateAndSet()
           }
           event.preventDefault();
-          let text = language.replace(/input/g, 'custom_input');
+          let text = ''
+          
           //text = '\nprint(0)\nv=custom_input("enter v1")\nprint(v)\nprint(0)\nv=custom_input("enter v2")\n\nhv=custom_input("enter v3")\n'
-          var csrftoken = $("input[name='csrfmiddlewaretoken']").val();
-          $.ajaxSetup({
-             beforeSend: function(xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-             }
-          }
-       });
-       $.ajax({
-          url: 'http://127.0.0.1:8000/test_code/',
-             method:'POST',
-             contentType: 'text/plain', // to prevent Django from treating the ajax as a form form the Query
-             data: {
-                text,
-                'tname': tname,
-             },
-             success: function(response){
+
+          let custom_lan = language
+          if(window.debug === '1'){
+            let languindex = 0;
+            custom_lan = '';
+         
             
-                let inner =  document.querySelector('#error').innerHTML;
-                if (inner=="undefined")
-                document.querySelector('#error').innerHTML = response;
-                else
-                document.querySelector('#error').innerHTML+=response;
-                if(response[response.length-1] == 't'){
-                   $('form button').html('Submit');
-                   $('form button').unbind('click');
+            for (let index = 0; index < clones.blocks.length; index++) {
+              const celement = clones.blocks[index];
+              
+              for (; languindex < language.length; languindex++) {
+                const element = language[languindex];
+                
+                if (element === '\n') {
+                  let ind = '';
+                  
+                  if (language[languindex + 1] === ' ') {
+                    ind = '    ';
+                    if (language[languindex + 5] ===' ')
+                        ind +='    ' 
+                    }
+                    languindex++; // Skip the space character
+                  
+                  custom_lan += `\n${ind}step(user_output.getvalue(), r'${$(celement).attr('data-id')}')\n`;
+                  break;
+                } else {
+                  custom_lan += element;
                 }
-             }
-          })
-          var socket = new WebSocket('ws://127.0.0.1:8080');
-          socket.addEventListener('open', function (event) {
-            console.log('Socket connected!');
-          });
-      
-          socket.addEventListener('message', function (event) {
-                console.log('Message received: ' + event.data);
-                socket.send(window.prompt(event.data)) 
-          });
-      
-          socket.addEventListener('close', function (event) {
-              console.log('Socket closed!');
-          });
-        
-  
+              }
+            }
+            while( languindex < language.length){
+                const element = language[languindex];
+                custom_lan += element;
+                languindex++;
+            }
+
+
+            //// add user_output to anyfunction by using global
+            let def_index = custom_lan.indexOf('def');
+            if(def_index!==-1){
+                ///find function name
+                let function_name = custom_lan.substring(def_index+4, custom_lan.indexOf('(', def_index)-1);
+                let oldparams = '';
+                while(custom_lan[def_index]!=='(')def_index++;
+                if(custom_lan[def_index+1]!==')')
+                     oldparams = custom_lan.substring(def_index+1, custom_lan.indexOf(')', def_index+1));
+
+
+                custom_lan = custom_lan.substring(0, def_index+1) + 'user_output' + (oldparams === '' ? '' : ',') + custom_lan.substring(def_index+1, custom_lan.length-1);
+
+                // modify call
+                var regex = new RegExp(`${function_name}\\([^)]*\\)`, 'g');
+
+                var matches = [];
+                
+                var match;
+                while ((match = regex.exec(custom_lan)) !== null) {
+                  matches.push(match[0]);
+                }
+                
+                matches.forEach(function(match) {
+                    if(match.indexOf('()')!==-1)
+                    custom_lan = custom_lan.replace(match, match.replace(`${function_name}(`, `${function_name}(user_output`));
+                    else
+                    custom_lan = custom_lan.replace(match, match.replace(`${function_name}(`, `${function_name}(user_output,`));
+                });
+                
+            }
+
+           //     custom_lan = language.replace(/\n/g, `\nstep(user_output.getvalue().strip().splitlines()[-1])\n`);
+               // custom_lan = language.replace(/    /g, `\tstep(user_output.getvalue().strip().splitlines()[-1])\n\t`);
+                if(socket!=null)
+                    socket.send('reviced'); 
+            }
+            custom_lan = custom_lan.replace(/input/g, 'custom_input');
+
+
+
+           // custom_lan='def factorial (user_output,a):\n    step(user_output.getvalue(), 1)\n    if ((a == 0 )):\n        step(user_output.getvalue(), 2)\n        return 1\n        step(user_output.getvalue(), 3)\n    step(user_output.getvalue(), 4)\n    return ((a * factorial(user_output,((a - 1 )) ) ))\nstep(user_output.getvalue(), 5)\nprint(factorial(user_output,5))';
+          sendPython(custom_lan, tname, $('form button').html());
+
        });
        window.language_type=function (){
           /*const button = event.target;
@@ -1646,14 +1834,12 @@ $(document).ready(function() {
 //*************** check the calling script for not setting the initial func in case 'game' ***************** */
 
    
-    console.log(window.calling_script)
-    /*if(window.calling_script!=undefined){
+    if(window.calling_script!=undefined){
 
-        const name = create_function_class('function', false);
-        var call = $('#caller');
+        const name = create_function_class('function', document.querySelector('.header').textContent);
+       var call = $('#caller');
     
         call.find('.name').text(name)
-        console.log(call.attr('class'))
 
         let d = call.children('path:first').attr("d");
         let match = H_REGEX.exec(d)
@@ -1663,8 +1849,11 @@ $(document).ready(function() {
             d = d.replace(matchedString, newString);
         call.children('path:first').attr("d", d)
         call.attr('transform','translate(1, 350)')
-        call.click();//set up main function
-    }*/
+        call.click();//set up main function*/
+        for (let index = 0; index < window.params; index++) {
+            $(clones.blocks[clones.blocks.length-2]).find('.-inputs').click();
+        }
+    }
     //$(".call.draggable").off("mousedown mousemove mouseup").removeClass("draggable");
 
 //*************** check the calling script for not setting the initial func in case 'game' ***************** */

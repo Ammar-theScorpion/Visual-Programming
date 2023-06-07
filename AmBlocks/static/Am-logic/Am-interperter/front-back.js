@@ -125,6 +125,7 @@ export class Blocks {
             }
             if(currentElement.id == 'if'){
                 textCode+= 'if';
+                textCode+=' ' + currentElement.querySelector('.ofc').querySelector('.Am-text').textContent;
                 textCode+=' '+this.getChildren(currentElement, `.draggable.circleOps`);
                 textCode+=' then {';
                 textCode += ` ${this.getChildren(currentElement, '.draggable:not(.selected):not(.circleOps)')}`;
@@ -137,18 +138,18 @@ export class Blocks {
             if(currentElement.id == 'counter'){
                 //for (let index = 0; index < array.length; index++) 
                 textCode+= 'for';
-                const allinputs = currentElement.querySelectorAll('svg .s');
+                const allinputs = currentElement.querySelector('svg .s');
                 let dic = {};
-                for (let index = 0; index < allinputs.length; index++) {
-                    const element = allinputs[index];
-                    const allAmText = element.querySelectorAll('.main');
+                    const allAmText = allinputs.querySelectorAll('.main');
                     const from = allAmText[0].textContent;
-                    const to = allAmText[1].textContent;
+                    let to = this.getChildren(allinputs, `.draggable.circleOps`);
+                    if(to==='')
+                        to = allAmText[1].textContent;
+
                     const by = allAmText[2].textContent;
-                    const index_name = element.querySelector('.varname').textContent;
+                    const index_name = allinputs.querySelector('.varname').textContent;
 
                     textCode += ` ${index_name} ${from} ${to} ${by}`;    
-                }
                 textCode += `{ ${this.getChildren(currentElement, '.draggable:not(.selected):not(.circleOps)')}`;
                 textCode+=' }';
                 textCode+=' '+this.getChildren(currentElement, `.selected`);
@@ -157,16 +158,15 @@ export class Blocks {
                 return textCode;
             }
             if(currentElement.id == 'while'){
-                textCode+= 'repeat';
-                const allAmText = currentElement.querySelectorAll('#condition .Am-text');
-                let index=1;
-                for (let index = 0; index < allAmText.length; index++) {
-                    const element = allAmText[index];
-                    textCode+=element.textContent;
-                }textCode+=' {';
-                textCode+=this.getChildren(currentElement, 'make-var');
-                textCode+=this.getChildren(currentElement, 'draggable:not(.operation-logic)');
+                textCode+= 'while';
+                textCode+=' ' + currentElement.querySelector('.ofc').querySelector('.Am-text').textContent;
+                textCode+=' '+this.getChildren(currentElement, `.draggable.circleOps`);
+                textCode+=' then {';
+                textCode += ` ${this.getChildren(currentElement, '.draggable:not(.selected):not(.circleOps)')}`;
                 textCode+=' }';
+                textCode+=' '+this.getChildren(currentElement, `.selected`);
+                this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
+
                 return textCode;
             }
             
@@ -191,22 +191,30 @@ export class Blocks {
 
                 textCode += 'def '+ function_name +' ' + variables+ '{';
                 textCode += ` ${this.getChildren(currentElement, '.draggable:not(.selected):not(.circleOps)')}`;
+                +this.getChildren(currentElement, '.draggable.circleOps') + '\n';
                 textCode+=' }';
+
+                //this.getVarType(printedValue);
+                
+
                 textCode+=' '+this.getChildren(currentElement, `.selected`);
                 this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
-
-
+                
                 return textCode;
             }else if (currentElement.id == 'print'){
-                const printedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+
+
+                const printedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')
+                +this.getChildren(currentElement, '.draggable.circleOps');
                 textCode += 'print ' + printedValue + '\n';
-                textCode+=' '+this.getChildren(currentElement, `.draggable`);
-                this.index+=(currentElement.querySelectorAll(`:scope > .draggable`)).length;//:scope > 
+                textCode+=' '+this.getChildren(currentElement, `.selected`);
+             
+                this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
                 //this.getVarType(printedValue);
                 return textCode;
                 
             }else if (currentElement.id == 'return'){
-                const returnedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+                const returnedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, '.draggable');
 
                 textCode += 'return ' + returnedValue + '\n';
                 //this.getVarType(printedValue);
@@ -217,7 +225,7 @@ export class Blocks {
                 let onstring ="";
                 if(operation==='cat' || operation==='idx' || operation==='spt')
                     onstring = currentElement.querySelector('.Am-edit .onstring').textContent.replace(/\t/g, '');
-                let on = currentElement.querySelector('.Am-edit .Am-text.on').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+                let on = currentElement.querySelector('.Am-edit .Am-text.on').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, '.draggable');
                 if(on==='')
                     on="'n'";
 
@@ -229,61 +237,86 @@ export class Blocks {
                                if(on===' ')
                                on="0";
                 }
-                textCode += `strings ${operation} ${onstring} ${on} `
+                textCode += `strings ${operation} ${onstring} ${on} \n`
                 return textCode;
                 
             }else if (currentElement.id == 'math'){
                 const operation =  currentElement.querySelector('.operation').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ');
-                let on = currentElement.querySelector('.on').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+                let on = currentElement.querySelector('.on').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, '.draggable');
                 if(on==='')
                     on='0';
                 textCode += `math ${operation} ${on} `
                 return textCode;
                 
             }else if (currentElement.id == 'indexAt'){
-                const printedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
+                const printedValue = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, '.draggable');
 
                 textCode += '[' + printedValue + ']';
                 return textCode;
                 
             }else if(currentElement.id=='caller'){
+                
                 const call =  currentElement.querySelector(`.Am-text:nth-of-type(${2})`).textContent.replace(' ', '_');
-                const args = currentElement.querySelectorAll('.Am-text');
+                const args = currentElement.querySelectorAll(':scope > .Am-edit .Am-text.name');
+                const oargs = currentElement.querySelectorAll(':scope > .Am-text');
+                const argss = currentElement.querySelectorAll('.draggable');
 
                 let arguements = '';
-                for (let index = 2; index < args.length; index+=2) {
-                    arguements += args[index].textContent+' ';
-                    arguements += '!'+args[index+1].textContent + ' ';
+                let index;
+                for ( index = 2; index < oargs.length; index+=2) {
+                    arguements += oargs[index].textContent+' ';
+                    let n = null;
+                    if(argss[index-2])
+                        n = this.getChildren(currentElement, '.draggable');
+                    if(n==null)
+                        n = args[index-2].textContent;
+                    arguements += '!'+ n + ' ';
                     
+                }
+                while(argss[index-2]){
+
+                        let n = this.getChildren(currentElement, '.draggable');
+                    arguements += '!'+ n + ' ';
+                    index++;
+
                 }
                 textCode += 'call '+call+' ' + arguements + '\n';
                 return textCode;
+
             }else if(currentElement.id=='each'){
                 const varname =  currentElement.querySelector(`.Am-edit:nth-of-type(${1}) .Am-text`).textContent;
                 let varname_over =  currentElement.querySelector(`.Am-edit:nth-of-type(${2}) .Am-text`).textContent;
                 if(varname_over=='')
-                    varname_over = []; 
+                    varname_over = "'n'"; 
+
                 textCode += 'each '+varname+' '+varname_over+'{';
-                textCode+=this.getChildren(currentElement, 'draggable.in');
+                textCode+=this.getChildren(currentElement, '.draggable.in:not(.selected):not(.circleOps)');
                 textCode+='}';
+                textCode+=' '+this.getChildren(currentElement, `.selected`);
+                this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
                 return textCode;
            
             }else if (currentElement.id == 'make_var'){
+
                 const texts = currentElement.querySelectorAll('.Am-text');
                 const varName = texts[1].textContent;
                 let equalto = texts[3].textContent;
-                const printedValue = this.getChildren(currentElement, 'draggable');
+                const printedValue = this.getChildren(currentElement, '.draggable.circleOps');
                 if(printedValue)
                     equalto = printedValue;
                 equalto = ` = ${equalto.replace(/\t/g, '').replace(/\u00A0/g)}\n`
                 textCode += 'allfather '+varName+equalto;
 
+                textCode+=' '+this.getChildren(currentElement, `.selected`);
+             
+                this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
+
                 return textCode;
 
             }else if (currentElement.id == 'operation' || currentElement.id == 'condition'){
-                let allOperations = currentElement.querySelectorAll('.draggable');
-                let allAmText = currentElement.querySelectorAll('.Am-edit:not(.op)');
-                let allOps = currentElement.querySelectorAll('.am-drop');
+                let allOperations = currentElement.querySelectorAll(':scope > .draggable');
+                let allAmText = currentElement.querySelectorAll(':scope > .Am-edit:not(.op)');
+                let allOps = currentElement.querySelectorAll(':scope > .am-drop');
 
 
                 //////////////////////////////////////////////////////
@@ -313,16 +346,16 @@ export class Blocks {
                         translationOper=allOperations[ocounter].getAttribute('transform').match(/translate\(([^,]+),/)[0];
 
                     if(translationOper == translationEdit){
-                        alltext += this.getChildren(currentElement, 'draggable');
+                        alltext += this.getBlocksAsString(allOperations[ocounter],1,1);
                     }else{
-                        ocounter++;
+                         
                         alltext += allAmText[tcounter].querySelector('.Am-text').textContent;
                     }
                     tcounter++;   
                     alltext += allOps[index].textContent;
                 }
                 while(ocounter < allOperations.length){
-                    alltext += this.getChildren(currentElement, 'draggable');
+                    alltext += this.getChildren(currentElement, '.draggable');
                     ocounter++;
                 }
                 if(tcounter < allAmText.length){
@@ -333,26 +366,31 @@ export class Blocks {
             
 
             }else if (currentElement.id == 'assigmnemt'){
-                const allAmText = currentElement.querySelectorAll('.Am-edit .Am-text') 
-                let varName = allAmText[0].textContent//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
-                let operater = currentElement.querySelector('.op').textContent;
-                let equalto = allAmText[1].textContent +this.getChildren(currentElement, 'draggable');//.textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ').replace(' ', '_');
-                let prompt = allAmText[allAmText.length-1].textContent;
-                let child  = this.getChildren(currentElement, 'draggable');
-
-                if(equalto !== prompt){
-                    operater += equalto;
-                    return `${varName} = ${equalto} ${prompt} \n ${child}`;
-                }else{
-                    equalto = equalto.replace(/\t/g, '')
+                const name = currentElement.querySelector('.name').textContent 
+                const op = currentElement.querySelector('.op').textContent 
+                let eq = currentElement.querySelector('.eq').textContent 
+                
+                let pr=null;
+                try{
+                    pr = currentElement.querySelector('.pr').textContent 
+                }catch(err){
                 }
-                textCode += varName +` ${operater} `+ equalto;
-                return textCode+'\n' + child;
+                let o = this.getChildren(currentElement, `.draggable.circleOps`);
+                if(o!='')
+                    eq = o;
+                textCode += ` ${this.getChildren(currentElement, '.draggable:not(.selected):not(.circleOps)')}`;
+                textCode+=' '+this.getChildren(currentElement, `.selected`);
+                this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
+
+                if(pr!=null)
+                    eq = pr;
+                return `${name} ${op} ${eq}\n ${textCode}`;
 
             } else if (currentElement.id == 'create_list'|| currentElement.id == 'create_set'){
-                const listName = currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')+this.getChildren(currentElement, 'draggable');
 
-                textCode += 'allfatherL ' +currentElement.id.split('_')[1]+' '+ listName+' ';
+                const lists = currentElement.querySelectorAll('.Am-text');
+
+                textCode += 'allfatherL ' +currentElement.id.split('_')[1]+' '+ lists[1].textContent+' ';
                 const values = currentElement.querySelectorAll('.list_create');
                 let v=[];
                 for (let index = 0; index < values.length; index++) {
@@ -364,14 +402,19 @@ export class Blocks {
                         v.push(this.getBlocksAsString(value))
                 }
                 if(v.length!==0)
-                    return `allfatherL ${currentElement.id.split('_')[1]} ${listName} {${v.join(' ')}}\n`
+                    return `allfatherL ${currentElement.id.split('_')[1]} ${lists[1].textContent} {${v.join(' ')}}\n`
+
+                    textCode+=' '+this.getChildren(currentElement, `.selected`)+' ';
+             
+                    this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
+    
                 return textCode;
 
             }
             else if (currentElement.classList.contains('ops')){
                 const name = currentElement.querySelector(`.dataStructureName`).textContent.replace(' ','_');
                 
-                const values =this.getChildren(currentElement, 'draggable');
+                const values =this.getChildren(currentElement, '.draggable.circleOps');
                 let  printedValue = ''
                 try{
                     printedValue= currentElement.querySelector('.Am-edit .Am-text').textContent.replace(/\t/g, '').replace(/\u00A0/g, ' ')
@@ -381,11 +424,14 @@ export class Blocks {
                 if(values)
                     printedValue = values
 
+                    textCode+=' '+this.getChildren(currentElement, `.selected`)+' ';
+             
+                    this.index+=(currentElement.querySelectorAll(`:scope > .draggable:not(.circleOps)`)).length;//:scope > 
                 /*let v=[];
                 for (let index = 0; index < values.length; index++) {
                     v.push(values[index].textContent);
                 }*/
-                return `list ${name} {${printedValue}} ${currentElement.id}\n`
+                return `list ${name} {${printedValue}} ${currentElement.id}\n ${textCode}`
             }
             else if (currentElement.id == 'list'){
                 const listname =  currentElement.querySelector(`.listname`).textContent.replace(' ','_');
@@ -452,7 +498,50 @@ export class Blocks {
                 if(textAt)
                     textAt = textAt.textContent;
             }*/
-        }return textCode;
+        }
+
+        /////////////////GAME BLOCKS/////////////////
+        else if(currentElement.id==='turn' || currentElement.id==='move'){
+            textCode+=currentElement.id+' ';
+            textCode+= currentElement.querySelector('.op').textContent+' '
+            let by = this.getChildren(currentElement, '.draggable.circleOps');
+            if(by===''){
+                by = currentElement.querySelector('.by').textContent
+            }
+            textCode+=by+' ';
+            textCode+= this.getChildren(currentElement, `.selected`);
+            this.index+=(currentElement.querySelectorAll(`:scope > .draggable`)).length;
+            return textCode+'\n';
+        }
+        else if(currentElement.id==='color'){
+            textCode+='color ' + currentElement.querySelector('.coloring').getAttribute('fill')+'\n';
+            textCode+=' '+this.getChildren(currentElement, `.selected`)
+            this.index+=(currentElement.querySelectorAll(`:scope > .draggable`)).length;
+            return textCode;
+        }
+
+        else if(currentElement.id==='colour'){
+            textCode+='colour ' 
+            textCode+=this.getChildren(currentElement, `.draggable.circleOps`);
+            textCode+='\n'
+            textCode+=' '+this.getChildren(currentElement, `.selected`)
+            this.index+=(currentElement.querySelectorAll(`:scope > .draggable`)).length;
+            return textCode;
+        }
+        else if(currentElement.id==='pen'){
+            textCode+='pen ' + currentElement.querySelector('.op').textContent+'\n';
+            textCode+=' '+this.getChildren(currentElement, `.selected`)
+            this.index+=(currentElement.querySelectorAll(`:scope > .draggable`)).length;
+            return textCode;
+        }
+        else if(currentElement.id==='break'){
+            textCode+='break ' + currentElement.querySelector('.op').textContent+'\n';
+            textCode+=' '+this.getChildren(currentElement, `.selected`)
+            this.index+=(currentElement.querySelectorAll(`:scope > .draggable`)).length;
+            return textCode;
+        }
+        
+        return textCode;
     };// if then {}
     translate(lang) {
         this.sortChildren();
@@ -487,7 +576,6 @@ export class Blocks {
         //src += this.generateVarType('print f'.split(' '));
         //src = 'if then { int x=4 if then { float c=22.2 if then { string vv="dfdf" }else { print c\n vd=3 } } if then {} }'
         //src = 'string x = "loop" each i g {print(i)\n}';
-         
         this.index = 0;
         let env = new Symbol();
         const languages = (this.covert.covertString(src, env, lang));//

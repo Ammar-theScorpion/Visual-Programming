@@ -1,19 +1,15 @@
 {% extends 'main.html' %}
 {% load static %}
 
-
-      
   {% block mainscript %}
     
   {% endblock mainscript %}
 
 {% block links %}
 <link rel="stylesheet" href="{% static '/Am-style/if.css' %}">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
 <link rel="stylesheet" href="{% static 'Am-style/game.css' %}">
-<script type="module" src="{% static '/Am-logic/main.js' %}" defer> </script>
+
 <script>
   window.step = '{{step|safe}}'
   console.log(window.step)
@@ -35,21 +31,47 @@
         <div style="width: 500px;">
             <canvas id="game" width="500" height="500"></canvas>
         </div>
-        
-        <svg class="codesspace Am-workspace main" visibility="visible" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            xmlns:html="http://www.w3.org/1999/xhtml"
-            version="1.1" width="100%" height="100%">
+        <g class="codesspace ">
+
+          <svg class="Am-workspace" visibility="visible" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          version="1.1" width="100%" height="100%">
+          <g class="Am-workspace main">
             <filter id="my-filter">
-                <feGaussianBlur stdDeviation="4" />
+              <feGaussianBlur stdDeviation="4" />
               </filter>
               
+        </g>
+          
+          
+        </svg>
+      </g>
 
-            </svg>
+
     </div>
+
+		<p id ='user_code' style="height: 100%;" >
+    </p>
+
+    <form method="post">
+			{% csrf_token %}
+			<input type="hidden" name="user_code" id="user_code_input"/>
+			 <div class="footer">
+				{% if step == 1 %}
+				<button value="<-step"  ><- step </button>
+					<button value="step->"  >step -> </button>
+				{% else %}
+					<button  type="submit" value="Submit"  >Run </button>
+				{% endif %}
+			</div>
+		</form>
     <button onclick="translateDrawingBlocks()" id="runButton" style="border: 1px solid #dd4b39; background-color: #dd4b39;color: #fff; font-size: large; margin: 5px; padding: 10px;  border-radius: 4px; text-align: center;" class="primary" title="Run the program you wrote.">
         <img src="{% static 'Am-images/play-button.png' %}" width="25" height="25"> Run Program
       </button>
     <script src="{% static 'Am-logic/game/game.js' %}" ></script>
+    <div id="flex" style="display: none; font: normal 11pt sans-serif;">
+			<div id="inner" contenteditable="true" spellcheck="false"><div>
+		</div>
 {% endblock %}
 
